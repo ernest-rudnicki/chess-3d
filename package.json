@@ -13,6 +13,7 @@
     "lint": "npm run lint -- --fix",
     "prepare": "husky install"
   },
+  "sideEffects": false,
   "keywords": [],
   "author": "Ernest Rudnicki",
   "license": "MIT",
