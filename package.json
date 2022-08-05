@@ -9,7 +9,8 @@
   "scripts": {
     "start:dev": "webpack serve --config webpack.dev.config.js",
     "build:dev": "webpack --config webpack.dev.config.js",
-    "build:prod": "webpack --config webpack.prod.config.js"
+    "build:prod": "webpack --config webpack.prod.config.js",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "Ernest Rudnicki",
@@ -19,9 +20,12 @@
     "three": "^0.143.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
     "@types/dat.gui": "^0.7.7",
     "@types/three": "^0.143.0",
     "copy-webpack-plugin": "^11.0.0",
+    "husky": "^8.0.1",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.9.1",
     "webpack": "^5.74.0",
