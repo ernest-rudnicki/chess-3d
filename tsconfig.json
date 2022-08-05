@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
     "target": "es2016",
     "module": "commonjs",
     "esModuleInterop": true,
@@ -8,7 +9,10 @@
     "sourceMap": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "scenes/*": ["scenes/*"]
+    }
   },
   "include": [ "src/**/*.ts" ],
   "exclude": [ "node_modules" ]
