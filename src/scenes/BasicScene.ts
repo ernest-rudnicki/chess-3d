@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import ChessBaseModel from "../assets/King/King.glb";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 export interface BasicSceneOptions {
   addGridHelper: boolean;
@@ -55,11 +57,6 @@ export default class BasicScene extends THREE.Scene {
       this.lights.push(light);
       this.add(new THREE.PointLightHelper(light, 0.5, 0xff9900));
     }
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.y = 0.5;
-    this.add(cube);
     if (debug) {
       this.debugger = new GUI();
       const lightGroup = this.debugger.addFolder("Lights");
@@ -67,16 +64,20 @@ export default class BasicScene extends THREE.Scene {
         lightGroup.add(this.lights[i], "visible", true);
       }
       lightGroup.open();
-      const cubeGroup = this.debugger.addFolder("Cube");
-      cubeGroup.add(cube.position, "x", -10, 10);
-      cubeGroup.add(cube.position, "y", 0.5, 10);
-      cubeGroup.add(cube.position, "z", -10, 10);
-      cubeGroup.open();
       const cameraGroup = this.debugger.addFolder("Camera");
       cameraGroup.add(this.camera, "fov", 20, 80);
       cameraGroup.add(this.camera, "zoom", 0, 1);
       cameraGroup.open();
     }
+    const loader = new GLTFLoader();
+    loader.load(ChessBaseModel, (gltf) => {
+      this.add(gltf.scene);
+      const chessBaseGroup = this.debugger.addFolder("Chess Base");
+      chessBaseGroup.add(gltf.scene.position, "x", 0);
+      chessBaseGroup.add(gltf.scene.position, "y", 0);
+      chessBaseGroup.add(gltf.scene.position, "z", 0);
+      chessBaseGroup.open();
+    });
   }
   /**
    * Given a ThreeJS camera and renderer, resizes the scene if the

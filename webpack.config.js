@@ -1,32 +1,38 @@
-const path = require('path');
+const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-    entry: './src/index.ts',
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'index.js'
+  entry: "./src/index.ts",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "index.js",
+  },
+  resolve: {
+    alias: {
+      three: path.resolve("./node_modules/three"),
+      scenes: path.resolve(__dirname, "./src/scenes"),
+      assets: path.resolve(__dirname, "./src/assets"),
     },
-    resolve: {
-        alias: {
-          three: path.resolve('./node_modules/three'),
-          scenes: path.resolve(__dirname, './src/scenes') 
-        },
-        extensions: ['.ts', '.js']
-    },
-    module: {
-        rules: [
-            {
-                use: 'ts-loader',
-                exclude: /node_modules/,
-            }
-        ]
-    },
-    plugins: [
-      new CopyPlugin({
-        patterns: [
-          { from: "static", to: "" },
+    extensions: [".ts", ".js"],
+  },
+  module: {
+    rules: [
+      {
+        use: "ts-loader",
+        exclude: [
+          /node_modules/,
+          /assets/,
         ],
-      }),
+      },
+      {
+        test: /\.glb$/i,
+        type: "asset/resource",
+      },
     ],
+  },
+  plugins: [
+    new CopyPlugin({
+      patterns: [{ from: "static", to: "" }],
+    }),
+  ],
 };
