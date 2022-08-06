@@ -5,7 +5,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { MainSceneOptions } from "./types";
 
 export class MainScene extends THREE.Scene {
-  debugger?: GUI | null = null;
+  debugger: GUI | null = null;
 
   camera: THREE.PerspectiveCamera;
   renderer: THREE.Renderer;
@@ -37,7 +37,9 @@ export class MainScene extends THREE.Scene {
     }
 
     if (debug) {
-      this.setupDebugger();
+      this.debugger = new GUI();
+      this.debugCamera();
+      this.debugLights();
     }
   }
 
@@ -99,16 +101,18 @@ export class MainScene extends THREE.Scene {
     }
   }
 
-  private setupDebugger() {
-    this.debugger = new GUI();
+  private debugCamera() {
+    const cameraGroup = this.debugger.addFolder("Camera");
+    cameraGroup.add(this.camera, "fov", 20, 80);
+    cameraGroup.add(this.camera, "zoom", 0, 1);
+    cameraGroup.open();
+  }
+
+  private debugLights() {
     const lightGroup = this.debugger.addFolder("Lights");
     for (let i = 0; i < this.lights.length; i++) {
       lightGroup.add(this.lights[i], "visible", true);
     }
     lightGroup.open();
-    const cameraGroup = this.debugger.addFolder("Camera");
-    cameraGroup.add(this.camera, "fov", 20, 80);
-    cameraGroup.add(this.camera, "zoom", 0, 1);
-    cameraGroup.open();
   }
 }
