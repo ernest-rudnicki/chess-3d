@@ -1,6 +1,6 @@
-import BasicScene from "scenes/BasicScene";
+import { MainScene } from "scenes/MainScene/MainScene";
 
-const scene = new BasicScene({ debug: true, addGridHelper: true });
+const scene = new MainScene({ debug: true, addGridHelper: true });
 
 function gameLoop() {
   scene.camera.updateProjectionMatrix();
