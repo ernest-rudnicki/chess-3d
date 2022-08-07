@@ -1,4 +1,4 @@
-export interface MainSceneOptions {
+export interface GameOptions {
   addGridHelper: boolean;
   debug: boolean;
 }

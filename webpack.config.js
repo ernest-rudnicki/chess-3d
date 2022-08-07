@@ -12,6 +12,9 @@ module.exports = {
       three: path.resolve("./node_modules/three"),
       scenes: path.resolve(__dirname, "./src/scenes"),
       assets: path.resolve(__dirname, "./src/assets"),
+      managers: path.resolve(__dirname, "./src/managers"),
+      objects: path.resolve(__dirname, "./src/objects"),
+      game: path.resolve(__dirname, "./src/game")
     },
     extensions: [".ts", ".js"],
   },

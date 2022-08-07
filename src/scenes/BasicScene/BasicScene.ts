@@ -1,65 +1,77 @@
 import * as THREE from "three";
 import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { MainSceneOptions } from "./types";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-export class MainScene extends THREE.Scene {
-  debugger: GUI | null = null;
+/**
+ * This class is a basic scene that can be extended to create scenes
+ * @param renderer ThreeJS Renderer object
+ * @param loader ThreeJS GLTF Loader object
+ * @param options initial options for development mode
+ * @param options.addGridHelper if set to true creates a grid for seeing the position of objects
+ * @param debugHelper GUI object for debugging
+ */
+export class BasicScene extends THREE.Scene {
+  private _renderer: THREE.Renderer;
+  private _loader: GLTFLoader;
+  private _mainDebugHelper: GUI;
+
+  subDebugHelper: GUI | null = null;
 
   camera: THREE.PerspectiveCamera;
-  renderer: THREE.Renderer;
   orbitals: OrbitControls;
-  loader: GLTFLoader;
 
   lights: Array<THREE.Light> = [];
-  lightCount = 6;
+  lightCount = 1;
   lightDistance = 3;
 
   width = window.innerWidth;
   height = window.innerHeight;
 
-  constructor(options: MainSceneOptions) {
+  resizeListener: () => void;
+
+  constructor(
+    renderer: THREE.Renderer,
+    loader: GLTFLoader,
+    options: MainSceneOptions,
+    debugHelper?: GUI
+  ) {
     super();
-    const { addGridHelper, debug } = options;
+    const { addGridHelper } = options;
 
+    this._renderer = renderer;
+    this._loader = loader;
     this.setupCamera();
-    this.setupRenderer();
     this.setupLights();
-    MainScene.addWindowResizing(this.camera, this.renderer);
 
-    this.orbitals = new OrbitControls(this.camera, this.renderer.domElement);
-    this.loader = new GLTFLoader();
+    this.addWindowResizing(this.camera);
+
+    this.orbitals = new OrbitControls(this.camera, this._renderer.domElement);
     this.background = new THREE.Color(0xefefef);
 
     if (addGridHelper) {
       this.setupGridHelper();
     }
 
-    if (debug) {
-      this.debugger = new GUI();
+    if (debugHelper) {
+      this.subDebugHelper = debugHelper.addFolder(this.constructor.name);
       this.debugCamera();
       this.debugLights();
     }
   }
 
-  /**
-   * Given a ThreeJS camera and renderer, resizes the scene if the
-   * browser window is resized.
-   * @param camera - a ThreeJS PerspectiveCamera object.
-   * @param renderer - a subclass of a ThreeJS Renderer object.
-   */
-  static addWindowResizing(
-    camera: THREE.PerspectiveCamera,
-    renderer: THREE.Renderer
-  ) {
-    window.addEventListener("resize", onWindowResize, false);
-
-    function onWindowResize() {
+  private addWindowResizing(camera: THREE.PerspectiveCamera) {
+    this.resizeListener = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+    };
+    window.addEventListener("resize", this.resizeListener, false);
+  }
+
+  cleanup() {
+    window.removeEventListener("resize", this.resizeListener);
+    this._mainDebugHelper.removeFolder(this.subDebugHelper);
   }
 
   private setupCamera() {
@@ -70,14 +82,6 @@ export class MainScene extends THREE.Scene {
       1000
     );
     this.camera.position.set(12, 12, 12);
-  }
-
-  private setupRenderer() {
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: document.getElementById("app") as HTMLCanvasElement,
-      alpha: true,
-    });
-    this.renderer.setSize(this.width, this.height);
   }
 
   private setupGridHelper() {
@@ -102,14 +106,14 @@ export class MainScene extends THREE.Scene {
   }
 
   private debugCamera() {
-    const cameraGroup = this.debugger.addFolder("Camera");
+    const cameraGroup = this.subDebugHelper.addFolder("Camera");
     cameraGroup.add(this.camera, "fov", 20, 80);
     cameraGroup.add(this.camera, "zoom", 0, 1);
     cameraGroup.open();
   }
 
   private debugLights() {
-    const lightGroup = this.debugger.addFolder("Lights");
+    const lightGroup = this.subDebugHelper.addFolder("Lights");
     for (let i = 0; i < this.lights.length; i++) {
       lightGroup.add(this.lights[i], "visible", true);
     }

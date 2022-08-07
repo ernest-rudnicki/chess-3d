@@ -12,7 +12,10 @@
     "outDir": "dist",
     "paths": {
       "scenes/*": ["scenes/*"],
-      "assets/*": ["assets/*"]
+      "managers/*": ["managers/*"],
+      "objects/*": ["objects/*"],
+      "game/*": ["game/*"],
+      "assets/*": ["assets/*"],
     }
   },
   "include": [ "src/**/*.ts", "global.d.ts", "global.d.ts" ],

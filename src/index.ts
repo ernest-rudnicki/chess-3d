@@ -1,12 +1,14 @@
-import { MainScene } from "scenes/MainScene/MainScene";
+import { Game } from "game/Game";
 
-const scene = new MainScene({ debug: true, addGridHelper: true });
+const game = new Game({ debug: true, addGridHelper: true });
 
 function gameLoop() {
-  scene.camera.updateProjectionMatrix();
-  scene.renderer.render(scene, scene.camera);
-  scene.orbitals.update();
-  requestAnimationFrame(gameLoop);
+  try {
+    game.update();
+    requestAnimationFrame(gameLoop);
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 gameLoop();
