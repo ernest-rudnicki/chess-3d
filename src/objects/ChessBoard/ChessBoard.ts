@@ -9,13 +9,14 @@ export class ChessBoard extends BaseGroup {
   width = 8;
   height = 8;
 
-  constructor(debugHelper: GUI) {
-    super(debugHelper);
+  constructor(name: string, debugHelper: GUI) {
+    super(name, debugHelper);
   }
 
-  init() {
+  init(): void {
     this.createBoardMatrix();
     this.centerMiddle();
+    this.setInitialDebugPosition(this.position);
   }
 
   createBoardMatrix(): void {
@@ -50,7 +51,7 @@ export class ChessBoard extends BaseGroup {
     }
   }
 
-  centerMiddle() {
+  centerMiddle(): void {
     new THREE.Box3()
       .setFromObject(this)
       .getCenter(this.position)

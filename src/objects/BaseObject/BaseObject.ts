@@ -5,24 +5,24 @@ import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 export abstract class BaseObject extends Object3D {
   modelName: string | null = null;
   model: GLTF;
+  debugHelper?: GUI;
+  name: string;
 
-  constructor(model: string | null, debugHelper?: GUI) {
+  constructor(name: string, model: string | null, debugHelper?: GUI) {
     super();
     this.modelName = model;
-    const name = this.constructor.name;
+    this.name = name;
 
     if (!debugHelper) {
       return;
     }
+    this.debugHelper = debugHelper;
 
-    if (!debugHelper.__folders[name]) {
-      debugHelper.addFolder(name);
+    if (!this.debugHelper.__folders[this.name]) {
+      debugHelper.addFolder(this.name);
     }
 
-    debugHelper.__folders[name].open();
-    debugHelper.__folders[name].add(this.position, "x", this.position.x);
-    debugHelper.__folders[name].add(this.position, "y", this.position.y);
-    debugHelper.__folders[name].add(this.position, "z", this.position.z);
+    this.debugHelper.__folders[this.name].open();
   }
 
   initModel(loader: GLTFLoader): Promise<GLTF | void> {
@@ -46,5 +46,11 @@ export abstract class BaseObject extends Object3D {
         }
       );
     });
+  }
+
+  setInitialDebugPosition(vector: THREE.Vector3): void {
+    this.debugHelper.__folders[this.name].add(this.position, "x", vector.x);
+    this.debugHelper.__folders[this.name].add(this.position, "y", vector.y);
+    this.debugHelper.__folders[this.name].add(this.position, "z", vector.z);
   }
 }
