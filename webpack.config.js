@@ -14,7 +14,8 @@ module.exports = {
       assets: path.resolve(__dirname, "./src/assets"),
       managers: path.resolve(__dirname, "./src/managers"),
       objects: path.resolve(__dirname, "./src/objects"),
-      game: path.resolve(__dirname, "./src/game")
+      game: path.resolve(__dirname, "./src/game"),
+      maps: path.resolve(__dirname, "./src/maps")
     },
     extensions: [".ts", ".js"],
   },

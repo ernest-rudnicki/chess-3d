@@ -9,7 +9,7 @@ export class ChessScene extends BasicScene {
   }
   init() {
     this.chessBoard = new ChessBoard(this.subDebugHelper);
-    this.chessBoard.init(this.loader);
+    this.chessBoard.init();
     this.add(this.chessBoard);
   }
 }

@@ -16,6 +16,7 @@
       "objects/*": ["objects/*"],
       "game/*": ["game/*"],
       "assets/*": ["assets/*"],
+      "maps/*": ["maps/*"]
     }
   },
   "include": [ "src/**/*.ts", "global.d.ts", "global.d.ts" ],

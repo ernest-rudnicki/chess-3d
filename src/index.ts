@@ -1,6 +1,6 @@
 import { Game } from "game/Game";
 
-const game = new Game({ debug: true, addGridHelper: false });
+const game = new Game({ debug: true, addGridHelper: true });
 game.init();
 
 function gameLoop(): void {

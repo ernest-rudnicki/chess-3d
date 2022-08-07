@@ -6,7 +6,7 @@ export abstract class BaseObject extends Object3D {
   modelName: string | null = null;
   model: GLTF;
 
-  constructor(model: string, debugHelper?: GUI) {
+  constructor(model: string | null, debugHelper?: GUI) {
     super();
     this.modelName = model;
     const name = this.constructor.name;
@@ -25,7 +25,7 @@ export abstract class BaseObject extends Object3D {
     debugHelper.__folders[name].add(this.position, "z", this.position.z);
   }
 
-  init(loader: GLTFLoader): Promise<GLTF> {
+  initModel(loader: GLTFLoader): Promise<GLTF | void> {
     if (!this.modelName) {
       throw Error(
         "A 3D Object class must be provided with a path to the model."
