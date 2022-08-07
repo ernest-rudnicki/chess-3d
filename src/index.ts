@@ -1,8 +1,9 @@
 import { Game } from "game/Game";
 
-const game = new Game({ debug: true, addGridHelper: true });
+const game = new Game({ debug: true, addGridHelper: false });
+game.init();
 
-function gameLoop() {
+function gameLoop(): void {
   try {
     game.update();
     requestAnimationFrame(gameLoop);

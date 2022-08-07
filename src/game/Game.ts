@@ -1,6 +1,7 @@
 import { GUI } from "dat.gui";
 import { LoadingManager } from "managers/LoadingManager/LoadingManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
+import { ChessScene } from "scenes/ChessScene/ChessScene";
 import * as THREE from "three";
 import { Renderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -40,20 +41,20 @@ export class Game {
       this.debugHelper = new GUI();
     }
 
-    this.activeScene = new BasicScene(
-      this.renderer,
-      this.loader,
-      { addGridHelper: this.addGridHelper },
-      this.debugHelper
-    );
+    this.activeScene = new ChessScene({
+      renderer: this.renderer,
+      loader: this.loader,
+      options: { addGridHelper: this.addGridHelper },
+      debugHelper: this.debugHelper,
+    });
   }
 
-  private setupLoader() {
+  private setupLoader(): void {
     this.loadingManager = new LoadingManager();
     this.loader = new GLTFLoader(this.loadingManager);
   }
 
-  private setupRenderer() {
+  private setupRenderer(): void {
     this.renderer = new THREE.WebGLRenderer({
       canvas: document.getElementById("app") as HTMLCanvasElement,
       alpha: true,
@@ -61,24 +62,34 @@ export class Game {
     this.renderer.setSize(this.width, this.height);
   }
 
-  private addListenerOnResize(renderer: Renderer) {
+  private addListenerOnResize(renderer: Renderer): void {
     this.resizeListener = () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener("resize", this.resizeListener, false);
   }
 
-  update() {
+  init() {
     if (!this.activeScene) {
       throw Error("There is no active scene at the moment");
     }
 
-    this.activeScene.camera.updateProjectionMatrix();
-    this.renderer.render(this.activeScene, this.activeScene.camera);
-    this.activeScene.orbitals.update();
+    if (!this.activeScene.init) {
+      throw Error("Every scene must be declaring init function");
+    }
+
+    this.activeScene.init();
   }
 
-  cleanup() {
+  update(): void {
+    if (!this.activeScene) {
+      throw Error("There is no active scene at the moment");
+    }
+
+    this.activeScene.update();
+  }
+
+  cleanup(): void {
     window.removeEventListener("resize", this.resizeListener);
   }
 }

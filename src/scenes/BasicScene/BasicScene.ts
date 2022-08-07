@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { MainSceneOptions } from "./types";
+import { BasicSceneProps } from "./types";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 /**
@@ -12,41 +12,37 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
  * @param options.addGridHelper if set to true creates a grid for seeing the position of objects
  * @param debugHelper GUI object for debugging
  */
-export class BasicScene extends THREE.Scene {
+export abstract class BasicScene extends THREE.Scene {
   private _renderer: THREE.Renderer;
-  private _loader: GLTFLoader;
   private _mainDebugHelper: GUI;
 
+  loader: GLTFLoader;
   subDebugHelper: GUI | null = null;
 
   camera: THREE.PerspectiveCamera;
   orbitals: OrbitControls;
 
   lights: Array<THREE.Light> = [];
-  lightCount = 1;
-  lightDistance = 3;
 
   width = window.innerWidth;
   height = window.innerHeight;
 
   resizeListener: () => void;
 
-  constructor(
-    renderer: THREE.Renderer,
-    loader: GLTFLoader,
-    options: MainSceneOptions,
-    debugHelper?: GUI
-  ) {
+  abstract init(): void;
+
+  constructor(props: BasicSceneProps) {
     super();
+    const { renderer, loader, debugHelper, options } = props;
     const { addGridHelper } = options;
 
     this._renderer = renderer;
-    this._loader = loader;
     this.setupCamera();
-    this.setupLights();
+    this.setupLights(!!debugHelper);
 
     this.addWindowResizing(this.camera);
 
+    this.loader = loader;
     this.orbitals = new OrbitControls(this.camera, this._renderer.domElement);
     this.background = new THREE.Color(0xefefef);
 
@@ -61,7 +57,7 @@ export class BasicScene extends THREE.Scene {
     }
   }
 
-  private addWindowResizing(camera: THREE.PerspectiveCamera) {
+  private addWindowResizing(camera: THREE.PerspectiveCamera): void {
     this.resizeListener = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -69,12 +65,12 @@ export class BasicScene extends THREE.Scene {
     window.addEventListener("resize", this.resizeListener, false);
   }
 
-  cleanup() {
+  cleanup(): void {
     window.removeEventListener("resize", this.resizeListener);
     this._mainDebugHelper.removeFolder(this.subDebugHelper);
   }
 
-  private setupCamera() {
+  private setupCamera(): void {
     this.camera = new THREE.PerspectiveCamera(
       35,
       this.width / this.height,
@@ -84,39 +80,44 @@ export class BasicScene extends THREE.Scene {
     this.camera.position.set(12, 12, 12);
   }
 
-  private setupGridHelper() {
+  private setupGridHelper(): void {
     this.add(new THREE.GridHelper(10, 10, "red"));
     this.add(new THREE.AxesHelper(3));
   }
 
-  private setupLights() {
-    for (let i = 0; i < this.lightCount; i++) {
-      const light = new THREE.PointLight(0xffffff, 1);
-      const lightX =
-        this.lightDistance * Math.sin(((Math.PI * 2) / this.lightCount) * i);
-      const lightZ =
-        this.lightDistance * Math.cos(((Math.PI * 2) / this.lightCount) * i);
-      light.position.set(lightX, this.lightDistance, lightZ);
+  private setupLights(debug?: boolean): void {
+    const light = new THREE.PointLight(0xffffff, 1);
+    light.position.set(0, 10, 0);
 
-      light.lookAt(0, 0, 0);
-      this.add(light);
-      this.lights.push(light);
-      this.add(new THREE.PointLightHelper(light, 0.5, 0xff9900));
+    light.lookAt(0, 0, 0);
+    this.add(light);
+    this.lights.push(light);
+
+    if (!debug) {
+      return;
     }
+
+    this.add(new THREE.PointLightHelper(light, 0.5, 0xff9900));
   }
 
-  private debugCamera() {
+  private debugCamera(): void {
     const cameraGroup = this.subDebugHelper.addFolder("Camera");
     cameraGroup.add(this.camera, "fov", 20, 80);
     cameraGroup.add(this.camera, "zoom", 0, 1);
     cameraGroup.open();
   }
 
-  private debugLights() {
+  private debugLights(): void {
     const lightGroup = this.subDebugHelper.addFolder("Lights");
     for (let i = 0; i < this.lights.length; i++) {
       lightGroup.add(this.lights[i], "visible", true);
     }
     lightGroup.open();
+  }
+
+  update() {
+    this.camera.updateProjectionMatrix();
+    this._renderer.render(this, this.camera);
+    this.orbitals.update();
   }
 }
