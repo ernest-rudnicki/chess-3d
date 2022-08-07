@@ -35,7 +35,7 @@ export class ChessBoard extends BaseGroup {
         const geometry = new THREE.PlaneGeometry(1, 1);
         const material = new THREE.MeshLambertMaterial({
           color: colorBlack ? "#000000" : "#FFFFFF",
-          side: THREE.DoubleSide,
+          side: THREE.FrontSide,
         });
         const plane = new THREE.Mesh(geometry, material);
 
@@ -43,7 +43,7 @@ export class ChessBoard extends BaseGroup {
 
         plane.position.setX(j * 1);
         plane.position.setZ(i * 1);
-        plane.rotation.x = Math.PI / 2;
+        plane.rotation.x = -Math.PI / 2;
 
         this.add(plane);
       }
