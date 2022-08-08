@@ -7,9 +7,11 @@ export class ChessScene extends BasicScene {
   constructor(props: BasicSceneProps) {
     super(props);
   }
+
   init() {
     this.chessBoard = new ChessBoard("ChessBoard", this.subDebugHelper);
     this.chessBoard.init();
     this.add(this.chessBoard);
+    this.chessBoard.markPlaneAsDroppable(2, 4);
   }
 }
