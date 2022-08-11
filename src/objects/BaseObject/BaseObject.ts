@@ -7,7 +7,7 @@ export abstract class BaseObject extends Object3D {
   model: GLTF;
   debugHelper?: GUI;
   name: string;
-  psychicsBody: Body;
+  body: Body;
 
   constructor(name: string, model: string | null, debugHelper?: GUI) {
     super();
@@ -17,6 +17,7 @@ export abstract class BaseObject extends Object3D {
     if (!debugHelper) {
       return;
     }
+
     this.debugHelper = debugHelper;
 
     if (!this.debugHelper.__folders[this.name]) {

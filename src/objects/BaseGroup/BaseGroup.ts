@@ -5,7 +5,7 @@ import * as THREE from "three";
 export abstract class BaseGroup extends THREE.Group {
   debugHelper?: GUI;
   name: string;
-  psychicsBody: Body;
+  body: Body;
 
   constructor(name: string, debugHelper?: GUI) {
     super();

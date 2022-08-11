@@ -16,7 +16,6 @@ export class ChessBoard extends BaseGroup {
   currentlyDroppable: DroppableField[] = [];
   width = 8;
   height = 8;
-  body: Body;
 
   constructor(name: string, debugHelper?: GUI) {
     super(name, debugHelper);
