@@ -1,9 +1,12 @@
+import { Body, Vec3 } from "cannon-es";
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 
 export abstract class BaseGroup extends THREE.Group {
   debugHelper?: GUI;
   name: string;
+  psychicsBody: Body;
+
   constructor(name: string, debugHelper?: GUI) {
     super();
     this.name = name;

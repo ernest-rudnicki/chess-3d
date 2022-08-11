@@ -3,21 +3,35 @@ import * as THREE from "three";
 import { BaseGroup } from "objects/BaseGroup/BaseGroup";
 import { DroppableField } from "./types";
 import { Id } from "global/types";
+import { Body, Plane } from "cannon-es";
+import {
+  convertCannonEsQuaternion,
+  convertCannonEsVector,
+  convertThreeQuaternion,
+  convertThreeVector,
+} from "utils/general";
 
 export class ChessBoard extends BaseGroup {
   boardMatrix: Array<Id[]> = [];
   currentlyDroppable: DroppableField[] = [];
   width = 8;
   height = 8;
+  body: Body;
 
-  constructor(name: string, debugHelper: GUI) {
+  constructor(name: string, debugHelper?: GUI) {
     super(name, debugHelper);
   }
 
-  init(): void {
+  init(): Body {
     this.createBoardMatrix();
     this.centerMiddle();
     this.setInitialDebugPosition(this.position);
+    this.createPsychicsBody();
+
+    this.body.position.copy(convertThreeVector(this.position));
+    this.body.quaternion.copy(convertThreeQuaternion(this.quaternion));
+
+    return this.body;
   }
 
   createBoardMatrix(): void {
@@ -71,9 +85,16 @@ export class ChessBoard extends BaseGroup {
     this.currentlyDroppable.push({ planeId, circleId: dropCircle.id });
   }
 
+  createPsychicsBody() {
+    this.body = new Body({
+      mass: 0,
+      shape: new Plane(),
+    });
+  }
+
   createDropCircle() {
     const geometry = new THREE.CircleGeometry(0.3, 16);
-    const material = new THREE.MeshLambertMaterial({ color: "gray" });
+    const material = new THREE.MeshLambertMaterial({ color: "orange" });
     const circle = new THREE.Mesh(geometry, material);
 
     return circle;
@@ -84,5 +105,10 @@ export class ChessBoard extends BaseGroup {
       .setFromObject(this)
       .getCenter(this.position)
       .multiplyScalar(-1);
+  }
+
+  update() {
+    this.position.copy(convertCannonEsVector(this.body.position));
+    this.quaternion.copy(convertCannonEsQuaternion(this.body.quaternion));
   }
 }

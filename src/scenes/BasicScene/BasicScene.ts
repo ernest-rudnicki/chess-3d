@@ -3,6 +3,7 @@ import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { BasicSceneProps } from "./types";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { World, Vec3 } from "cannon-es";
 
 /**
  * This class is a basic scene that can be extended to create scenes
@@ -21,6 +22,7 @@ export abstract class BasicScene extends THREE.Scene {
 
   camera: THREE.PerspectiveCamera;
   orbitals: OrbitControls;
+  world: World;
 
   lights: Array<THREE.Light> = [];
 
@@ -45,6 +47,7 @@ export abstract class BasicScene extends THREE.Scene {
     this.loader = loader;
     this.orbitals = new OrbitControls(this.camera, this._renderer.domElement);
     this.background = new THREE.Color(0xefefef);
+    this.world = new World({ gravity: new Vec3(0, -9.82, 0) });
 
     if (addGridHelper) {
       this.setupGridHelper();
@@ -119,5 +122,6 @@ export abstract class BasicScene extends THREE.Scene {
     this.camera.updateProjectionMatrix();
     this._renderer.render(this, this.camera);
     this.orbitals.update();
+    this.world.fixedStep();
   }
 }

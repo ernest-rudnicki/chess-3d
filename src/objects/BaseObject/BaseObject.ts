@@ -7,6 +7,7 @@ export abstract class BaseObject extends Object3D {
   model: GLTF;
   debugHelper?: GUI;
   name: string;
+  psychicsBody: Body;
 
   constructor(name: string, model: string | null, debugHelper?: GUI) {
     super();

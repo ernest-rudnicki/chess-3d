@@ -17,7 +17,8 @@
       "game/*": ["game/*"],
       "assets/*": ["assets/*"],
       "maps/*": ["maps/*"],
-      "global/*": ["global/*"]
+      "global/*": ["global/*"],
+      "utils/*": ["utils/*"]
     }
   },
   "include": [ "src/**/*.ts", "global.d.ts", "global.d.ts" ],

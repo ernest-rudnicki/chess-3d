@@ -4,14 +4,21 @@ import { BasicSceneProps } from "scenes/BasicScene/types";
 
 export class ChessScene extends BasicScene {
   chessBoard: ChessBoard;
+
   constructor(props: BasicSceneProps) {
     super(props);
   }
 
   init() {
     this.chessBoard = new ChessBoard("ChessBoard", this.subDebugHelper);
-    this.chessBoard.init();
+    const chessBoardBody = this.chessBoard.init();
+
+    this.world.addBody(chessBoardBody);
     this.add(this.chessBoard);
-    this.chessBoard.markPlaneAsDroppable(2, 4);
+  }
+
+  update() {
+    super.update();
+    this.chessBoard.update();
   }
 }

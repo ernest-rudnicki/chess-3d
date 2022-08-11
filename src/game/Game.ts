@@ -86,6 +86,7 @@ export class Game {
       throw Error("There is no active scene at the moment");
     }
 
+    this.activeScene.world.fixedStep();
     this.activeScene.update();
   }
 
