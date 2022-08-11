@@ -1,4 +1,4 @@
-import { Body, Vec3 } from "cannon-es";
+import { Body } from "cannon-es";
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 
