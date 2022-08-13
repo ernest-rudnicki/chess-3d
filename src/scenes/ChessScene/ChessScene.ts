@@ -1,6 +1,7 @@
 import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
+import { Vector3 } from "three";
 
 export class ChessScene extends BasicScene {
   chessBoardManager: ChessBoardManager;
@@ -10,7 +11,21 @@ export class ChessScene extends BasicScene {
     this.chessBoardManager = new ChessBoardManager(this.world, this.loader);
   }
 
+  setupLights() {
+    this.setupLight(
+      "#FFFFFF",
+      new Vector3(0, 1, -8),
+      0.5,
+      new Vector3(0, 0, 8)
+    );
+
+    this.setupLight("#FFFFFF", new Vector3(0, 7, 0), 0.8, new Vector3(0, 0, 0));
+
+    this.setupLight("#FFFFFF", new Vector3(0, 1, 8), 0.5, new Vector3(0, 0, 8));
+  }
+
   init(): void {
+    this.setupLights();
     this.chessBoardManager.init(this);
   }
 

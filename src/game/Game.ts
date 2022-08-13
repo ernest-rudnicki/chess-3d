@@ -1,7 +1,7 @@
 import { CustomLoadingManager } from "managers/LoadingManager/LoadingManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { ChessScene } from "scenes/ChessScene/ChessScene";
-import { Renderer, WebGLRenderer } from "three";
+import { ReinhardToneMapping, sRGBEncoding, WebGLRenderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GameOptions } from "./types";
 
@@ -14,7 +14,7 @@ import { GameOptions } from "./types";
 export class Game {
   loadingManager: CustomLoadingManager;
   loader: GLTFLoader;
-  renderer: Renderer;
+  renderer: WebGLRenderer;
 
   activeScene: BasicScene | null;
 
@@ -57,9 +57,13 @@ export class Game {
       alpha: true,
     });
     this.renderer.setSize(this.width, this.height);
+    this.renderer.toneMapping = ReinhardToneMapping;
+    this.renderer.toneMappingExposure = 3;
+
+    this.renderer.outputEncoding = sRGBEncoding;
   }
 
-  private addListenerOnResize(renderer: Renderer): void {
+  private addListenerOnResize(renderer: WebGLRenderer): void {
     this.resizeListener = () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
     };

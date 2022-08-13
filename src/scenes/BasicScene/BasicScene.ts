@@ -5,6 +5,7 @@ import { World, Vec3 } from "cannon-es";
 import {
   AxesHelper,
   Color,
+  ColorRepresentation,
   GridHelper,
   Light,
   PerspectiveCamera,
@@ -12,6 +13,7 @@ import {
   PointLightHelper,
   Renderer,
   Scene,
+  Vector3,
 } from "three";
 
 /**
@@ -32,6 +34,7 @@ export abstract class BasicScene extends Scene {
   world: World;
 
   lights: Array<Light> = [];
+  lightHelpers: boolean;
 
   width = window.innerWidth;
   height = window.innerHeight;
@@ -44,10 +47,10 @@ export abstract class BasicScene extends Scene {
     super();
     const { renderer, loader, options } = props;
     const { addGridHelper, lightHelpers } = options;
+    this.lightHelpers = lightHelpers;
 
     this._renderer = renderer;
     this.setupCamera();
-    this.setupLights(lightHelpers);
 
     this.addWindowResizing(this.camera);
 
@@ -80,7 +83,7 @@ export abstract class BasicScene extends Scene {
       0.1,
       1000
     );
-    this.camera.position.set(12, 12, 12);
+    this.camera.position.set(0, 12, 12);
   }
 
   private setupGridHelper(): void {
@@ -88,15 +91,23 @@ export abstract class BasicScene extends Scene {
     this.add(new AxesHelper(3));
   }
 
-  private setupLights(lightHelpers?: boolean): void {
-    const light = new PointLight(0xffffff, 1);
-    light.position.set(0, 6, 0);
+  setupLight(
+    color: ColorRepresentation,
+    position: Vector3,
+    intensity: number,
+    lookAt?: Vector3
+  ): void {
+    const light = new PointLight(color, intensity);
+    light.position.copy(position);
 
-    light.lookAt(0, 0, 0);
+    if (lookAt) {
+      light.lookAt(lookAt);
+    }
+
     this.add(light);
     this.lights.push(light);
 
-    if (!lightHelpers) {
+    if (!this.lightHelpers) {
       return;
     }
 

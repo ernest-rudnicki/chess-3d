@@ -1,6 +1,6 @@
 import { Body, Box, Vec3 } from "cannon-es";
 import { BaseObject } from "objects/BaseObject/BaseObject";
-import { Mesh, MeshPhongMaterial, Vector3 } from "three";
+import { Color, Mesh, MeshPhongMaterial, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import {
   convertCannonEsQuaternion,
@@ -30,7 +30,7 @@ export abstract class Piece extends BaseObject {
     this.createPsychicsBody(initialPosition);
 
     this.position.copy(initialPosition);
-    this.scale.copy(new Vector3(15, 15, 15));
+    this.scale.set(15, 15, 15);
 
     return this.body;
   }
@@ -40,9 +40,13 @@ export abstract class Piece extends BaseObject {
       if (!o.isMesh) {
         return;
       }
+      const color = new Color(
+        this.color === PieceColor.BLACK ? "#191a1a" : "#ffd363"
+      );
+      color.convertSRGBToLinear();
 
       o.material = new MeshPhongMaterial({
-        color: this.color === PieceColor.BLACK ? "#000000" : "#E7CE89",
+        color,
       });
     });
   }

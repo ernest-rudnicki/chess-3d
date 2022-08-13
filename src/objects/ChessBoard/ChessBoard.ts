@@ -10,6 +10,7 @@ import {
 import {
   Box3,
   CircleGeometry,
+  Color,
   FrontSide,
   Mesh,
   MeshLambertMaterial,
@@ -48,8 +49,11 @@ export class ChessBoard extends BaseGroup {
 
       for (let j = 0; j < this.size; j++) {
         const geometry = new PlaneGeometry(1, 1);
+        const color = new Color(colorBlack ? "#000000" : "#FFFFFF");
+        color.convertSRGBToLinear();
+
         const material = new MeshLambertMaterial({
-          color: colorBlack ? "#000000" : "#FFFFFF",
+          color,
           side: FrontSide,
         });
         const plane = new Mesh(geometry, material);
