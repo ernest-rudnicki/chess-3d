@@ -22,12 +22,14 @@ export class Game {
   height = window.innerHeight;
 
   addGridHelper: boolean;
+  lightHelpers: boolean;
 
   resizeListener: () => void;
 
   constructor(options: GameOptions) {
-    const { addGridHelper } = options;
+    const { addGridHelper, lightHelpers } = options;
     this.addGridHelper = addGridHelper;
+    this.lightHelpers = lightHelpers;
 
     this.setupLoader();
     this.setupRenderer();

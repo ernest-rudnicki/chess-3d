@@ -42,12 +42,12 @@ export abstract class BasicScene extends Scene {
 
   constructor(props: BasicSceneProps) {
     super();
-    const { renderer, loader, debugHelper, options } = props;
-    const { addGridHelper } = options;
+    const { renderer, loader, options } = props;
+    const { addGridHelper, lightHelpers } = options;
 
     this._renderer = renderer;
     this.setupCamera();
-    this.setupLights(!!debugHelper);
+    this.setupLights(lightHelpers);
 
     this.addWindowResizing(this.camera);
 
@@ -88,7 +88,7 @@ export abstract class BasicScene extends Scene {
     this.add(new AxesHelper(3));
   }
 
-  private setupLights(debug?: boolean): void {
+  private setupLights(lightHelpers?: boolean): void {
     const light = new PointLight(0xffffff, 1);
     light.position.set(0, 6, 0);
 
@@ -96,7 +96,7 @@ export abstract class BasicScene extends Scene {
     this.add(light);
     this.lights.push(light);
 
-    if (!debug) {
+    if (!lightHelpers) {
       return;
     }
 
