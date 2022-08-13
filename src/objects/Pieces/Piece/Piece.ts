@@ -41,11 +41,15 @@ export abstract class Piece extends BaseObject {
       if (!o.isMesh) {
         return;
       }
+
+      o.castShadow = true;
+      o.receiveShadow = true;
+
       const color = new Color(
         this.color === PieceColor.BLACK ? BLACK_COLOR_PIECE : WHITE_COLOR_PIECE
       );
-      color.convertSRGBToLinear();
 
+      color.convertSRGBToLinear();
       o.material = new MeshPhongMaterial({
         color,
       });

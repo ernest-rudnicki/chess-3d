@@ -14,6 +14,7 @@ import {
   FrontSide,
   Mesh,
   MeshLambertMaterial,
+  MeshPhongMaterial,
   PlaneGeometry,
 } from "three";
 import { BLACK_COLOR_FIELD, WHITE_COLOR_FIELD } from "constants/colors";
@@ -55,12 +56,13 @@ export class ChessBoard extends BaseGroup {
         );
         color.convertSRGBToLinear();
 
-        const material = new MeshLambertMaterial({
+        const material = new MeshPhongMaterial({
           color,
           side: FrontSide,
         });
         const plane = new Mesh(geometry, material);
 
+        plane.receiveShadow = true;
         plane.position.setX(j * 1);
         plane.position.setZ(i * 1);
         plane.rotation.x = -Math.PI / 2;

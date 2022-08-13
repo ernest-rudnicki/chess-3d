@@ -54,13 +54,17 @@ export class Game {
   private setupRenderer(): void {
     this.renderer = new WebGLRenderer({
       canvas: document.getElementById("app") as HTMLCanvasElement,
-      alpha: true,
+      alpha: false,
+      powerPreference: "high-performance",
     });
+
     this.renderer.setSize(this.width, this.height);
+
     this.renderer.toneMapping = ReinhardToneMapping;
     this.renderer.toneMappingExposure = 3;
-
+    this.renderer.physicallyCorrectLights = true;
     this.renderer.outputEncoding = sRGBEncoding;
+    this.renderer.shadowMap.enabled = true;
   }
 
   private addListenerOnResize(renderer: WebGLRenderer): void {

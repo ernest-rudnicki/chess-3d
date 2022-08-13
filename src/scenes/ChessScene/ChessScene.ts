@@ -12,16 +12,11 @@ export class ChessScene extends BasicScene {
   }
 
   setupLights() {
-    this.setupLight(
-      "#FFFFFF",
-      new Vector3(0, 1, -8),
-      0.5,
-      new Vector3(0, 0, 8)
-    );
+    this.setupLight("#FFFFFF", new Vector3(0, 1, -8), 5, new Vector3(0, 0, 0));
 
-    this.setupLight("#FFFFFF", new Vector3(0, 7, 0), 0.8, new Vector3(0, 0, 0));
+    this.setupLight("#FFFFFF", new Vector3(0, 12, 0), 10, new Vector3(0, 0, 0));
 
-    this.setupLight("#FFFFFF", new Vector3(0, 1, 8), 0.5, new Vector3(0, 0, 8));
+    this.setupLight("#FFFFFF", new Vector3(0, 1, 8), 5, new Vector3(0, 0, 0));
   }
 
   init(): void {

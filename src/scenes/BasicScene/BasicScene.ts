@@ -100,6 +100,11 @@ export abstract class BasicScene extends Scene {
     const light = new PointLight(color, intensity);
     light.position.copy(position);
 
+    light.castShadow = true;
+    light.shadow.bias = -0.0001;
+    light.shadow.mapSize.width = 1024 * 2;
+    light.shadow.mapSize.height = 1024 * 2;
+
     if (lookAt) {
       light.lookAt(lookAt);
     }
