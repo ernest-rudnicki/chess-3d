@@ -1,5 +1,4 @@
 import { GUI } from "dat.gui";
-import * as THREE from "three";
 import { BaseGroup } from "objects/BaseGroup/BaseGroup";
 import { DroppableField } from "./types";
 import { Id } from "global/types";
@@ -10,6 +9,14 @@ import {
   convertThreeQuaternion,
   convertThreeVector,
 } from "utils/general";
+import {
+  Box3,
+  CircleGeometry,
+  FrontSide,
+  Mesh,
+  MeshLambertMaterial,
+  PlaneGeometry,
+} from "three";
 
 export class ChessBoard extends BaseGroup {
   boardMatrix: Array<Id[]> = [];
@@ -42,12 +49,12 @@ export class ChessBoard extends BaseGroup {
       colorBlack = !colorBlack;
 
       for (let j = 0; j < 8; j++) {
-        const geometry = new THREE.PlaneGeometry(1, 1);
-        const material = new THREE.MeshLambertMaterial({
+        const geometry = new PlaneGeometry(1, 1);
+        const material = new MeshLambertMaterial({
           color: colorBlack ? "#000000" : "#FFFFFF",
-          side: THREE.FrontSide,
+          side: FrontSide,
         });
-        const plane = new THREE.Mesh(geometry, material);
+        const plane = new Mesh(geometry, material);
 
         plane.position.setX(j * 1);
         plane.position.setZ(i * 1);
@@ -69,7 +76,7 @@ export class ChessBoard extends BaseGroup {
       throw Error("There is no plane with specified row and column");
     }
 
-    const plane = this.getObjectById(planeId) as THREE.Mesh;
+    const plane = this.getObjectById(planeId) as Mesh;
 
     if (!plane) {
       throw Error("There is no plane with specified id");
@@ -92,18 +99,15 @@ export class ChessBoard extends BaseGroup {
   }
 
   createDropCircle() {
-    const geometry = new THREE.CircleGeometry(0.3, 16);
-    const material = new THREE.MeshLambertMaterial({ color: "orange" });
-    const circle = new THREE.Mesh(geometry, material);
+    const geometry = new CircleGeometry(0.3, 16);
+    const material = new MeshLambertMaterial({ color: "orange" });
+    const circle = new Mesh(geometry, material);
 
     return circle;
   }
 
   centerMiddle(): void {
-    new THREE.Box3()
-      .setFromObject(this)
-      .getCenter(this.position)
-      .multiplyScalar(-1);
+    new Box3().setFromObject(this).getCenter(this.position).multiplyScalar(-1);
   }
 
   update() {

@@ -1,22 +1,22 @@
 import { Quaternion, Vec3 } from "cannon-es";
-import * as THREE from "three";
+import { Vector3, Quaternion as ThreeQuaternion } from "three";
 
-export function convertCannonEsVector(vector: Vec3): THREE.Vector3 {
-  return vector as unknown as THREE.Vector3;
+export function convertCannonEsVector(vector: Vec3): Vector3 {
+  return vector as unknown as Vector3;
 }
 
 export function convertCannonEsQuaternion(
   quaternion: Quaternion
-): THREE.Quaternion {
-  return quaternion as unknown as THREE.Quaternion;
+): ThreeQuaternion {
+  return quaternion as unknown as ThreeQuaternion;
 }
 
-export function convertThreeVector(vector: THREE.Vector3): Vec3 {
+export function convertThreeVector(vector: Vector3): Vec3 {
   return vector as unknown as Vec3;
 }
 
 export function convertThreeQuaternion(
-  quaternion: THREE.Quaternion
+  quaternion: ThreeQuaternion
 ): Quaternion {
   return quaternion as unknown as Quaternion;
 }

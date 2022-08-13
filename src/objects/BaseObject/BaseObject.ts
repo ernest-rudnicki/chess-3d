@@ -1,5 +1,5 @@
 import { GUI } from "dat.gui";
-import { Object3D } from "three";
+import { Object3D, Vector3 } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 export abstract class BaseObject extends Object3D {
@@ -50,7 +50,7 @@ export abstract class BaseObject extends Object3D {
     });
   }
 
-  setInitialDebugPosition(vector: THREE.Vector3): void {
+  setInitialDebugPosition(vector: Vector3): void {
     this.debugHelper.__folders[this.name].add(this.position, "x", vector.x);
     this.debugHelper.__folders[this.name].add(this.position, "y", vector.y);
     this.debugHelper.__folders[this.name].add(this.position, "z", vector.z);

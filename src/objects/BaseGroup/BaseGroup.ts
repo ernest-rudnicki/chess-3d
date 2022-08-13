@@ -1,8 +1,8 @@
 import { Body } from "cannon-es";
 import { GUI } from "dat.gui";
-import * as THREE from "three";
+import { Group, Vector3 } from "three";
 
-export abstract class BaseGroup extends THREE.Group {
+export abstract class BaseGroup extends Group {
   debugHelper?: GUI;
   name: string;
   body: Body;
@@ -24,7 +24,7 @@ export abstract class BaseGroup extends THREE.Group {
     this.debugHelper.__folders[this.name].open();
   }
 
-  setInitialDebugPosition(vector: THREE.Vector3): void {
+  setInitialDebugPosition(vector: Vector3): void {
     this.debugHelper.__folders[this.name].add(this.position, "x", vector.x);
     this.debugHelper.__folders[this.name].add(this.position, "y", vector.y);
     this.debugHelper.__folders[this.name].add(this.position, "z", vector.z);

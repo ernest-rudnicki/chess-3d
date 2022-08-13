@@ -1,6 +1,6 @@
-import * as THREE from "three";
+import { LoadingManager } from "three";
 
-export class LoadingManager extends THREE.LoadingManager {
+export class CustomLoadingManager extends LoadingManager {
   loaded: boolean;
   error: boolean;
   itemsLoaded: number;

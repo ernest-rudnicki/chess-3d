@@ -8,6 +8,7 @@ module.exports = {
     filename: "index.js",
   },
   resolve: {
+    modules: ['./src', 'node_modules'],
     alias: {
       three: path.resolve("./node_modules/three"),
       scenes: path.resolve(__dirname, "./src/scenes"),
@@ -17,7 +18,7 @@ module.exports = {
       game: path.resolve(__dirname, "./src/game"),
       maps: path.resolve(__dirname, "./src/maps"),
       global: path.resolve(__dirname, "./src/global"),
-      utils: path.resolve(__dirname, "./src/utils")
+      utils: path.resolve(__dirname, "./src/utils"),
     },
     extensions: [".ts", ".js"],
   },

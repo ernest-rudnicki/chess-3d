@@ -1,9 +1,8 @@
 import { GUI } from "dat.gui";
-import { LoadingManager } from "managers/LoadingManager/LoadingManager";
+import { CustomLoadingManager } from "managers/LoadingManager/LoadingManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { ChessScene } from "scenes/ChessScene/ChessScene";
-import * as THREE from "three";
-import { Renderer } from "three";
+import { Renderer, WebGLRenderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GameOptions } from "./types";
 
@@ -14,10 +13,10 @@ import { GameOptions } from "./types";
  * @param options.debug if set to true creates a panel with objects currently added in the scene
  */
 export class Game {
-  loadingManager: LoadingManager;
+  loadingManager: CustomLoadingManager;
   loader: GLTFLoader;
   debugHelper?: GUI;
-  renderer: THREE.Renderer;
+  renderer: Renderer;
 
   activeScene: BasicScene | null;
 
@@ -50,12 +49,12 @@ export class Game {
   }
 
   private setupLoader(): void {
-    this.loadingManager = new LoadingManager();
+    this.loadingManager = new CustomLoadingManager();
     this.loader = new GLTFLoader(this.loadingManager);
   }
 
   private setupRenderer(): void {
-    this.renderer = new THREE.WebGLRenderer({
+    this.renderer = new WebGLRenderer({
       canvas: document.getElementById("app") as HTMLCanvasElement,
       alpha: true,
     });

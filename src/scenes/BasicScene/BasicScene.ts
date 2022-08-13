@@ -1,9 +1,19 @@
-import * as THREE from "three";
 import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { BasicSceneProps } from "./types";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { World, Vec3 } from "cannon-es";
+import {
+  AxesHelper,
+  Color,
+  GridHelper,
+  Light,
+  PerspectiveCamera,
+  PointLight,
+  PointLightHelper,
+  Renderer,
+  Scene,
+} from "three";
 
 /**
  * This class is a basic scene that can be extended to create scenes
@@ -13,18 +23,18 @@ import { World, Vec3 } from "cannon-es";
  * @param options.addGridHelper if set to true creates a grid for seeing the position of objects
  * @param debugHelper GUI object for debugging
  */
-export abstract class BasicScene extends THREE.Scene {
-  private _renderer: THREE.Renderer;
+export abstract class BasicScene extends Scene {
+  private _renderer: Renderer;
   private _mainDebugHelper: GUI;
 
   loader: GLTFLoader;
   subDebugHelper: GUI | null = null;
 
-  camera: THREE.PerspectiveCamera;
+  camera: PerspectiveCamera;
   orbitals: OrbitControls;
   world: World;
 
-  lights: Array<THREE.Light> = [];
+  lights: Array<Light> = [];
 
   width = window.innerWidth;
   height = window.innerHeight;
@@ -46,7 +56,7 @@ export abstract class BasicScene extends THREE.Scene {
 
     this.loader = loader;
     this.orbitals = new OrbitControls(this.camera, this._renderer.domElement);
-    this.background = new THREE.Color(0xefefef);
+    this.background = new Color(0xefefef);
     this.world = new World({ gravity: new Vec3(0, -9.82, 0) });
 
     if (addGridHelper) {
@@ -60,7 +70,7 @@ export abstract class BasicScene extends THREE.Scene {
     }
   }
 
-  private addWindowResizing(camera: THREE.PerspectiveCamera): void {
+  private addWindowResizing(camera: PerspectiveCamera): void {
     this.resizeListener = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -74,7 +84,7 @@ export abstract class BasicScene extends THREE.Scene {
   }
 
   private setupCamera(): void {
-    this.camera = new THREE.PerspectiveCamera(
+    this.camera = new PerspectiveCamera(
       35,
       this.width / this.height,
       0.1,
@@ -84,12 +94,12 @@ export abstract class BasicScene extends THREE.Scene {
   }
 
   private setupGridHelper(): void {
-    this.add(new THREE.GridHelper(10, 10, "red"));
-    this.add(new THREE.AxesHelper(3));
+    this.add(new GridHelper(10, 10, "red"));
+    this.add(new AxesHelper(3));
   }
 
   private setupLights(debug?: boolean): void {
-    const light = new THREE.PointLight(0xffffff, 1);
+    const light = new PointLight(0xffffff, 1);
     light.position.set(0, 10, 0);
 
     light.lookAt(0, 0, 0);
@@ -100,7 +110,7 @@ export abstract class BasicScene extends THREE.Scene {
       return;
     }
 
-    this.add(new THREE.PointLightHelper(light, 0.5, 0xff9900));
+    this.add(new PointLightHelper(light, 0.5, 0xff9900));
   }
 
   private debugCamera(): void {
