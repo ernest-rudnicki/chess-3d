@@ -1,12 +1,10 @@
-import { GUI } from "dat.gui";
 import { BaseGroup } from "objects/BaseGroup/BaseGroup";
 import { DroppableField } from "./types";
 import { Id } from "global/types";
-import { Body, Box, Plane, Vec3 } from "cannon-es";
+import { Body, Box, Vec3 } from "cannon-es";
 import {
   convertCannonEsQuaternion,
   convertCannonEsVector,
-  convertThreeQuaternion,
   convertThreeVector,
 } from "utils/general";
 import {
@@ -23,14 +21,13 @@ export class ChessBoard extends BaseGroup {
   currentlyDroppable: DroppableField[] = [];
   size = 8;
 
-  constructor(name: string, debugHelper?: GUI) {
-    super(name, debugHelper);
+  constructor(name: string) {
+    super(name);
   }
 
   init(): Body {
     this.createBoardMatrix();
     this.centerMiddle();
-    this.setInitialDebugPosition(this.position);
     this.createPsychicsBody();
 
     this.body.position.copy(convertThreeVector(this.position));

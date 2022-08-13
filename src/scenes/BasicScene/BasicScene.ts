@@ -1,4 +1,3 @@
-import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { BasicSceneProps } from "./types";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -25,10 +24,8 @@ import {
  */
 export abstract class BasicScene extends Scene {
   private _renderer: Renderer;
-  private _mainDebugHelper: GUI;
 
   loader: GLTFLoader;
-  subDebugHelper: GUI | null = null;
 
   camera: PerspectiveCamera;
   orbitals: OrbitControls;
@@ -62,12 +59,6 @@ export abstract class BasicScene extends Scene {
     if (addGridHelper) {
       this.setupGridHelper();
     }
-
-    if (debugHelper) {
-      this.subDebugHelper = debugHelper.addFolder(this.constructor.name);
-      this.debugCamera();
-      this.debugLights();
-    }
   }
 
   private addWindowResizing(camera: PerspectiveCamera): void {
@@ -80,7 +71,6 @@ export abstract class BasicScene extends Scene {
 
   cleanup(): void {
     window.removeEventListener("resize", this.resizeListener);
-    this._mainDebugHelper.removeFolder(this.subDebugHelper);
   }
 
   private setupCamera(): void {
@@ -111,21 +101,6 @@ export abstract class BasicScene extends Scene {
     }
 
     this.add(new PointLightHelper(light, 0.5, 0xff9900));
-  }
-
-  private debugCamera(): void {
-    const cameraGroup = this.subDebugHelper.addFolder("Camera");
-    cameraGroup.add(this.camera, "fov", 20, 80);
-    cameraGroup.add(this.camera, "zoom", 0, 1);
-    cameraGroup.open();
-  }
-
-  private debugLights(): void {
-    const lightGroup = this.subDebugHelper.addFolder("Lights");
-    for (let i = 0; i < this.lights.length; i++) {
-      lightGroup.add(this.lights[i], "visible", true);
-    }
-    lightGroup.open();
   }
 
   update(): void {

@@ -1,4 +1,3 @@
-import { GUI } from "dat.gui";
 import { CustomLoadingManager } from "managers/LoadingManager/LoadingManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { ChessScene } from "scenes/ChessScene/ChessScene";
@@ -15,7 +14,6 @@ import { GameOptions } from "./types";
 export class Game {
   loadingManager: CustomLoadingManager;
   loader: GLTFLoader;
-  debugHelper?: GUI;
   renderer: Renderer;
 
   activeScene: BasicScene | null;
@@ -28,7 +26,7 @@ export class Game {
   resizeListener: () => void;
 
   constructor(options: GameOptions) {
-    const { addGridHelper, debug } = options;
+    const { addGridHelper } = options;
     this.addGridHelper = addGridHelper;
 
     this.setupLoader();
@@ -36,15 +34,10 @@ export class Game {
 
     this.addListenerOnResize(this.renderer);
 
-    if (debug) {
-      this.debugHelper = new GUI();
-    }
-
     this.activeScene = new ChessScene({
       renderer: this.renderer,
       loader: this.loader,
       options: { addGridHelper: this.addGridHelper },
-      debugHelper: this.debugHelper,
     });
   }
 

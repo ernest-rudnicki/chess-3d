@@ -1,13 +1,6 @@
 import { Body, Box, Vec3 } from "cannon-es";
-import { GUI } from "dat.gui";
 import { BaseObject } from "objects/BaseObject/BaseObject";
-import {
-  Color,
-  Mesh,
-  MeshLambertMaterial,
-  MeshPhongMaterial,
-  Vector3,
-} from "three";
+import { Mesh, MeshPhongMaterial, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import {
   convertCannonEsQuaternion,
@@ -20,13 +13,8 @@ export abstract class Piece extends BaseObject {
   chessPosition: PieceChessPosition;
   color: PieceColor;
 
-  constructor(
-    name: string,
-    model: string | null,
-    options: PieceOptions,
-    debugHelper?: GUI
-  ) {
-    super(name, model, debugHelper);
+  constructor(name: string, model: string | null, options: PieceOptions) {
+    super(name, model);
 
     const { initialChessPosition, color } = options;
 
@@ -43,8 +31,6 @@ export abstract class Piece extends BaseObject {
 
     this.position.copy(initialPosition);
     this.scale.copy(new Vector3(15, 15, 15));
-
-    this.setInitialDebugPosition(this.position);
 
     return this.body;
   }

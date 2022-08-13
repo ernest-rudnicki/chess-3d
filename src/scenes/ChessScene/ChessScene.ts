@@ -7,11 +7,7 @@ export class ChessScene extends BasicScene {
 
   constructor(props: BasicSceneProps) {
     super(props);
-    this.chessBoardManager = new ChessBoardManager(
-      this.world,
-      this.loader,
-      this.subDebugHelper
-    );
+    this.chessBoardManager = new ChessBoardManager(this.world, this.loader);
   }
 
   init(): void {
