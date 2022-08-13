@@ -1,4 +1,5 @@
 import { Body, Box, Vec3 } from "cannon-es";
+import { BLACK_COLOR_PIECE, WHITE_COLOR_PIECE } from "constants/colors";
 import { BaseObject } from "objects/BaseObject/BaseObject";
 import { Color, Mesh, MeshPhongMaterial, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -41,7 +42,7 @@ export abstract class Piece extends BaseObject {
         return;
       }
       const color = new Color(
-        this.color === PieceColor.BLACK ? "#191a1a" : "#ffd363"
+        this.color === PieceColor.BLACK ? BLACK_COLOR_PIECE : WHITE_COLOR_PIECE
       );
       color.convertSRGBToLinear();
 

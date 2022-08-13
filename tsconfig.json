@@ -18,7 +18,8 @@
       "assets/*": ["assets/*"],
       "maps/*": ["maps/*"],
       "global/*": ["global/*"],
-      "utils/*": ["utils/*"]
+      "utils/*": ["utils/*"],
+      "colors/*": ["colors/*"]
     }
   },
   "include": [ "src/**/*.ts", "global.d.ts", "global.d.ts" ],

@@ -16,6 +16,7 @@ import {
   MeshLambertMaterial,
   PlaneGeometry,
 } from "three";
+import { BLACK_COLOR_FIELD, WHITE_COLOR_FIELD } from "constants/colors";
 
 export class ChessBoard extends BaseGroup {
   boardMatrix: Array<Id[]> = [];
@@ -49,7 +50,9 @@ export class ChessBoard extends BaseGroup {
 
       for (let j = 0; j < this.size; j++) {
         const geometry = new PlaneGeometry(1, 1);
-        const color = new Color(colorBlack ? "#000000" : "#FFFFFF");
+        const color = new Color(
+          colorBlack ? BLACK_COLOR_FIELD : WHITE_COLOR_FIELD
+        );
         color.convertSRGBToLinear();
 
         const material = new MeshLambertMaterial({

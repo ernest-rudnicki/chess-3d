@@ -19,6 +19,7 @@ module.exports = {
       maps: path.resolve(__dirname, "./src/maps"),
       global: path.resolve(__dirname, "./src/global"),
       utils: path.resolve(__dirname, "./src/utils"),
+      colors: path.resolve(__dirname, "./src/colors")
     },
     extensions: [".ts", ".js"],
   },
