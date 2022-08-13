@@ -6,22 +6,22 @@ export class CustomLoadingManager extends LoadingManager {
   itemsLoaded: number;
   itemsTotal: number;
 
-  onStart = (url: string, itemsLoaded: number, itemsTotal: number) => {
+  onStart = (url: string, itemsLoaded: number, itemsTotal: number): void => {
     this.loaded = false;
     this.itemsLoaded = itemsLoaded;
     this.itemsTotal = itemsTotal;
   };
 
-  onProgress = (url: string, itemsLoaded: number, itemsTotal: number) => {
+  onProgress = (url: string, itemsLoaded: number, itemsTotal: number): void => {
     this.itemsLoaded = itemsLoaded;
     this.itemsTotal = itemsTotal;
   };
 
-  onError = () => {
+  onError = (): void => {
     this.error = true;
   };
 
-  onLoad = () => {
+  onLoad = (): void => {
     this.loaded = true;
   };
 }

@@ -1,3 +1,4 @@
+import { Body } from "cannon-es";
 import { GUI } from "dat.gui";
 import { Object3D, Vector3 } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -23,11 +24,9 @@ export abstract class BaseObject extends Object3D {
     if (!this.debugHelper.__folders[this.name]) {
       debugHelper.addFolder(this.name);
     }
-
-    this.debugHelper.__folders[this.name].open();
   }
 
-  initModel(loader: GLTFLoader): Promise<GLTF | void> {
+  initModel(loader: GLTFLoader): Promise<GLTF> {
     if (!this.modelName) {
       throw Error(
         "A 3D Object class must be provided with a path to the model."

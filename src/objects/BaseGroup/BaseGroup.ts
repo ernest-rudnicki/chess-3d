@@ -20,8 +20,6 @@ export abstract class BaseGroup extends Group {
     if (!this.debugHelper.__folders[this.name]) {
       this.debugHelper.addFolder(this.name);
     }
-
-    this.debugHelper.__folders[this.name].open();
   }
 
   setInitialDebugPosition(vector: Vector3): void {

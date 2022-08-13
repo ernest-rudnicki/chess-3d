@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { BaseGroup } from "objects/BaseGroup/BaseGroup";
 import { DroppableField } from "./types";
 import { Id } from "global/types";
-import { Body, Plane } from "cannon-es";
+import { Body, Box, Plane, Vec3 } from "cannon-es";
 import {
   convertCannonEsQuaternion,
   convertCannonEsVector,
@@ -21,8 +21,7 @@ import {
 export class ChessBoard extends BaseGroup {
   boardMatrix: Array<Id[]> = [];
   currentlyDroppable: DroppableField[] = [];
-  width = 8;
-  height = 8;
+  size = 8;
 
   constructor(name: string, debugHelper?: GUI) {
     super(name, debugHelper);
@@ -35,7 +34,9 @@ export class ChessBoard extends BaseGroup {
     this.createPsychicsBody();
 
     this.body.position.copy(convertThreeVector(this.position));
-    this.body.quaternion.copy(convertThreeQuaternion(this.quaternion));
+    this.body.position.y = -this.size;
+
+    this.quaternion.copy(convertCannonEsQuaternion(this.body.quaternion));
 
     return this.body;
   }
@@ -44,11 +45,11 @@ export class ChessBoard extends BaseGroup {
     this.boardMatrix = [];
     let colorBlack = true;
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < this.size; i++) {
       this.boardMatrix.push([]);
       colorBlack = !colorBlack;
 
-      for (let j = 0; j < 8; j++) {
+      for (let j = 0; j < this.size; j++) {
         const geometry = new PlaneGeometry(1, 1);
         const material = new MeshLambertMaterial({
           color: colorBlack ? "#000000" : "#FFFFFF",
@@ -67,6 +68,14 @@ export class ChessBoard extends BaseGroup {
         colorBlack = !colorBlack;
       }
     }
+  }
+
+  createDropCircle() {
+    const geometry = new CircleGeometry(0.3, 16);
+    const material = new MeshLambertMaterial({ color: "orange" });
+    const circle = new Mesh(geometry, material);
+
+    return circle;
   }
 
   markPlaneAsDroppable(row: number, column: number) {
@@ -94,16 +103,8 @@ export class ChessBoard extends BaseGroup {
   createPsychicsBody() {
     this.body = new Body({
       mass: 0,
-      shape: new Plane(),
+      shape: new Box(new Vec3(this.size, this.size, this.size)),
     });
-  }
-
-  createDropCircle() {
-    const geometry = new CircleGeometry(0.3, 16);
-    const material = new MeshLambertMaterial({ color: "orange" });
-    const circle = new Mesh(geometry, material);
-
-    return circle;
   }
 
   centerMiddle(): void {
@@ -111,7 +112,10 @@ export class ChessBoard extends BaseGroup {
   }
 
   update() {
-    this.position.copy(convertCannonEsVector(this.body.position));
+    const clonedPosition = this.body.position.clone();
+    clonedPosition.y = clonedPosition.y + this.size;
+
+    this.position.copy(convertCannonEsVector(clonedPosition));
     this.quaternion.copy(convertCannonEsQuaternion(this.body.quaternion));
   }
 }

@@ -100,7 +100,7 @@ export abstract class BasicScene extends Scene {
 
   private setupLights(debug?: boolean): void {
     const light = new PointLight(0xffffff, 1);
-    light.position.set(0, 10, 0);
+    light.position.set(0, 6, 0);
 
     light.lookAt(0, 0, 0);
     this.add(light);
@@ -128,7 +128,7 @@ export abstract class BasicScene extends Scene {
     lightGroup.open();
   }
 
-  update() {
+  update(): void {
     this.camera.updateProjectionMatrix();
     this._renderer.render(this, this.camera);
     this.orbitals.update();

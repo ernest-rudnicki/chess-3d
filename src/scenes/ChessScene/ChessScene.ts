@@ -1,24 +1,25 @@
-import { ChessBoard } from "objects/ChessBoard/ChessBoard";
+import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
 
 export class ChessScene extends BasicScene {
-  chessBoard: ChessBoard;
+  chessBoardManager: ChessBoardManager;
 
   constructor(props: BasicSceneProps) {
     super(props);
+    this.chessBoardManager = new ChessBoardManager(
+      this.world,
+      this.loader,
+      this.subDebugHelper
+    );
   }
 
-  init() {
-    this.chessBoard = new ChessBoard("ChessBoard", this.subDebugHelper);
-    const chessBoardBody = this.chessBoard.init();
-
-    this.world.addBody(chessBoardBody);
-    this.add(this.chessBoard);
+  init(): void {
+    this.chessBoardManager.init(this);
   }
 
-  update() {
+  update(): void {
     super.update();
-    this.chessBoard.update();
+    this.chessBoardManager.update();
   }
 }
