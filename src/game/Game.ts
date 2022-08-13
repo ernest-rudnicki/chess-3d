@@ -39,7 +39,10 @@ export class Game {
     this.activeScene = new ChessScene({
       renderer: this.renderer,
       loader: this.loader,
-      options: { addGridHelper: this.addGridHelper },
+      options: {
+        addGridHelper: this.addGridHelper,
+        lightHelpers: this.lightHelpers,
+      },
     });
   }
 
