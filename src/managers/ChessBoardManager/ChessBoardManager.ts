@@ -56,8 +56,6 @@ export class ChessBoardManager {
       const field = this.chessBoard.getObjectById(fieldId);
       const initialPosition = new Vector3();
       field.getWorldPosition(initialPosition);
-      initialPosition.setY(initialPosition.y + 0.5);
-
       const pawnBody = pawn.init(initialPosition, this.loader);
 
       scene.add(pawn);
