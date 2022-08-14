@@ -15,21 +15,17 @@ export class Game {
   loadingManager: CustomLoadingManager;
   loader: GLTFLoader;
   renderer: WebGLRenderer;
-
   activeScene: BasicScene | null;
 
   width = window.innerWidth;
   height = window.innerHeight;
 
-  addGridHelper: boolean;
-  lightHelpers: boolean;
+  options: GameOptions;
 
   resizeListener: () => void;
 
   constructor(options: GameOptions) {
-    const { addGridHelper, lightHelpers } = options;
-    this.addGridHelper = addGridHelper;
-    this.lightHelpers = lightHelpers;
+    this.options = options;
 
     this.setupLoader();
     this.setupRenderer();
@@ -40,8 +36,9 @@ export class Game {
       renderer: this.renderer,
       loader: this.loader,
       options: {
-        addGridHelper: this.addGridHelper,
-        lightHelpers: this.lightHelpers,
+        addGridHelper: this.options.addGridHelper,
+        lightHelpers: this.options.lightHelpers,
+        cannonDebugger: this.options.cannonDebugger,
       },
     });
   }
@@ -92,6 +89,7 @@ export class Game {
     }
 
     this.activeScene.world.fixedStep();
+    this.activeScene.cannonDebugger?.update();
     this.activeScene.update();
   }
 

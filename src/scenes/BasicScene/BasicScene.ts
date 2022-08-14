@@ -15,6 +15,7 @@ import {
   Scene,
   Vector3,
 } from "three";
+import CannonDebugger from "cannon-es-debugger";
 
 /**
  * This class is a basic scene that can be extended to create scenes
@@ -32,6 +33,7 @@ export abstract class BasicScene extends Scene {
   camera: PerspectiveCamera;
   orbitals: OrbitControls;
   world: World;
+  cannonDebugger?: CannonDebugger;
 
   lights: Array<Light> = [];
   lightHelpers: boolean;
@@ -46,7 +48,7 @@ export abstract class BasicScene extends Scene {
   constructor(props: BasicSceneProps) {
     super();
     const { renderer, loader, options } = props;
-    const { addGridHelper, lightHelpers } = options;
+    const { addGridHelper, lightHelpers, cannonDebugger } = options;
     this.lightHelpers = lightHelpers;
 
     this._renderer = renderer;
@@ -62,6 +64,10 @@ export abstract class BasicScene extends Scene {
     if (addGridHelper) {
       this.setupGridHelper();
     }
+
+    if (cannonDebugger) {
+      this.setupCannonDebugger();
+    }
   }
 
   private addWindowResizing(camera: PerspectiveCamera): void {
@@ -76,7 +82,7 @@ export abstract class BasicScene extends Scene {
     window.removeEventListener("resize", this.resizeListener);
   }
 
-  private setupCamera(): void {
+  setupCamera(): void {
     this.camera = new PerspectiveCamera(
       35,
       this.width / this.height,
@@ -86,9 +92,13 @@ export abstract class BasicScene extends Scene {
     this.camera.position.set(0, 10, 10);
   }
 
-  private setupGridHelper(): void {
+  setupGridHelper(): void {
     this.add(new GridHelper(10, 10, "red"));
     this.add(new AxesHelper(3));
+  }
+
+  setupCannonDebugger(): void {
+    this.cannonDebugger = new CannonDebugger(this, this.world);
   }
 
   setupLight(
