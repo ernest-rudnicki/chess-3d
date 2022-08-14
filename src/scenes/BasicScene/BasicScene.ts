@@ -15,7 +15,7 @@ import {
   Scene,
   Vector3,
 } from "three";
-import CannonDebugger from "cannon-es-debugger";
+import createCannonDebugger from "cannon-es-debugger";
 
 /**
  * This class is a basic scene that can be extended to create scenes
@@ -33,7 +33,7 @@ export abstract class BasicScene extends Scene {
   camera: PerspectiveCamera;
   orbitals: OrbitControls;
   world: World;
-  cannonDebugger?: CannonDebugger;
+  cannonDebugger?: ReturnType<typeof createCannonDebugger>;
 
   lights: Array<Light> = [];
   lightHelpers: boolean;
@@ -98,7 +98,7 @@ export abstract class BasicScene extends Scene {
   }
 
   setupCannonDebugger(): void {
-    this.cannonDebugger = new CannonDebugger(this, this.world);
+    this.cannonDebugger = createCannonDebugger(this, this.world);
   }
 
   setupLight(
