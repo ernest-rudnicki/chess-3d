@@ -3,16 +3,13 @@ import { BLACK_COLOR_PIECE, WHITE_COLOR_PIECE } from "constants/colors";
 import { BaseObject } from "objects/BaseObject/BaseObject";
 import { Color, Mesh, MeshPhongMaterial, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import {
-  convertCannonEsQuaternion,
-  convertCannonEsVector,
-  convertThreeVector,
-} from "utils/general";
+import { convertCannonEsQuaternion, convertThreeVector } from "utils/general";
 import { PieceChessPosition, PieceColor, PieceOptions } from "./types";
 
 export abstract class Piece extends BaseObject {
   chessPosition: PieceChessPosition;
   color: PieceColor;
+  size: Vec3;
 
   constructor(name: string, model: string | null, options: PieceOptions) {
     super(name, model);
@@ -57,15 +54,21 @@ export abstract class Piece extends BaseObject {
   }
 
   createPsychicsBody(initialPosition: Vector3): void {
+    this.size = new Vec3(0.4, 0.5, 0.4);
+
     this.body = new Body({
       mass: 0.1,
       position: new Vec3().copy(convertThreeVector(initialPosition)),
-      shape: new Box(new Vec3(1, 0.01, 1)),
+      shape: new Box(this.size),
     });
   }
 
   update(): void {
-    this.position.copy(convertCannonEsVector(this.body.position));
+    this.position.set(
+      this.body.position.x,
+      this.body.position.y - this.size.y,
+      this.body.position.z
+    );
     this.quaternion.copy(convertCannonEsQuaternion(this.body.quaternion));
   }
 }
