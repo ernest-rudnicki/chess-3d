@@ -3,7 +3,6 @@ import { Game } from "game/Game";
 const game = new Game({
   addGridHelper: true,
   lightHelpers: true,
-  cannonDebugger: true,
 });
 game.init();
 
