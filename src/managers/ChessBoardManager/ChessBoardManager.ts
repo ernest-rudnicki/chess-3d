@@ -44,9 +44,23 @@ export class ChessBoardManager {
     const fieldId = this.chessBoard.boardMatrix[row][column];
     const field = this.chessBoard.getObjectById(fieldId);
     const position = new Vector3();
+
     field.getWorldPosition(position);
 
     return position;
+  }
+
+  setupPieceInScene(
+    piece: Piece,
+    row: number,
+    column: number,
+    scene: Scene
+  ): void {
+    const initialPosition = this.getFieldPosition(row, column);
+    const rookBody = piece.init(initialPosition, this.loader);
+
+    scene.add(piece);
+    this.world.addBody(rookBody);
   }
 
   initPawns(color: PieceColor, scene: Scene): Pawn[] {
@@ -60,17 +74,13 @@ export class ChessBoardManager {
         color,
       });
 
-      const initialPosition = this.getFieldPosition(row, i);
-      const pawnBody = pawn.init(initialPosition, this.loader);
-
-      scene.add(pawn);
-      this.world.addBody(pawnBody);
+      this.setupPieceInScene(pawn, row, i, scene);
       pawns.push(pawn);
     }
     return pawns;
   }
 
-  createRook(color: PieceColor, column: number, scene: Scene) {
+  createRook(color: PieceColor, column: number, scene: Scene): Rook {
     const name = this.concatPieceName("Rook", color);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -79,16 +89,11 @@ export class ChessBoardManager {
       color,
     });
 
-    const initialPosition = this.getFieldPosition(row, column);
-    const rookBody = rook.init(initialPosition, this.loader);
-
-    scene.add(rook);
-    this.world.addBody(rookBody);
-
+    this.setupPieceInScene(rook, row, column, scene);
     return rook;
   }
 
-  initRooks(color: PieceColor, scene: Scene) {
+  initRooks(color: PieceColor, scene: Scene): Rook[] {
     const rooks: Rook[] = [];
 
     rooks.push(this.createRook(color, 0, scene));
@@ -97,7 +102,7 @@ export class ChessBoardManager {
     return rooks;
   }
 
-  initPieces(scene: Scene) {
+  initPieces(scene: Scene): void {
     this.pieces = {
       black: {
         pawns: this.initPawns(PieceColor.BLACK, scene),
@@ -110,13 +115,13 @@ export class ChessBoardManager {
     };
   }
 
-  updatePieces(set: keyof PiecesContainer) {
+  updatePieces(set: keyof PiecesContainer): void {
     for (const pieceSet of Object.values(this.pieces[set])) {
       pieceSet.forEach((el: Piece) => el.update());
     }
   }
 
-  update() {
+  update(): void {
     this.chessBoard.update();
     this.updatePieces("black");
     this.updatePieces("white");
