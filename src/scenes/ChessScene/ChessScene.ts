@@ -1,4 +1,6 @@
 import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
+import { PiecesContainer } from "managers/ChessBoardManager/types";
+import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
 import { Vector3 } from "three";
@@ -21,7 +23,25 @@ export class ChessScene extends BasicScene {
 
   init(): void {
     this.setupLights();
-    this.chessBoardManager.init(this);
+    this.chessBoardManager.init();
+
+    this.setupScene();
+  }
+
+  setupPieceSet(set: keyof PiecesContainer): void {
+    const pieceSet = this.chessBoardManager.pieces[set];
+
+    for (const pieces of Object.values(pieceSet)) {
+      pieces.forEach((el: Piece) => {
+        this.add(el);
+      });
+    }
+  }
+
+  setupScene(): void {
+    this.add(this.chessBoardManager.chessBoard);
+    this.setupPieceSet("white");
+    this.setupPieceSet("black");
   }
 
   update(): void {

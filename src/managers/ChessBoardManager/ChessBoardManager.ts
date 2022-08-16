@@ -4,7 +4,7 @@ import { Pawn } from "objects/Pieces/Pawn/Pawn";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { PieceColor } from "objects/Pieces/Piece/types";
 import { Rook } from "objects/Pieces/Rook/Rook";
-import { Scene, Vector3 } from "three";
+import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { PiecesContainer } from "./types";
 
@@ -20,15 +20,14 @@ export class ChessBoardManager {
     this.loader = loader;
   }
 
-  init(scene: Scene): void {
-    this.initChessBoard(scene);
-    this.initPieces(scene);
+  init(): void {
+    this.initChessBoard();
+    this.initPieces();
   }
 
-  initChessBoard(scene: Scene) {
+  initChessBoard() {
     this.chessBoard = new ChessBoard("ChessBoard");
     const chessBoardBody = this.chessBoard.init();
-    scene.add(this.chessBoard);
     this.world.addBody(chessBoardBody);
   }
 
@@ -50,20 +49,14 @@ export class ChessBoardManager {
     return position;
   }
 
-  setupPieceInScene(
-    piece: Piece,
-    row: number,
-    column: number,
-    scene: Scene
-  ): void {
+  setupPiecePosition(piece: Piece, row: number, column: number): void {
     const initialPosition = this.getFieldPosition(row, column);
     const rookBody = piece.init(initialPosition, this.loader);
 
-    scene.add(piece);
     this.world.addBody(rookBody);
   }
 
-  initPawns(color: PieceColor, scene: Scene): Pawn[] {
+  initPawns(color: PieceColor): Pawn[] {
     const pawns: Pawn[] = [];
     const name = this.concatPieceName("Pawn", color);
     const row = color === PieceColor.BLACK ? 1 : 6;
@@ -74,13 +67,13 @@ export class ChessBoardManager {
         color,
       });
 
-      this.setupPieceInScene(pawn, row, i, scene);
+      this.setupPiecePosition(pawn, row, i);
       pawns.push(pawn);
     }
     return pawns;
   }
 
-  createRook(color: PieceColor, column: number, scene: Scene): Rook {
+  createRook(color: PieceColor, column: number): Rook {
     const name = this.concatPieceName("Rook", color);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -89,28 +82,28 @@ export class ChessBoardManager {
       color,
     });
 
-    this.setupPieceInScene(rook, row, column, scene);
+    this.setupPiecePosition(rook, row, column);
     return rook;
   }
 
-  initRooks(color: PieceColor, scene: Scene): Rook[] {
+  initRooks(color: PieceColor): Rook[] {
     const rooks: Rook[] = [];
 
-    rooks.push(this.createRook(color, 0, scene));
-    rooks.push(this.createRook(color, 7, scene));
+    rooks.push(this.createRook(color, 0));
+    rooks.push(this.createRook(color, 7));
 
     return rooks;
   }
 
-  initPieces(scene: Scene): void {
+  initPieces(): void {
     this.pieces = {
       black: {
-        pawns: this.initPawns(PieceColor.BLACK, scene),
-        rooks: this.initRooks(PieceColor.BLACK, scene),
+        pawns: this.initPawns(PieceColor.BLACK),
+        rooks: this.initRooks(PieceColor.BLACK),
       },
       white: {
-        pawns: this.initPawns(PieceColor.WHITE, scene),
-        rooks: this.initRooks(PieceColor.WHITE, scene),
+        pawns: this.initPawns(PieceColor.WHITE),
+        rooks: this.initRooks(PieceColor.WHITE),
       },
     };
   }
