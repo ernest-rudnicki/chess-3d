@@ -1,4 +1,4 @@
-import { Quaternion, World } from "cannon-es";
+import { World } from "cannon-es";
 import { ChessBoard } from "objects/ChessBoard/ChessBoard";
 import { Knight } from "objects/Pieces/Knight/Knight";
 import { Pawn } from "objects/Pieces/Pawn/Pawn";
