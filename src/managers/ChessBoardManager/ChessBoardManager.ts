@@ -106,7 +106,6 @@ export class ChessBoardManager {
     });
 
     this.setupPiecePosition(knight, row, column);
-
     if (color === PieceColor.WHITE) {
       knight.body.quaternion.set(0, Math.PI, 0, 0);
     }
