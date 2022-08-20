@@ -1,4 +1,5 @@
 import { World } from "cannon-es";
+import { Bishop } from "objects/Bishop/Bishop";
 import { ChessBoard } from "objects/ChessBoard/ChessBoard";
 import { Knight } from "objects/Pieces/Knight/Knight";
 import { Pawn } from "objects/Pieces/Pawn/Pawn";
@@ -106,6 +107,7 @@ export class ChessBoardManager {
     });
 
     this.setupPiecePosition(knight, row, column);
+
     if (color === PieceColor.WHITE) {
       knight.body.quaternion.set(0, Math.PI, 0, 0);
     }
@@ -113,7 +115,7 @@ export class ChessBoardManager {
     return knight;
   }
 
-  initKnights(color: PieceColor) {
+  initKnights(color: PieceColor): Knight[] {
     const knights = [];
 
     knights.push(this.createKnight(color, 1));
@@ -122,17 +124,44 @@ export class ChessBoardManager {
     return knights;
   }
 
+  createBishop(color: PieceColor, column: number): Bishop {
+    const name = this.concatPieceName("Bishop", color, column);
+    const row = this.getMajorPieceInitialRow(color);
+
+    const bishop = new Bishop(name, {
+      initialChessPosition: { row, column },
+      color,
+    });
+
+    this.setupPiecePosition(bishop, row, column);
+
+    bishop.body.quaternion.y = Math.PI / 3;
+
+    return bishop;
+  }
+
+  initBishops(color: PieceColor): Bishop[] {
+    const bishops = [];
+
+    bishops.push(this.createBishop(color, 2));
+    bishops.push(this.createBishop(color, 5));
+
+    return bishops;
+  }
+
   initPieces(): void {
     this.pieces = {
       black: {
         pawns: this.initPawns(PieceColor.BLACK),
         rooks: this.initRooks(PieceColor.BLACK),
         knights: this.initKnights(PieceColor.BLACK),
+        bishops: this.initBishops(PieceColor.BLACK),
       },
       white: {
         pawns: this.initPawns(PieceColor.WHITE),
         rooks: this.initRooks(PieceColor.WHITE),
         knights: this.initKnights(PieceColor.WHITE),
+        bishops: this.initBishops(PieceColor.WHITE),
       },
     };
   }

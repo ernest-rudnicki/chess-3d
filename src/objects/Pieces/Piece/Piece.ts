@@ -54,7 +54,7 @@ export abstract class Piece extends BaseObject {
   }
 
   createPsychicsBody(initialPosition: Vector3): void {
-    this.size = new Vec3(0.4, 0.5, 0.4);
+    this.size = new Vec3(0.3, 0.5, 0.3);
     const initialBodyPosition = new Vec3().copy(
       convertThreeVector(initialPosition)
     );

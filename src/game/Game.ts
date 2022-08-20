@@ -4,13 +4,6 @@ import { ChessScene } from "scenes/ChessScene/ChessScene";
 import { ReinhardToneMapping, sRGBEncoding, WebGLRenderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GameOptions } from "./types";
-
-/**
- * A class that is responsible for managing scenes and rendering
- * @param options initial options for development mode
- * @param options.addGridHelper if set to true creates a grid for seeing the position of objects
- * @param options.debug if set to true creates a panel with objects currently added in the scene
- */
 export class Game {
   loadingManager: CustomLoadingManager;
   loader: GLTFLoader;

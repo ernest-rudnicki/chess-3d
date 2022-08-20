@@ -17,14 +17,6 @@ import {
 } from "three";
 import createCannonDebugger from "cannon-es-debugger";
 
-/**
- * This class is a basic scene that can be extended to create scenes
- * @param renderer ThreeJS Renderer object
- * @param loader ThreeJS GLTF Loader object
- * @param options initial options for development mode
- * @param options.addGridHelper if set to true creates a grid for seeing the position of objects
- * @param debugHelper GUI object for debugging
- */
 export abstract class BasicScene extends Scene {
   private _renderer: Renderer;
 
