@@ -8,7 +8,6 @@ import {
   ColorRepresentation,
   GridHelper,
   Light,
-  MOUSE,
   PerspectiveCamera,
   PointLight,
   PointLightHelper,
