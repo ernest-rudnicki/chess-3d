@@ -8,6 +8,7 @@ import {
   ColorRepresentation,
   GridHelper,
   Light,
+  MOUSE,
   PerspectiveCamera,
   PointLight,
   PointLightHelper,
@@ -50,6 +51,8 @@ export abstract class BasicScene extends Scene {
 
     this.loader = loader;
     this.orbitals = new OrbitControls(this.camera, this._renderer.domElement);
+    this.orbitals.mouseButtons = null;
+
     this.background = new Color(0xefefef);
     this.world = new World({ gravity: new Vec3(0, -9.82, 0) });
 
@@ -124,7 +127,6 @@ export abstract class BasicScene extends Scene {
   update(): void {
     this.camera.updateProjectionMatrix();
     this._renderer.render(this, this.camera);
-    this.orbitals.update();
     this.world.fixedStep();
   }
 }
