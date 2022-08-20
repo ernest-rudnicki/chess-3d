@@ -1,10 +1,12 @@
 import { World } from "cannon-es";
 import { Bishop } from "objects/Bishop/Bishop";
 import { ChessBoard } from "objects/ChessBoard/ChessBoard";
+import { King } from "objects/Pieces/King/King";
 import { Knight } from "objects/Pieces/Knight/Knight";
 import { Pawn } from "objects/Pieces/Pawn/Pawn";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { PieceColor } from "objects/Pieces/Piece/types";
+import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -149,6 +151,34 @@ export class ChessBoardManager {
     return bishops;
   }
 
+  initQueen(color: PieceColor): Queen[] {
+    const name = this.concatPieceName("Queen", color, 3);
+    const row = this.getMajorPieceInitialRow(color);
+
+    const queen = new Queen(name, {
+      initialChessPosition: { row, column: 3 },
+      color,
+    });
+
+    this.setupPiecePosition(queen, row, 3);
+
+    return [queen];
+  }
+
+  initKing(color: PieceColor): King[] {
+    const name = this.concatPieceName("King", color, 4);
+    const row = this.getMajorPieceInitialRow(color);
+
+    const king = new King(name, {
+      initialChessPosition: { row, column: 4 },
+      color,
+    });
+
+    this.setupPiecePosition(king, row, 4);
+
+    return [king];
+  }
+
   initPieces(): void {
     this.pieces = {
       black: {
@@ -156,12 +186,16 @@ export class ChessBoardManager {
         rooks: this.initRooks(PieceColor.BLACK),
         knights: this.initKnights(PieceColor.BLACK),
         bishops: this.initBishops(PieceColor.BLACK),
+        queen: this.initQueen(PieceColor.BLACK),
+        king: this.initKing(PieceColor.BLACK),
       },
       white: {
         pawns: this.initPawns(PieceColor.WHITE),
         rooks: this.initRooks(PieceColor.WHITE),
         knights: this.initKnights(PieceColor.WHITE),
         bishops: this.initBishops(PieceColor.WHITE),
+        queen: this.initQueen(PieceColor.WHITE),
+        king: this.initKing(PieceColor.WHITE),
       },
     };
   }
