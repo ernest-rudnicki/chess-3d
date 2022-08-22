@@ -66,6 +66,8 @@ export abstract class Piece extends BaseObject {
       position: initialBodyPosition,
       shape: new Box(this.size),
     });
+
+    this.body.sleepSpeedLimit = 1;
   }
 
   update(): void {
