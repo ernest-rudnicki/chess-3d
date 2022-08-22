@@ -12,12 +12,22 @@ import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { PiecesContainer } from "./types";
 
+export const CHESS_BOARD_NAME = "ChessBoard";
+export const PAWN_NAME = "Pawn";
+export const ROOK_NAME = "Rook";
+export const KNIGHT_NAME = "Knight";
+export const BISHOP_NAME = "Bishop";
+export const QUEEN_NAME = "Queen";
+export const KING_NAME = "King";
+
 export class ChessBoardManager {
   chessBoard: ChessBoard;
   pieces: PiecesContainer;
 
   world: World;
   loader: GLTFLoader;
+
+  selected: Piece | null;
 
   constructor(world: World, loader: GLTFLoader) {
     this.world = world;
@@ -65,7 +75,7 @@ export class ChessBoardManager {
     const row = color === PieceColor.BLACK ? 1 : 6;
 
     for (let i = 0; i < 8; i++) {
-      const name = this.concatPieceName("Pawn", color, i);
+      const name = this.concatPieceName(PAWN_NAME, color, i);
       const pawn = new Pawn(name, {
         initialChessPosition: { row, column: i },
         color,
@@ -78,7 +88,7 @@ export class ChessBoardManager {
   }
 
   createRook(color: PieceColor, column: number): Rook {
-    const name = this.concatPieceName("Rook", color, column);
+    const name = this.concatPieceName(ROOK_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
     const rook = new Rook(name, {
@@ -100,7 +110,7 @@ export class ChessBoardManager {
   }
 
   createKnight(color: PieceColor, column: number): Knight {
-    const name = this.concatPieceName("Knight", color, column);
+    const name = this.concatPieceName(KNIGHT_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
     const knight = new Knight(name, {
@@ -127,7 +137,7 @@ export class ChessBoardManager {
   }
 
   createBishop(color: PieceColor, column: number): Bishop {
-    const name = this.concatPieceName("Bishop", color, column);
+    const name = this.concatPieceName(BISHOP_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
     const bishop = new Bishop(name, {
@@ -152,7 +162,7 @@ export class ChessBoardManager {
   }
 
   initQueen(color: PieceColor): Queen[] {
-    const name = this.concatPieceName("Queen", color, 3);
+    const name = this.concatPieceName(QUEEN_NAME, color, 3);
     const row = this.getMajorPieceInitialRow(color);
 
     const queen = new Queen(name, {
@@ -166,7 +176,7 @@ export class ChessBoardManager {
   }
 
   initKing(color: PieceColor): King[] {
-    const name = this.concatPieceName("King", color, 4);
+    const name = this.concatPieceName(KING_NAME, color, 4);
     const row = this.getMajorPieceInitialRow(color);
 
     const king = new King(name, {

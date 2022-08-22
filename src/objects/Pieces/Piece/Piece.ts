@@ -39,6 +39,8 @@ export abstract class Piece extends BaseObject {
         return;
       }
 
+      o.userData.lastParent = this;
+
       o.castShadow = true;
       o.receiveShadow = true;
 

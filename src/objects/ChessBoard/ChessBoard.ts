@@ -19,6 +19,8 @@ import {
 } from "three";
 import { BLACK_COLOR_FIELD, WHITE_COLOR_FIELD } from "constants/colors";
 
+export const FIELD_NAME = "Field";
+
 export class ChessBoard extends BaseGroup {
   boardMatrix: Array<Id[]> = [];
   currentlyDroppable: DroppableField[] = [];
@@ -66,6 +68,8 @@ export class ChessBoard extends BaseGroup {
         plane.position.setX(j * 1);
         plane.position.setZ(i * 1);
         plane.rotation.x = -Math.PI / 2;
+
+        plane.name = `${FIELD_NAME}Row${i}Column${j}`;
 
         this.boardMatrix[i].push(plane.id);
 
