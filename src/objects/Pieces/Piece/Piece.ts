@@ -7,6 +7,8 @@ import { convertCannonEsQuaternion, convertThreeVector } from "utils/general";
 import { PieceChessPosition, PieceColor, PieceOptions } from "./types";
 
 export abstract class Piece extends BaseObject {
+  private initialMass = 0.1;
+
   chessPosition: PieceChessPosition;
   color: PieceColor;
   size: Vec3;
@@ -55,6 +57,14 @@ export abstract class Piece extends BaseObject {
     });
   }
 
+  removeMass(): void {
+    this.body.mass = 0;
+  }
+
+  resetMass(): void {
+    this.body.mass = this.initialMass;
+  }
+
   createPsychicsBody(initialPosition: Vector3): void {
     this.size = new Vec3(0.3, 0.5, 0.3);
     const initialBodyPosition = new Vec3().copy(
@@ -64,7 +74,7 @@ export abstract class Piece extends BaseObject {
     initialBodyPosition.y = initialBodyPosition.y + this.size.y;
 
     this.body = new Body({
-      mass: 0.1,
+      mass: this.initialMass,
       position: initialBodyPosition,
       shape: new Box(this.size),
     });

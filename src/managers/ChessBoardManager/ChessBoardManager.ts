@@ -210,6 +210,29 @@ export class ChessBoardManager {
     };
   }
 
+  setSelected(piece: Piece | null): void {
+    console.log(piece);
+    if (!piece) {
+      this.selected.resetMass();
+      this.selected = piece;
+
+      return;
+    }
+
+    piece.removeMass();
+    this.selected = piece;
+  }
+
+  moveSelectedBody(x: number, z: number): void {
+    if (!this.selected) {
+      return;
+    }
+
+    this.selected.body.position.x = x;
+    this.selected.body.position.y = 1.5;
+    this.selected.body.position.z = z;
+  }
+
   updatePieces(set: keyof PiecesContainer): void {
     for (const pieceSet of Object.values(this.pieces[set])) {
       pieceSet.forEach((el: Piece) => el.update());

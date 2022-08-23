@@ -53,6 +53,7 @@ export class ChessBoard extends BaseGroup {
 
       for (let j = 0; j < this.size; j++) {
         const geometry = new PlaneGeometry(1, 1);
+
         const color = new Color(
           colorBlack ? BLACK_COLOR_FIELD : WHITE_COLOR_FIELD
         );
@@ -63,6 +64,7 @@ export class ChessBoard extends BaseGroup {
           side: FrontSide,
         });
         const plane = new Mesh(geometry, material);
+        plane.userData.ground = true;
 
         plane.receiveShadow = true;
         plane.position.setX(j * 1);

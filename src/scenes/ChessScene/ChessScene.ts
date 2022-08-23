@@ -1,56 +1,56 @@
 import { isPiece } from "managers/ChessBoardManager/chessboard-utils";
 import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
 import { PiecesContainer } from "managers/ChessBoardManager/types";
-import { FIELD_NAME } from "objects/ChessBoard/ChessBoard";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
-import {
-  Color,
-  Mesh,
-  MeshPhongMaterial,
-  Raycaster,
-  Vector2,
-  Vector3,
-} from "three";
+import { Raycaster, Vector2, Vector3 } from "three";
 
 export class ChessScene extends BasicScene {
   chessBoardManager: ChessBoardManager;
 
   raycaster: Raycaster;
-  pointer: Vector2;
+  clickPointer: Vector2;
 
   constructor(props: BasicSceneProps) {
     super(props);
     this.chessBoardManager = new ChessBoardManager(this.world, this.loader);
   }
 
-  onPointerMove = (event: MouseEvent): void => {
-    this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  getCoords(event: MouseEvent): { x: number; y: number } {
+    const x = (event.clientX / window.innerWidth) * 2 - 1;
+    const y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    if (!this.chessBoardManager.selected) {
-      return;
-    }
+    return { x, y };
+  }
+
+  onPointerMove = (event: MouseEvent) => {
+    this.movePiece(event);
   };
 
   onMouseDown = (event: MouseEvent): void => {
-    this.onPointerMove(event);
-    this.updateRaycaster();
+    const { x, y } = this.getCoords(event);
+    this.clickPointer.x = x;
+    this.clickPointer.y = y;
 
-    window.addEventListener("pointermove", this.onPointerMove);
+    this.selectPiece();
   };
 
   onMouseUp = (): void => {
-    window.removeEventListener("pointermove", this.onPointerMove);
+    if (!this.chessBoardManager.selected) {
+      return;
+    }
+
+    this.chessBoardManager.setSelected(null);
   };
 
   setupRaycaster(): void {
     this.raycaster = new Raycaster();
-    this.pointer = new Vector2();
+    this.clickPointer = new Vector2();
 
     window.addEventListener("mousedown", this.onMouseDown);
     window.addEventListener("mouseup", this.onMouseUp);
+    window.addEventListener("pointermove", this.onPointerMove);
   }
 
   setupLights(): void {
@@ -85,16 +85,41 @@ export class ChessScene extends BasicScene {
     this.setupPieceSet("black");
   }
 
-  updateRaycaster(): void {
-    this.raycaster.setFromCamera(this.pointer, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.children);
-    const { lastParent } = intersects[0].object.userData;
-
-    if (lastParent && !isPiece(lastParent)) {
+  movePiece(event: MouseEvent): void {
+    if (!this.chessBoardManager.selected) {
       return;
     }
 
-    this.chessBoardManager.selected = lastParent;
+    const { x, y } = this.getCoords(event);
+
+    this.raycaster.setFromCamera({ x, y }, this.camera);
+
+    const intersects = this.raycaster.intersectObjects(this.children);
+    const item = intersects.find((el) => el.object.userData.ground);
+
+    this.chessBoardManager.moveSelectedBody(item.point.x, item.point.z);
+  }
+
+  selectPiece(): void {
+    this.raycaster.setFromCamera(this.clickPointer, this.camera);
+
+    if (this.chessBoardManager.selected) {
+      return;
+    }
+
+    const intersects = this.raycaster.intersectObjects(this.children);
+    const found = intersects.find((el) => !!el.object.userData.lastParent);
+    const { lastParent } = found.object.userData;
+
+    if (!lastParent) {
+      return;
+    }
+
+    if (!isPiece(lastParent)) {
+      return;
+    }
+
+    this.chessBoardManager.setSelected(lastParent);
   }
 
   update(): void {
@@ -105,5 +130,6 @@ export class ChessScene extends BasicScene {
   cleanup(): void {
     window.removeEventListener("mousedown", this.onMouseDown);
     window.removeEventListener("mouseup", this.onMouseUp);
+    window.removeEventListener("pointermove", this.onPointerMove);
   }
 }
