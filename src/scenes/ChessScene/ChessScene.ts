@@ -40,7 +40,7 @@ export class ChessScene extends BasicScene {
     if (!this.chessBoardManager.selected) {
       return;
     }
-
+    this.world.addBody(this.chessBoardManager.selected.body);
     this.chessBoardManager.setSelected(null);
   };
 
@@ -97,7 +97,7 @@ export class ChessScene extends BasicScene {
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
-    this.chessBoardManager.moveSelectedBody(item.point.x, item.point.z);
+    this.chessBoardManager.moveSelectedPiece(item.point.x, item.point.z);
   }
 
   selectPiece(): void {
@@ -119,6 +119,7 @@ export class ChessScene extends BasicScene {
       return;
     }
 
+    this.world.removeBody(lastParent.body);
     this.chessBoardManager.setSelected(lastParent);
   }
 

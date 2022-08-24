@@ -223,13 +223,13 @@ export class ChessBoardManager {
     this.selected = piece;
   }
 
-  moveSelectedBody(x: number, z: number): void {
+  moveSelectedPiece(x: number, z: number): void {
     if (!this.selected) {
       return;
     }
 
     this.selected.body.position.x = x;
-    this.selected.body.position.y = 1.5;
+    this.selected.body.position.y = 0.8;
     this.selected.body.position.z = z;
   }
 
