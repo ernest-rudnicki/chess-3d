@@ -101,6 +101,11 @@ export class ChessScene extends BasicScene {
 
     const intersects = this.raycaster.intersectObjects(this.children);
     const found = intersects.find((el) => !!el.object.userData.lastParent);
+
+    if (!found) {
+      return;
+    }
+
     const { lastParent } = found.object.userData;
 
     if (!lastParent) {
