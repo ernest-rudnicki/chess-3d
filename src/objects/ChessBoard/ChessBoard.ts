@@ -22,28 +22,24 @@ import { BLACK_COLOR_FIELD, WHITE_COLOR_FIELD } from "constants/colors";
 export const FIELD_NAME = "Field";
 
 export class ChessBoard extends BaseGroup {
+  private size = 8;
+
   boardMatrix: Array<Id[]> = [];
   currentlyDroppable: DroppableField[] = [];
-  size = 8;
 
   constructor(name: string) {
     super(name);
   }
 
-  init(): Body {
-    this.createBoardMatrix();
-    this.centerMiddle();
-    this.createPsychicsBody();
+  private createDropCircle() {
+    const geometry = new CircleGeometry(0.3, 16);
+    const material = new MeshLambertMaterial({ color: "orange" });
+    const circle = new Mesh(geometry, material);
 
-    this.body.position.copy(convertThreeVector(this.position));
-    this.body.position.y = -this.size;
-
-    this.quaternion.copy(convertCannonEsQuaternion(this.body.quaternion));
-
-    return this.body;
+    return circle;
   }
 
-  createBoardMatrix(): void {
+  private createBoardMatrix(): void {
     this.boardMatrix = [];
     let colorBlack = true;
 
@@ -82,12 +78,15 @@ export class ChessBoard extends BaseGroup {
     }
   }
 
-  createDropCircle() {
-    const geometry = new CircleGeometry(0.3, 16);
-    const material = new MeshLambertMaterial({ color: "orange" });
-    const circle = new Mesh(geometry, material);
+  private createPsychicsBody() {
+    this.body = new Body({
+      mass: 0,
+      shape: new Box(new Vec3(this.size, this.size, this.size)),
+    });
+  }
 
-    return circle;
+  private centerMiddle(): void {
+    new Box3().setFromObject(this).getCenter(this.position).multiplyScalar(-1);
   }
 
   markPlaneAsDroppable(row: number, column: number) {
@@ -112,15 +111,17 @@ export class ChessBoard extends BaseGroup {
     this.currentlyDroppable.push({ planeId, circleId: dropCircle.id });
   }
 
-  createPsychicsBody() {
-    this.body = new Body({
-      mass: 0,
-      shape: new Box(new Vec3(this.size, this.size, this.size)),
-    });
-  }
+  init(): Body {
+    this.createBoardMatrix();
+    this.centerMiddle();
+    this.createPsychicsBody();
 
-  centerMiddle(): void {
-    new Box3().setFromObject(this).getCenter(this.position).multiplyScalar(-1);
+    this.body.position.copy(convertThreeVector(this.position));
+    this.body.position.y = -this.size;
+
+    this.quaternion.copy(convertCannonEsQuaternion(this.body.quaternion));
+
+    return this.body;
   }
 
   update() {

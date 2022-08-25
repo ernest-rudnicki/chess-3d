@@ -5,13 +5,13 @@ import { ReinhardToneMapping, sRGBEncoding, WebGLRenderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GameOptions } from "./types";
 export class Game {
+  private width = window.innerWidth;
+  private height = window.innerHeight;
+
   loadingManager: CustomLoadingManager;
   loader: GLTFLoader;
   renderer: WebGLRenderer;
   activeScene: BasicScene | null;
-
-  width = window.innerWidth;
-  height = window.innerHeight;
 
   options: GameOptions;
 

@@ -1,4 +1,4 @@
-import { World } from "cannon-es";
+import { Vec3, World } from "cannon-es";
 import { Bishop } from "objects/Bishop/Bishop";
 import { ChessBoard } from "objects/ChessBoard/ChessBoard";
 import { King } from "objects/Pieces/King/King";
@@ -10,7 +10,8 @@ import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { PiecesContainer } from "./types";
+import { IChessEngine, PiecesContainer } from "./types";
+import { Game as ChessEngine } from "js-chess-engine";
 
 export const CHESS_BOARD_NAME = "ChessBoard";
 export const PAWN_NAME = "Pawn";
@@ -23,37 +24,53 @@ export const KING_NAME = "King";
 export class ChessBoardManager {
   chessBoard: ChessBoard;
   pieces: PiecesContainer;
+  chessEngine: IChessEngine;
 
   world: World;
   loader: GLTFLoader;
 
   selected: Piece | null;
+  selectedInitialPosition: Vec3;
 
   constructor(world: World, loader: GLTFLoader) {
     this.world = world;
     this.loader = loader;
+    this.chessEngine = new ChessEngine();
   }
 
-  init(): void {
-    this.initChessBoard();
-    this.initPieces();
+  private deselect(): void {
+    this.selected.body.position.copy(this.selectedInitialPosition);
+    this.selectedInitialPosition = null;
+
+    this.selected.resetMass();
+    this.selected = null;
   }
 
-  initChessBoard() {
+  private select(piece: Piece): void {
+    piece.removeMass();
+    this.selectedInitialPosition = piece.body.position.clone();
+    this.selected = piece;
+  }
+
+  private initChessBoard() {
     this.chessBoard = new ChessBoard("ChessBoard");
     const chessBoardBody = this.chessBoard.init();
     this.world.addBody(chessBoardBody);
   }
 
-  concatPieceName(name: string, color: PieceColor, column: number): string {
+  private concatPieceName(
+    name: string,
+    color: PieceColor,
+    column: number
+  ): string {
     return `${name}${column}${color === PieceColor.BLACK ? "Black" : "White"}`;
   }
 
-  getMajorPieceInitialRow(color: PieceColor): number {
+  private getMajorPieceInitialRow(color: PieceColor): number {
     return color === PieceColor.BLACK ? 0 : 7;
   }
 
-  getFieldPosition(row: number, column: number): Vector3 {
+  private getFieldPosition(row: number, column: number): Vector3 {
     const fieldId = this.chessBoard.boardMatrix[row][column];
     const field = this.chessBoard.getObjectById(fieldId);
     const position = new Vector3();
@@ -63,14 +80,14 @@ export class ChessBoardManager {
     return position;
   }
 
-  setupPiecePosition(piece: Piece, row: number, column: number): void {
+  private setupPiecePosition(piece: Piece, row: number, column: number): void {
     const initialPosition = this.getFieldPosition(row, column);
     const rookBody = piece.init(initialPosition, this.loader);
 
     this.world.addBody(rookBody);
   }
 
-  initPawns(color: PieceColor): Pawn[] {
+  private initPawns(color: PieceColor): Pawn[] {
     const pawns: Pawn[] = [];
     const row = color === PieceColor.BLACK ? 1 : 6;
 
@@ -87,7 +104,7 @@ export class ChessBoardManager {
     return pawns;
   }
 
-  createRook(color: PieceColor, column: number): Rook {
+  private createRook(color: PieceColor, column: number): Rook {
     const name = this.concatPieceName(ROOK_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -100,7 +117,7 @@ export class ChessBoardManager {
     return rook;
   }
 
-  initRooks(color: PieceColor): Rook[] {
+  private initRooks(color: PieceColor): Rook[] {
     const rooks: Rook[] = [];
 
     rooks.push(this.createRook(color, 0));
@@ -109,7 +126,7 @@ export class ChessBoardManager {
     return rooks;
   }
 
-  createKnight(color: PieceColor, column: number): Knight {
+  private createKnight(color: PieceColor, column: number): Knight {
     const name = this.concatPieceName(KNIGHT_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -127,7 +144,7 @@ export class ChessBoardManager {
     return knight;
   }
 
-  initKnights(color: PieceColor): Knight[] {
+  private initKnights(color: PieceColor): Knight[] {
     const knights = [];
 
     knights.push(this.createKnight(color, 1));
@@ -136,7 +153,7 @@ export class ChessBoardManager {
     return knights;
   }
 
-  createBishop(color: PieceColor, column: number): Bishop {
+  private createBishop(color: PieceColor, column: number): Bishop {
     const name = this.concatPieceName(BISHOP_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -152,7 +169,7 @@ export class ChessBoardManager {
     return bishop;
   }
 
-  initBishops(color: PieceColor): Bishop[] {
+  private initBishops(color: PieceColor): Bishop[] {
     const bishops = [];
 
     bishops.push(this.createBishop(color, 2));
@@ -161,7 +178,7 @@ export class ChessBoardManager {
     return bishops;
   }
 
-  initQueen(color: PieceColor): Queen[] {
+  private initQueen(color: PieceColor): Queen[] {
     const name = this.concatPieceName(QUEEN_NAME, color, 3);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -175,7 +192,7 @@ export class ChessBoardManager {
     return [queen];
   }
 
-  initKing(color: PieceColor): King[] {
+  private initKing(color: PieceColor): King[] {
     const name = this.concatPieceName(KING_NAME, color, 4);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -189,7 +206,7 @@ export class ChessBoardManager {
     return [king];
   }
 
-  initPieces(): void {
+  private initPieces(): void {
     this.pieces = {
       black: {
         pawns: this.initPawns(PieceColor.BLACK),
@@ -210,17 +227,24 @@ export class ChessBoardManager {
     };
   }
 
-  setSelected(piece: Piece | null): void {
-    console.log(piece);
-    if (!piece) {
-      this.selected.resetMass();
-      this.selected = piece;
+  private updatePieces(set: keyof PiecesContainer): void {
+    for (const pieceSet of Object.values(this.pieces[set])) {
+      pieceSet.forEach((el: Piece) => el.update());
+    }
+  }
 
+  init(): void {
+    this.initChessBoard();
+    this.initPieces();
+  }
+
+  setSelected(piece: Piece | null): void {
+    if (!piece) {
+      this.deselect();
       return;
     }
 
-    piece.removeMass();
-    this.selected = piece;
+    this.select(piece);
   }
 
   moveSelectedPiece(x: number, z: number): void {
@@ -231,12 +255,6 @@ export class ChessBoardManager {
     this.selected.body.position.x = x;
     this.selected.body.position.y = 0.8;
     this.selected.body.position.z = z;
-  }
-
-  updatePieces(set: keyof PiecesContainer): void {
-    for (const pieceSet of Object.values(this.pieces[set])) {
-      pieceSet.forEach((el: Piece) => el.update());
-    }
   }
 
   update(): void {

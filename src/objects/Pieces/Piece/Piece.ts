@@ -8,10 +8,10 @@ import { PieceChessPosition, PieceColor, PieceOptions } from "./types";
 
 export abstract class Piece extends BaseObject {
   private initialMass = 0.1;
+  private size: Vec3;
+  private color: PieceColor;
 
   chessPosition: PieceChessPosition;
-  color: PieceColor;
-  size: Vec3;
 
   constructor(name: string, model: string | null, options: PieceOptions) {
     super(name, model);
@@ -22,20 +22,7 @@ export abstract class Piece extends BaseObject {
     this.color = color;
   }
 
-  init(initialPosition: Vector3, loader: GLTFLoader): Body {
-    this.initModel(loader).then(() => {
-      this.changeMaterial();
-    });
-
-    this.createPsychicsBody(initialPosition);
-
-    this.position.copy(initialPosition);
-    this.scale.set(15, 15, 15);
-
-    return this.body;
-  }
-
-  changeMaterial(): void {
+  private changeMaterial(): void {
     this.model.scene.traverse((o: Mesh) => {
       if (!o.isMesh) {
         return;
@@ -57,15 +44,7 @@ export abstract class Piece extends BaseObject {
     });
   }
 
-  removeMass(): void {
-    this.body.mass = 0;
-  }
-
-  resetMass(): void {
-    this.body.mass = this.initialMass;
-  }
-
-  createPsychicsBody(initialPosition: Vector3): void {
+  private createPsychicsBody(initialPosition: Vector3): void {
     this.size = new Vec3(0.3, 0.5, 0.3);
     const initialBodyPosition = new Vec3().copy(
       convertThreeVector(initialPosition)
@@ -80,6 +59,27 @@ export abstract class Piece extends BaseObject {
     });
 
     this.body.sleepSpeedLimit = 1;
+  }
+
+  init(initialPosition: Vector3, loader: GLTFLoader): Body {
+    this.initModel(loader).then(() => {
+      this.changeMaterial();
+    });
+
+    this.createPsychicsBody(initialPosition);
+
+    this.position.copy(initialPosition);
+    this.scale.set(15, 15, 15);
+
+    return this.body;
+  }
+
+  removeMass(): void {
+    this.body.mass = 0;
+  }
+
+  resetMass(): void {
+    this.body.mass = this.initialMass;
   }
 
   update(): void {
