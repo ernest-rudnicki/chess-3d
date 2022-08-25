@@ -21,5 +21,6 @@ export interface PiecesContainer {
 }
 
 export interface IChessEngine {
+  move: (from: string, to: string) => void;
   moves: (from?: string) => string[];
 }

@@ -8,11 +8,12 @@ import { Piece } from "objects/Pieces/Piece/Piece";
 import { PieceChessPosition, PieceColor } from "objects/Pieces/Piece/types";
 import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
-import { Vector3 } from "three";
+import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { IChessEngine, PiecesContainer } from "./types";
 import { Game as ChessEngine } from "js-chess-engine";
 import { getChessNotation, getMatrixPosition } from "./chessboard-utils";
+import { convertThreeVector } from "utils/general";
 
 export const CHESS_BOARD_NAME = "ChessBoard";
 export const PAWN_NAME = "Pawn";
@@ -47,23 +48,6 @@ export class ChessBoardManager {
 
       this.chessBoard.markPlaneAsDroppable(row, column);
     });
-  }
-
-  private select(piece: Piece): void {
-    piece.removeMass();
-    this.markPossibleFields(piece.chessPosition);
-    this.selectedInitialPosition = piece.body.position.clone();
-    this.selected = piece;
-  }
-
-  private deselect(): void {
-    this.selected.body.position.copy(this.selectedInitialPosition);
-    this.selectedInitialPosition = null;
-
-    this.chessBoard.clearMarkedPlanes();
-
-    this.selected.resetMass();
-    this.selected = null;
   }
 
   private initChessBoard() {
@@ -247,18 +231,47 @@ export class ChessBoardManager {
     }
   }
 
+  private dropPiece(droppedField: Object3D): void {
+    const { chessPosition: toPosition } = droppedField.userData;
+    const { chessPosition: fromPosition } = this.selected;
+    const worldPosition = new Vector3();
+
+    droppedField.getWorldPosition(worldPosition);
+
+    const from = getChessNotation(fromPosition);
+    const to = getChessNotation(toPosition);
+
+    this.chessEngine.move(from, to);
+    this.selected.changePosition(toPosition, convertThreeVector(worldPosition));
+  }
+
+  select(piece: Piece): void {
+    piece.removeMass();
+    this.markPossibleFields(piece.chessPosition);
+    this.selectedInitialPosition = piece.body.position.clone();
+    this.selected = piece;
+  }
+
+  deselect(intersectedField: Object3D): void {
+    const { droppable } = intersectedField.userData;
+
+    if (!droppable) {
+      const { x, y, z } = this.selectedInitialPosition;
+      this.selected.changeWorldPosition(x, y, z);
+      this.selectedInitialPosition = null;
+    } else {
+      this.dropPiece(intersectedField);
+    }
+
+    this.chessBoard.clearMarkedPlanes();
+
+    this.selected.resetMass();
+    this.selected = null;
+  }
+
   init(): void {
     this.initChessBoard();
     this.initPieces();
-  }
-
-  setSelected(piece: Piece | null): void {
-    if (!piece) {
-      this.deselect();
-      return;
-    }
-
-    this.select(piece);
   }
 
   moveSelectedPiece(x: number, z: number): void {
@@ -266,9 +279,7 @@ export class ChessBoardManager {
       return;
     }
 
-    this.selected.body.position.x = x;
-    this.selected.body.position.y = 0.8;
-    this.selected.body.position.z = z;
+    this.selected.changeWorldPosition(x, 0.8, z);
   }
 
   update(): void {

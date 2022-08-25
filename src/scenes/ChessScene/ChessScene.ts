@@ -40,8 +40,11 @@ export class ChessScene extends BasicScene {
     if (!this.chessBoardManager.selected) {
       return;
     }
+    const intersects = this.raycaster.intersectObjects(this.children);
+    const item = intersects.find((el) => el.object.userData.ground);
+
     this.world.addBody(this.chessBoardManager.selected.body);
-    this.chessBoardManager.setSelected(null);
+    this.chessBoardManager.deselect(item.object);
   };
 
   private setupRaycaster(): void {
@@ -117,7 +120,7 @@ export class ChessScene extends BasicScene {
     }
 
     this.world.removeBody(lastParent.body);
-    this.chessBoardManager.setSelected(lastParent);
+    this.chessBoardManager.select(lastParent);
   }
 
   init(): void {

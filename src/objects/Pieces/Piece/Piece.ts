@@ -61,6 +61,19 @@ export abstract class Piece extends BaseObject {
     this.body.sleepSpeedLimit = 1;
   }
 
+  changePosition(chessPosition: PieceChessPosition, worldPosition: Vec3): void {
+    const { x, y, z } = worldPosition;
+    this.chessPosition = chessPosition;
+
+    this.changeWorldPosition(x, y, z);
+  }
+
+  changeWorldPosition(x: number, y: number, z: number): void {
+    this.body.position.x = x;
+    this.body.position.y = y + this.size.y;
+    this.body.position.z = z;
+  }
+
   init(initialPosition: Vector3, loader: GLTFLoader): Body {
     this.initModel(loader).then(() => {
       this.changeMaterial();

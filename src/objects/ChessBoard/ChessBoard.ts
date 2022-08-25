@@ -60,7 +60,11 @@ export class ChessBoard extends BaseGroup {
           side: FrontSide,
         });
         const plane = new Mesh(geometry, material);
+
         plane.userData.ground = true;
+        plane.userData.droppable = false;
+
+        plane.userData.chessPosition = { row: i, column: j };
 
         plane.receiveShadow = true;
         plane.position.setX(j * 1);
@@ -89,7 +93,7 @@ export class ChessBoard extends BaseGroup {
     new Box3().setFromObject(this).getCenter(this.position).multiplyScalar(-1);
   }
 
-  markPlaneAsDroppable(row: number, column: number) {
+  markPlaneAsDroppable(row: number, column: number): void {
     const planeId = this.boardMatrix[row][column];
 
     if (!planeId) {
@@ -97,6 +101,7 @@ export class ChessBoard extends BaseGroup {
     }
 
     const plane = this.getObjectById(planeId) as Mesh;
+    plane.userData.droppable = true;
 
     if (!plane) {
       throw Error("There is no plane with specified id");
@@ -116,6 +121,9 @@ export class ChessBoard extends BaseGroup {
       const { circleId } = field;
 
       const circle = this.getObjectById(circleId);
+      const plane = this.getObjectById(field.planeId);
+      plane.userData.droppable = false;
+
       this.remove(circle);
     });
 
