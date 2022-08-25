@@ -43,7 +43,6 @@ export class ChessScene extends BasicScene {
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
-    this.world.addBody(this.chessBoardManager.selected.body);
     this.chessBoardManager.deselect(item.object);
   };
 
@@ -119,7 +118,6 @@ export class ChessScene extends BasicScene {
       return;
     }
 
-    this.world.removeBody(lastParent.body);
     this.chessBoardManager.select(lastParent);
   }
 

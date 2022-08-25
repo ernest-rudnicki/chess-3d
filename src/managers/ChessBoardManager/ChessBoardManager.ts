@@ -241,14 +241,23 @@ export class ChessBoardManager {
     const from = getChessNotation(fromPosition);
     const to = getChessNotation(toPosition);
 
+    worldPosition.y += 0.1;
+
     this.chessEngine.move(from, to);
-    this.selected.changePosition(toPosition, convertThreeVector(worldPosition));
+    this.selected.changePosition(
+      toPosition,
+      convertThreeVector(worldPosition),
+      true
+    );
   }
 
   select(piece: Piece): void {
     piece.removeMass();
     this.markPossibleFields(piece.chessPosition);
+
     this.selectedInitialPosition = piece.body.position.clone();
+    this.world.removeBody(piece.body);
+
     this.selected = piece;
   }
 
@@ -264,8 +273,9 @@ export class ChessBoardManager {
     }
 
     this.chessBoard.clearMarkedPlanes();
-
     this.selected.resetMass();
+    this.world.addBody(this.selected.body);
+
     this.selected = null;
   }
 

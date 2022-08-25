@@ -61,16 +61,25 @@ export abstract class Piece extends BaseObject {
     this.body.sleepSpeedLimit = 1;
   }
 
-  changePosition(chessPosition: PieceChessPosition, worldPosition: Vec3): void {
+  changePosition(
+    chessPosition: PieceChessPosition,
+    worldPosition: Vec3,
+    useHeightOffset?: boolean
+  ): void {
     const { x, y, z } = worldPosition;
     this.chessPosition = chessPosition;
 
-    this.changeWorldPosition(x, y, z);
+    this.changeWorldPosition(x, y, z, useHeightOffset);
   }
 
-  changeWorldPosition(x: number, y: number, z: number): void {
+  changeWorldPosition(
+    x: number,
+    y: number,
+    z: number,
+    useHeightOffset?: boolean
+  ): void {
     this.body.position.x = x;
-    this.body.position.y = y + this.size.y;
+    this.body.position.y = useHeightOffset ? y + this.size.y : y;
     this.body.position.z = z;
   }
 
