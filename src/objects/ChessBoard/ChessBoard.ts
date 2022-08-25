@@ -23,9 +23,9 @@ export const FIELD_NAME = "Field";
 
 export class ChessBoard extends BaseGroup {
   private size = 8;
+  private currentlyDroppable: DroppableField[] = [];
 
   boardMatrix: Array<Id[]> = [];
-  currentlyDroppable: DroppableField[] = [];
 
   constructor(name: string) {
     super(name);
@@ -109,6 +109,17 @@ export class ChessBoard extends BaseGroup {
 
     this.add(dropCircle);
     this.currentlyDroppable.push({ planeId, circleId: dropCircle.id });
+  }
+
+  clearMarkedPlanes(): void {
+    this.currentlyDroppable.forEach((field) => {
+      const { circleId } = field;
+
+      const circle = this.getObjectById(circleId);
+      this.remove(circle);
+    });
+
+    this.currentlyDroppable = [];
   }
 
   init(): Body {

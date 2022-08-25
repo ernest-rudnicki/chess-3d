@@ -5,13 +5,14 @@ import { King } from "objects/Pieces/King/King";
 import { Knight } from "objects/Pieces/Knight/Knight";
 import { Pawn } from "objects/Pieces/Pawn/Pawn";
 import { Piece } from "objects/Pieces/Piece/Piece";
-import { PieceColor } from "objects/Pieces/Piece/types";
+import { PieceChessPosition, PieceColor } from "objects/Pieces/Piece/types";
 import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { IChessEngine, PiecesContainer } from "./types";
 import { Game as ChessEngine } from "js-chess-engine";
+import { getChessNotation, getMatrixPosition } from "./chessboard-utils";
 
 export const CHESS_BOARD_NAME = "ChessBoard";
 export const PAWN_NAME = "Pawn";
@@ -38,18 +39,31 @@ export class ChessBoardManager {
     this.chessEngine = new ChessEngine();
   }
 
-  private deselect(): void {
-    this.selected.body.position.copy(this.selectedInitialPosition);
-    this.selectedInitialPosition = null;
+  private markPossibleFields(chessPosition: PieceChessPosition): void {
+    const chessNotation = getChessNotation(chessPosition);
+    const possibleMoves = this.chessEngine.moves(chessNotation);
+    possibleMoves.forEach((move) => {
+      const { row, column } = getMatrixPosition(move);
 
-    this.selected.resetMass();
-    this.selected = null;
+      this.chessBoard.markPlaneAsDroppable(row, column);
+    });
   }
 
   private select(piece: Piece): void {
     piece.removeMass();
+    this.markPossibleFields(piece.chessPosition);
     this.selectedInitialPosition = piece.body.position.clone();
     this.selected = piece;
+  }
+
+  private deselect(): void {
+    this.selected.body.position.copy(this.selectedInitialPosition);
+    this.selectedInitialPosition = null;
+
+    this.chessBoard.clearMarkedPlanes();
+
+    this.selected.resetMass();
+    this.selected = null;
   }
 
   private initChessBoard() {
@@ -67,7 +81,7 @@ export class ChessBoardManager {
   }
 
   private getMajorPieceInitialRow(color: PieceColor): number {
-    return color === PieceColor.BLACK ? 0 : 7;
+    return color === PieceColor.WHITE ? 0 : 7;
   }
 
   private getFieldPosition(row: number, column: number): Vector3 {
@@ -89,7 +103,7 @@ export class ChessBoardManager {
 
   private initPawns(color: PieceColor): Pawn[] {
     const pawns: Pawn[] = [];
-    const row = color === PieceColor.BLACK ? 1 : 6;
+    const row = color === PieceColor.WHITE ? 1 : 6;
 
     for (let i = 0; i < 8; i++) {
       const name = this.concatPieceName(PAWN_NAME, color, i);
@@ -137,7 +151,7 @@ export class ChessBoardManager {
 
     this.setupPiecePosition(knight, row, column);
 
-    if (color === PieceColor.WHITE) {
+    if (color === PieceColor.BLACK) {
       knight.body.quaternion.set(0, Math.PI, 0, 0);
     }
 
