@@ -305,7 +305,7 @@ export class ChessBoardManager {
     this.selected = piece;
   }
 
-  drop(intersectedField: Object3D): number | undefined {
+  deselect(intersectedField: Object3D): number | undefined {
     const { droppable } = intersectedField.userData;
     let capturedPieceId: number;
 

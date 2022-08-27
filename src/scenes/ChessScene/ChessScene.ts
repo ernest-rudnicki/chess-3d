@@ -43,7 +43,7 @@ export class ChessScene extends BasicScene {
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
-    const removedObjectId = this.chessBoardManager.drop(item.object);
+    const removedObjectId = this.chessBoardManager.deselect(item.object);
 
     if (!removedObjectId) {
       return;
