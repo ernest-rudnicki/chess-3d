@@ -11,14 +11,14 @@ export abstract class Piece extends BaseObject {
   private size: Vec3;
   private color: PieceColor;
 
-  chessPosition: PieceChessPosition;
+  private _chessPosition: PieceChessPosition;
 
   constructor(name: string, model: string | null, options: PieceOptions) {
     super(name, model);
 
     const { initialChessPosition, color } = options;
 
-    this.chessPosition = initialChessPosition;
+    this._chessPosition = initialChessPosition;
     this.color = color;
   }
 
@@ -61,13 +61,17 @@ export abstract class Piece extends BaseObject {
     this.body.sleepSpeedLimit = 1;
   }
 
+  get chessPosition(): PieceChessPosition {
+    return this._chessPosition;
+  }
+
   changePosition(
     chessPosition: PieceChessPosition,
     worldPosition: Vec3,
     useHeightOffset?: boolean
   ): void {
     const { x, y, z } = worldPosition;
-    this.chessPosition = chessPosition;
+    this._chessPosition = chessPosition;
 
     this.changeWorldPosition(x, y, z, useHeightOffset);
   }

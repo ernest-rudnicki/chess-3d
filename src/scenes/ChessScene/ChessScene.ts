@@ -1,16 +1,14 @@
 import { isPiece } from "managers/ChessBoardManager/chessboard-utils";
 import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
-import { PiecesContainer } from "managers/ChessBoardManager/types";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
 import { Raycaster, Vector2, Vector3 } from "three";
 
 export class ChessScene extends BasicScene {
-  chessBoardManager: ChessBoardManager;
-
-  raycaster: Raycaster;
-  clickPointer: Vector2;
+  private chessBoardManager: ChessBoardManager;
+  private raycaster: Raycaster;
+  private clickPointer: Vector2;
 
   constructor(props: BasicSceneProps) {
     super(props);
@@ -37,7 +35,7 @@ export class ChessScene extends BasicScene {
   };
 
   private onMouseUp = (): void => {
-    if (!this.chessBoardManager.selected) {
+    if (!this.chessBoardManager.isAnySelected()) {
       return;
     }
     const intersects = this.raycaster.intersectObjects(this.children);
@@ -70,24 +68,20 @@ export class ChessScene extends BasicScene {
     this.setupLight("#FFFFFF", new Vector3(0, 8, 8), 3, new Vector3(0, 0, 0));
   }
 
-  private setupPieceSet(set: keyof PiecesContainer): void {
-    const pieceSet = this.chessBoardManager.pieces[set];
-
-    for (const pieces of Object.values(pieceSet)) {
-      pieces.forEach((el: Piece) => {
-        this.add(el);
-      });
-    }
+  private setupPieces(): void {
+    const pieces = this.chessBoardManager.getAllPieces();
+    pieces.forEach((el: Piece) => {
+      this.add(el);
+    });
   }
 
   private setupScene(): void {
     this.add(this.chessBoardManager.chessBoard);
-    this.setupPieceSet("w");
-    this.setupPieceSet("b");
+    this.setupPieces();
   }
 
   private movePiece(event: MouseEvent): void {
-    if (!this.chessBoardManager.selected) {
+    if (!this.chessBoardManager.isAnySelected()) {
       return;
     }
 
@@ -108,7 +102,7 @@ export class ChessScene extends BasicScene {
   private selectPiece(): void {
     this.raycaster.setFromCamera(this.clickPointer, this.camera);
 
-    if (this.chessBoardManager.selected) {
+    if (this.chessBoardManager.isAnySelected()) {
       return;
     }
 

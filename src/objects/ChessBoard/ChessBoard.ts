@@ -25,7 +25,7 @@ export class ChessBoard extends BaseGroup {
   private size = 8;
   private currentlyDroppable: DroppableField[] = [];
 
-  boardMatrix: Array<Id[]> = [];
+  private boardMatrix: Array<Id[]> = [];
 
   constructor(name: string) {
     super(name);
@@ -120,6 +120,10 @@ export class ChessBoard extends BaseGroup {
     });
 
     this.currentlyDroppable = [];
+  }
+
+  getFieldId(row: number, column: number): number {
+    return this.boardMatrix[row][column];
   }
 
   init(): Body {
