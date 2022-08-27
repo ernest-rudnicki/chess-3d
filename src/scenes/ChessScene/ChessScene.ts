@@ -56,11 +56,11 @@ export class ChessScene extends BasicScene {
   }
 
   private setupLights(): void {
-    this.setupLight("#FFFFFF", new Vector3(0, 8, -8), 5, new Vector3(0, 0, 0));
+    this.setupLight("#FFFFFF", new Vector3(0, 8, -8), 3, new Vector3(0, 0, 0));
 
-    this.setupLight("#FFFFFF", new Vector3(0, 13, 0), 10, new Vector3(0, 0, 0));
+    this.setupLight("#FFFFFF", new Vector3(0, 13, 0), 8, new Vector3(0, 0, 0));
 
-    this.setupLight("#FFFFFF", new Vector3(0, 8, 8), 5, new Vector3(0, 0, 0));
+    this.setupLight("#FFFFFF", new Vector3(0, 8, 8), 3, new Vector3(0, 0, 0));
   }
 
   private setupPieceSet(set: keyof PiecesContainer): void {
