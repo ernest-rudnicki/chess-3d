@@ -43,7 +43,14 @@ export class ChessScene extends BasicScene {
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
-    this.chessBoardManager.deselect(item.object);
+    const removedObjectId = this.chessBoardManager.drop(item.object);
+
+    if (!removedObjectId) {
+      return;
+    }
+
+    const pieceToRemove = this.getObjectById(removedObjectId);
+    this.remove(pieceToRemove);
   };
 
   private setupRaycaster(): void {
@@ -75,8 +82,8 @@ export class ChessScene extends BasicScene {
 
   private setupScene(): void {
     this.add(this.chessBoardManager.chessBoard);
-    this.setupPieceSet("white");
-    this.setupPieceSet("black");
+    this.setupPieceSet("w");
+    this.setupPieceSet("b");
   }
 
   private movePiece(event: MouseEvent): void {

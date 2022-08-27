@@ -7,15 +7,15 @@ import { Rook } from "objects/Pieces/Rook/Rook";
 
 // for simplicity queen and knight are also in arrays to not provide new methods for updating in scene
 export interface PieceSet {
-  pawns: Pawn[];
-  rooks: Rook[];
-  knights: Knight[];
-  bishops: Bishop[];
-  queen: Queen[];
-  king: King[];
+  p: Pawn[];
+  r: Rook[];
+  n: Knight[];
+  b: Bishop[];
+  q: Queen[];
+  k: King[];
 }
 
 export interface PiecesContainer {
-  black: PieceSet;
-  white: PieceSet;
+  b: PieceSet;
+  w: PieceSet;
 }

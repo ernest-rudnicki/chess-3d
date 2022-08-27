@@ -10,7 +10,7 @@ import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { PiecesContainer } from "./types";
+import { PiecesContainer, PieceSet } from "./types";
 import { getChessNotation, getMatrixPosition } from "./chessboard-utils";
 import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance } from "chess.js";
@@ -208,21 +208,21 @@ export class ChessBoardManager {
 
   private initPieces(): void {
     this.pieces = {
-      black: {
-        pawns: this.initPawns(PieceColor.BLACK),
-        rooks: this.initRooks(PieceColor.BLACK),
-        knights: this.initKnights(PieceColor.BLACK),
-        bishops: this.initBishops(PieceColor.BLACK),
-        queen: this.initQueen(PieceColor.BLACK),
-        king: this.initKing(PieceColor.BLACK),
+      b: {
+        p: this.initPawns(PieceColor.BLACK),
+        r: this.initRooks(PieceColor.BLACK),
+        n: this.initKnights(PieceColor.BLACK),
+        b: this.initBishops(PieceColor.BLACK),
+        q: this.initQueen(PieceColor.BLACK),
+        k: this.initKing(PieceColor.BLACK),
       },
-      white: {
-        pawns: this.initPawns(PieceColor.WHITE),
-        rooks: this.initRooks(PieceColor.WHITE),
-        knights: this.initKnights(PieceColor.WHITE),
-        bishops: this.initBishops(PieceColor.WHITE),
-        queen: this.initQueen(PieceColor.WHITE),
-        king: this.initKing(PieceColor.WHITE),
+      w: {
+        p: this.initPawns(PieceColor.WHITE),
+        r: this.initRooks(PieceColor.WHITE),
+        n: this.initKnights(PieceColor.WHITE),
+        b: this.initBishops(PieceColor.WHITE),
+        q: this.initQueen(PieceColor.WHITE),
+        k: this.initKing(PieceColor.WHITE),
       },
     };
   }
@@ -233,10 +233,42 @@ export class ChessBoardManager {
     }
   }
 
-  private dropPiece(droppedField: Object3D): void {
+  private capturePiece(
+    color: keyof PiecesContainer,
+    captured: keyof PieceSet,
+    to: string
+  ): number {
+    const { row: capturedRow, column: capturedColumn } = getMatrixPosition(to);
+    let capturedColor: keyof PiecesContainer = "b";
+
+    if (color === "b") {
+      capturedColor = "w";
+    }
+
+    const pieceSet: Piece[] = this.pieces[capturedColor][captured];
+
+    const capturedPieceIndex = pieceSet.findIndex((piece) => {
+      const { row, column } = piece.chessPosition;
+
+      return row === capturedRow && column === capturedColumn;
+    });
+
+    if (capturedPieceIndex === -1) {
+      return;
+    }
+    const capturedPiece = pieceSet[capturedPieceIndex];
+
+    this.world.removeBody(capturedPiece.body);
+    pieceSet.splice(capturedPieceIndex, 1);
+
+    return capturedPiece.id;
+  }
+
+  private dropPiece(droppedField: Object3D): number | undefined {
     const { chessPosition: toPosition } = droppedField.userData;
     const { chessPosition: fromPosition } = this.selected;
     const worldPosition = new Vector3();
+    let capturedPieceId: number;
 
     droppedField.getWorldPosition(worldPosition);
 
@@ -245,12 +277,22 @@ export class ChessBoardManager {
 
     worldPosition.y += 0.1;
 
-    this.chessEngine.move(`${from}${to}`, { sloppy: true });
+    const result = this.chessEngine.move(`${from}${to}`, {
+      sloppy: true,
+    });
+
+    if (result.captured) {
+      const { color, captured, to: movedTo } = result;
+      capturedPieceId = this.capturePiece(color, captured, movedTo);
+    }
+
     this.selected.changePosition(
       toPosition,
       convertThreeVector(worldPosition),
       true
     );
+
+    return capturedPieceId;
   }
 
   select(piece: Piece): void {
@@ -263,15 +305,16 @@ export class ChessBoardManager {
     this.selected = piece;
   }
 
-  deselect(intersectedField: Object3D): void {
+  drop(intersectedField: Object3D): number | undefined {
     const { droppable } = intersectedField.userData;
+    let capturedPieceId: number;
 
     if (!droppable) {
       const { x, y, z } = this.selectedInitialPosition;
       this.selected.changeWorldPosition(x, y, z);
       this.selectedInitialPosition = null;
     } else {
-      this.dropPiece(intersectedField);
+      capturedPieceId = this.dropPiece(intersectedField);
     }
 
     this.chessBoard.clearMarkedPlanes();
@@ -279,6 +322,8 @@ export class ChessBoardManager {
     this.world.addBody(this.selected.body);
 
     this.selected = null;
+
+    return capturedPieceId;
   }
 
   init(): void {
@@ -296,7 +341,7 @@ export class ChessBoardManager {
 
   update(): void {
     this.chessBoard.update();
-    this.updatePieces("black");
-    this.updatePieces("white");
+    this.updatePieces("b");
+    this.updatePieces("w");
   }
 }
