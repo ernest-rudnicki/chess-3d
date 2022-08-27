@@ -91,6 +91,10 @@ export class ChessScene extends BasicScene {
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
+    if (!item) {
+      return;
+    }
+
     this.chessBoardManager.moveSelectedPiece(item.point.x, item.point.z);
   }
 

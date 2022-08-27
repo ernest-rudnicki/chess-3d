@@ -10,10 +10,10 @@ import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { IChessEngine, PiecesContainer } from "./types";
-import { Game as ChessEngine } from "js-chess-engine";
+import { PiecesContainer } from "./types";
 import { getChessNotation, getMatrixPosition } from "./chessboard-utils";
 import { convertThreeVector } from "utils/general";
+import { Chess, ChessInstance } from "chess.js";
 
 export const CHESS_BOARD_NAME = "ChessBoard";
 export const PAWN_NAME = "Pawn";
@@ -26,8 +26,7 @@ export const KING_NAME = "King";
 export class ChessBoardManager {
   chessBoard: ChessBoard;
   pieces: PiecesContainer;
-  chessEngine: IChessEngine;
-
+  chessEngine: ChessInstance;
   world: World;
   loader: GLTFLoader;
 
@@ -37,14 +36,17 @@ export class ChessBoardManager {
   constructor(world: World, loader: GLTFLoader) {
     this.world = world;
     this.loader = loader;
-    this.chessEngine = new ChessEngine();
+    this.chessEngine = new Chess();
   }
 
   private markPossibleFields(chessPosition: PieceChessPosition): void {
     const chessNotation = getChessNotation(chessPosition);
-    const possibleMoves = this.chessEngine.moves(chessNotation);
+    const possibleMoves = this.chessEngine.moves({
+      square: chessNotation,
+      verbose: true,
+    });
     possibleMoves.forEach((move) => {
-      const { row, column } = getMatrixPosition(move);
+      const { row, column } = getMatrixPosition(move.to);
 
       this.chessBoard.markPlaneAsDroppable(row, column);
     });
@@ -243,7 +245,7 @@ export class ChessBoardManager {
 
     worldPosition.y += 0.1;
 
-    this.chessEngine.move(from, to);
+    this.chessEngine.move(`${from}${to}`, { sloppy: true });
     this.selected.changePosition(
       toPosition,
       convertThreeVector(worldPosition),

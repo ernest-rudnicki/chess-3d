@@ -19,8 +19,3 @@ export interface PiecesContainer {
   black: PieceSet;
   white: PieceSet;
 }
-
-export interface IChessEngine {
-  move: (from: string, to: string) => void;
-  moves: (from?: string) => string[];
-}

@@ -96,16 +96,8 @@ export class ChessBoard extends BaseGroup {
   markPlaneAsDroppable(row: number, column: number): void {
     const planeId = this.boardMatrix[row][column];
 
-    if (!planeId) {
-      throw Error("There is no plane with specified row and column");
-    }
-
     const plane = this.getObjectById(planeId) as Mesh;
     plane.userData.droppable = true;
-
-    if (!plane) {
-      throw Error("There is no plane with specified id");
-    }
 
     const dropCircle = this.createDropCircle();
     dropCircle.position.copy(plane.position);

@@ -15,12 +15,6 @@ export abstract class BaseObject extends Object3D {
   }
 
   initModel(loader: GLTFLoader): Promise<GLTF> {
-    if (!this.modelName) {
-      throw Error(
-        "A 3D Object class must be provided with a path to the model."
-      );
-    }
-
     return new Promise((resolve, reject) => {
       loader.load(
         this.modelName,
