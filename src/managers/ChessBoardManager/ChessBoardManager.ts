@@ -13,7 +13,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { PiecesContainer, PieceSet } from "./types";
 import { getChessNotation, getMatrixPosition } from "./chessboard-utils";
 import { convertThreeVector } from "utils/general";
-import { Chess, ChessInstance } from "chess.js";
+import { Chess, ChessInstance, Move } from "chess.js";
 
 export const CHESS_BOARD_NAME = "ChessBoard";
 export const PAWN_NAME = "Pawn";
@@ -264,18 +264,38 @@ export class ChessBoardManager {
     return capturedPiece.id;
   }
 
+  private handleNormalMove(droppedField: Object3D): void {
+    const { chessPosition } = droppedField.userData;
+    const worldPosition = new Vector3();
+
+    droppedField.getWorldPosition(worldPosition);
+    worldPosition.y += 0.1;
+
+    this.selected.changePosition(
+      chessPosition,
+      convertThreeVector(worldPosition),
+      true
+    );
+  }
+
+  private handleFlags(result: Move, droppedField: Object3D): void {
+    const { flags } = result;
+    switch (flags) {
+      case "k":
+        console.log("hello");
+        break;
+      default:
+        this.handleNormalMove(droppedField);
+    }
+  }
+
   private dropPiece(droppedField: Object3D): number | undefined {
     const { chessPosition: toPosition } = droppedField.userData;
     const { chessPosition: fromPosition } = this.selected;
-    const worldPosition = new Vector3();
     let capturedPieceId: number;
-
-    droppedField.getWorldPosition(worldPosition);
 
     const from = getChessNotation(fromPosition);
     const to = getChessNotation(toPosition);
-
-    worldPosition.y += 0.1;
 
     const result = this.chessEngine.move(`${from}${to}`, {
       sloppy: true,
@@ -286,11 +306,7 @@ export class ChessBoardManager {
       capturedPieceId = this.capturePiece(color, captured, movedTo);
     }
 
-    this.selected.changePosition(
-      toPosition,
-      convertThreeVector(worldPosition),
-      true
-    );
+    this.handleFlags(result, droppedField);
 
     return capturedPieceId;
   }
