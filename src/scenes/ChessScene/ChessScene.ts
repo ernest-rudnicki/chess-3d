@@ -110,11 +110,7 @@ export class ChessScene extends BasicScene {
 
     const { lastParent } = found.object.userData;
 
-    if (!lastParent) {
-      return;
-    }
-
-    if (!isPiece(lastParent)) {
+    if (!lastParent || !isPiece(lastParent)) {
       return;
     }
 
