@@ -34,6 +34,13 @@ export class ChessScene extends BasicScene {
     this.selectPiece();
   };
 
+  private removePiecesFromScene(piecesIds: number[]) {
+    piecesIds.forEach((id) => {
+      const pieceToRemove = this.getObjectById(id);
+      this.remove(pieceToRemove);
+    });
+  }
+
   private onMouseUp = (): void => {
     if (!this.chessBoardManager.isAnySelected()) {
       return;
@@ -41,14 +48,12 @@ export class ChessScene extends BasicScene {
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
-    const removedObjectId = this.chessBoardManager.deselect(item.object);
+    const removedPiecesIds = this.chessBoardManager.deselect(item.object);
 
-    if (!removedObjectId) {
+    if (!removedPiecesIds) {
       return;
     }
-
-    const pieceToRemove = this.getObjectById(removedObjectId);
-    this.remove(pieceToRemove);
+    this.removePiecesFromScene(removedPiecesIds);
   };
 
   private setupRaycaster(): void {

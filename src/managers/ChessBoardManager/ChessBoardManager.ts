@@ -46,17 +46,23 @@ export class ChessBoardManager {
     this.world.addBody(chessBoardBody);
   }
 
+  private getOppositeColor(color: PieceColor): PieceColor {
+    let newColor: PieceColor = "b";
+
+    if (color === "b") {
+      newColor = "w";
+    }
+
+    return newColor;
+  }
+
   private capturePiece(
     color: PieceColor,
     captured: keyof PieceSet,
     to: string
   ): number | undefined {
     const capturedChessPosition = getMatrixPosition(to);
-    let capturedColor: PieceColor = "b";
-
-    if (color === "b") {
-      capturedColor = "w";
-    }
+    const capturedColor = this.getOppositeColor(color);
 
     return this.piecesManager.removePiece(
       capturedColor,
@@ -79,11 +85,7 @@ export class ChessBoardManager {
     );
   }
 
-  private handleCastling(
-    droppedField: Object3D,
-    color: PieceColor,
-    castlingType: "k" | "q"
-  ): void {
+  private handleCastling(color: PieceColor, castlingType: "k" | "q"): void {
     const rookRow = color === "w" ? 0 : 7;
     const rookColumn = castlingType === "q" ? 0 : 7;
     const castlingRook = this.piecesManager.getPiece(color, "r", {
@@ -95,25 +97,41 @@ export class ChessBoardManager {
     const castlingField = this.chessBoard.getField(rookRow, rookCastlingColumn);
 
     this.movePieceToField(castlingField, castlingRook);
-    this.movePieceToField(droppedField, this.selected);
   }
 
-  private handleFlags(result: Move, droppedField: Object3D): void {
+  private handleEnPassante(color: PieceColor, droppedField: Object3D): number {
+    const { chessPosition } = droppedField.userData;
+    const { row, column }: PieceChessPosition = chessPosition;
+    const opposite = this.getOppositeColor(color);
+    const enPassanteRow = color === "w" ? row - 1 : row + 1;
+
+    return this.piecesManager.removePiece(opposite, "p", {
+      row: enPassanteRow,
+      column,
+    });
+  }
+
+  private handleFlags(result: Move, droppedField: Object3D): number[] {
     const { flags, color } = result;
+    const removedPiecesIds: number[] = [];
+
     switch (flags) {
       case "q":
       case "k":
-        this.handleCastling(droppedField, color, flags);
+        this.handleCastling(color, flags);
         break;
-      default:
-        this.movePieceToField(droppedField, this.selected);
+      case "e":
+        removedPiecesIds.push(this.handleEnPassante(color, droppedField));
+        break;
     }
+
+    return removedPiecesIds;
   }
 
-  private dropPiece(droppedField: Object3D): number | undefined {
+  private dropPiece(droppedField: Object3D): number[] {
     const { chessPosition: toPosition } = droppedField.userData;
     const { chessPosition: fromPosition } = this.selected;
-    let capturedPieceId: number;
+    const removedPiecesIds: number[] = [];
 
     const from = getChessNotation(fromPosition);
     const to = getChessNotation(toPosition);
@@ -124,12 +142,15 @@ export class ChessBoardManager {
 
     if (result.captured) {
       const { color, captured, to: movedTo } = result;
-      capturedPieceId = this.capturePiece(color, captured, movedTo);
+      const capturedPieceId = this.capturePiece(color, captured, movedTo);
+      removedPiecesIds.push(capturedPieceId);
     }
 
-    this.handleFlags(result, droppedField);
+    const specialRemoved = this.handleFlags(result, droppedField);
 
-    return capturedPieceId;
+    this.movePieceToField(droppedField, this.selected);
+
+    return [...removedPiecesIds, ...specialRemoved];
   }
 
   get chessBoard(): ChessBoard {
@@ -150,16 +171,16 @@ export class ChessBoardManager {
     this.selected = piece;
   }
 
-  deselect(intersectedField: Object3D): number | undefined {
+  deselect(intersectedField: Object3D): number[] | undefined {
     const { droppable } = intersectedField.userData;
-    let capturedPieceId: number;
+    let removedPiecesIds: number[];
 
     if (!droppable) {
       const { x, y, z } = this.selectedInitialPosition;
       this.selected.changeWorldPosition(x, y, z);
       this.selectedInitialPosition = null;
     } else {
-      capturedPieceId = this.dropPiece(intersectedField);
+      removedPiecesIds = this.dropPiece(intersectedField);
     }
 
     this._chessBoard.clearMarkedPlanes();
@@ -168,7 +189,7 @@ export class ChessBoardManager {
 
     this.selected = null;
 
-    return capturedPieceId;
+    return removedPiecesIds;
   }
 
   getAllPieces(): Piece[] {
