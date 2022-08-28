@@ -41,7 +41,8 @@ export class PiecesManager {
     return color === PieceColor.WHITE ? 0 : 7;
   }
 
-  private getFieldPosition(row: number, column: number): Vector3 {
+  private getFieldPosition(chessPosition: PieceChessPosition): Vector3 {
+    const { row, column } = chessPosition;
     const fieldId = this.chessBoard.getFieldId(row, column);
     const field = this.chessBoard.getObjectById(fieldId);
     const position = new Vector3();
@@ -51,8 +52,11 @@ export class PiecesManager {
     return position;
   }
 
-  private setupPiecePosition(piece: Piece, row: number, column: number): void {
-    const initialPosition = this.getFieldPosition(row, column);
+  private setupPiecePosition(
+    piece: Piece,
+    chessPosition: PieceChessPosition
+  ): void {
+    const initialPosition = this.getFieldPosition(chessPosition);
     const rookBody = piece.init(initialPosition, this.loader);
 
     this.world.addBody(rookBody);
@@ -69,7 +73,7 @@ export class PiecesManager {
         color,
       });
 
-      this.setupPiecePosition(pawn, row, i);
+      this.setupPiecePosition(pawn, { row, column: i });
       pawns.push(pawn);
     }
     return pawns;
@@ -84,7 +88,7 @@ export class PiecesManager {
       color,
     });
 
-    this.setupPiecePosition(rook, row, column);
+    this.setupPiecePosition(rook, { row, column });
     return rook;
   }
 
@@ -106,7 +110,7 @@ export class PiecesManager {
       color,
     });
 
-    this.setupPiecePosition(knight, row, column);
+    this.setupPiecePosition(knight, { row, column });
 
     if (color === PieceColor.BLACK) {
       knight.body.quaternion.set(0, Math.PI, 0, 0);
@@ -133,7 +137,7 @@ export class PiecesManager {
       color,
     });
 
-    this.setupPiecePosition(bishop, row, column);
+    this.setupPiecePosition(bishop, { row, column });
 
     bishop.body.quaternion.y = Math.PI / 3;
 
@@ -150,29 +154,31 @@ export class PiecesManager {
   }
 
   private initQueen(color: PieceColor): Queen[] {
-    const name = this.concatPieceName(QUEEN_NAME, color, 3);
+    const column = 3;
+    const name = this.concatPieceName(QUEEN_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
     const queen = new Queen(name, {
-      initialChessPosition: { row, column: 3 },
+      initialChessPosition: { row, column },
       color,
     });
 
-    this.setupPiecePosition(queen, row, 3);
+    this.setupPiecePosition(queen, { row, column });
 
     return [queen];
   }
 
   private initKing(color: PieceColor): King[] {
-    const name = this.concatPieceName(KING_NAME, color, 4);
+    const column = 4;
+    const name = this.concatPieceName(KING_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
     const king = new King(name, {
-      initialChessPosition: { row, column: 4 },
+      initialChessPosition: { row, column },
       color,
     });
 
-    this.setupPiecePosition(king, row, 4);
+    this.setupPiecePosition(king, { row, column });
 
     return [king];
   }
