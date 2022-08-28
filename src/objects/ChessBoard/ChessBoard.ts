@@ -32,7 +32,7 @@ export class ChessBoard extends BaseGroup {
   }
 
   private createDropCircle() {
-    const geometry = new CircleGeometry(0.3, 16);
+    const geometry = new CircleGeometry(0.4, 16);
     const material = new MeshLambertMaterial({ color: "orange" });
     const circle = new Mesh(geometry, material);
 
