@@ -1,10 +1,11 @@
 import { Body, Box, Vec3 } from "cannon-es";
+import { PieceColor } from "chess.js";
 import { BLACK_COLOR_PIECE, WHITE_COLOR_PIECE } from "constants/colors";
 import { BaseObject } from "objects/BaseObject/BaseObject";
 import { Color, Mesh, MeshPhongMaterial, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { convertCannonEsQuaternion, convertThreeVector } from "utils/general";
-import { PieceChessPosition, PieceColor, PieceOptions } from "./types";
+import { PieceChessPosition, PieceOptions } from "./types";
 
 export abstract class Piece extends BaseObject {
   private initialMass = 0.1;
@@ -34,7 +35,7 @@ export abstract class Piece extends BaseObject {
       o.receiveShadow = true;
 
       const color = new Color(
-        this.color === PieceColor.BLACK ? BLACK_COLOR_PIECE : WHITE_COLOR_PIECE
+        this.color === "w" ? WHITE_COLOR_PIECE : BLACK_COLOR_PIECE
       );
 
       color.convertSRGBToLinear();

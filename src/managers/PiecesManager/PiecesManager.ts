@@ -1,11 +1,12 @@
 import { World } from "cannon-es";
+import { PieceColor } from "chess.js";
 import { Bishop } from "objects/Bishop/Bishop";
 import { ChessBoard } from "objects/ChessBoard/ChessBoard";
 import { King } from "objects/Pieces/King/King";
 import { Knight } from "objects/Pieces/Knight/Knight";
 import { Pawn } from "objects/Pieces/Pawn/Pawn";
 import { Piece } from "objects/Pieces/Piece/Piece";
-import { PieceChessPosition, PieceColor } from "objects/Pieces/Piece/types";
+import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Vector3 } from "three";
@@ -34,17 +35,16 @@ export class PiecesManager {
     color: PieceColor,
     column: number
   ): string {
-    return `${name}${column}${color === PieceColor.BLACK ? "Black" : "White"}`;
+    return `${name}${column}${color === "w" ? "White" : "Black"}`;
   }
 
   private getMajorPieceInitialRow(color: PieceColor): number {
-    return color === PieceColor.WHITE ? 0 : 7;
+    return color === "w" ? 0 : 7;
   }
 
   private getFieldPosition(chessPosition: PieceChessPosition): Vector3 {
     const { row, column } = chessPosition;
-    const fieldId = this.chessBoard.getFieldId(row, column);
-    const field = this.chessBoard.getObjectById(fieldId);
+    const field = this.chessBoard.getField(row, column);
     const position = new Vector3();
 
     field.getWorldPosition(position);
@@ -64,7 +64,7 @@ export class PiecesManager {
 
   private initPawns(color: PieceColor): Pawn[] {
     const pawns: Pawn[] = [];
-    const row = color === PieceColor.WHITE ? 1 : 6;
+    const row = color === "w" ? 1 : 6;
 
     for (let i = 0; i < 8; i++) {
       const name = this.concatPieceName(PAWN_NAME, color, i);
@@ -112,7 +112,7 @@ export class PiecesManager {
 
     this.setupPiecePosition(knight, { row, column });
 
-    if (color === PieceColor.BLACK) {
+    if (color === "b") {
       knight.body.quaternion.set(0, Math.PI, 0, 0);
     }
 
@@ -183,7 +183,7 @@ export class PiecesManager {
     return [king];
   }
 
-  private reducePieces(color: keyof PiecesContainer): Piece[] {
+  private reducePieces(color: PieceColor): Piece[] {
     const pieceSet = this.pieces[color];
     let pieces: Piece[] = [];
 
@@ -195,7 +195,7 @@ export class PiecesManager {
   }
 
   removePiece(
-    color: keyof PiecesContainer,
+    color: PieceColor,
     type: keyof PieceSet,
     chessPosition: PieceChessPosition
   ): number | undefined {
@@ -222,30 +222,45 @@ export class PiecesManager {
   initPieces(): void {
     this.pieces = {
       b: {
-        p: this.initPawns(PieceColor.BLACK),
-        r: this.initRooks(PieceColor.BLACK),
-        n: this.initKnights(PieceColor.BLACK),
-        b: this.initBishops(PieceColor.BLACK),
-        q: this.initQueen(PieceColor.BLACK),
-        k: this.initKing(PieceColor.BLACK),
+        p: this.initPawns("b"),
+        r: this.initRooks("b"),
+        n: this.initKnights("b"),
+        b: this.initBishops("b"),
+        q: this.initQueen("b"),
+        k: this.initKing("b"),
       },
       w: {
-        p: this.initPawns(PieceColor.WHITE),
-        r: this.initRooks(PieceColor.WHITE),
-        n: this.initKnights(PieceColor.WHITE),
-        b: this.initBishops(PieceColor.WHITE),
-        q: this.initQueen(PieceColor.WHITE),
-        k: this.initKing(PieceColor.WHITE),
+        p: this.initPawns("w"),
+        r: this.initRooks("w"),
+        n: this.initKnights("w"),
+        b: this.initBishops("w"),
+        q: this.initQueen("w"),
+        k: this.initKing("w"),
       },
     };
+  }
+
+  getPiece(
+    color: PieceColor,
+    type: keyof PieceSet,
+    chessPosition: PieceChessPosition
+  ): Piece | undefined {
+    const pieceSet: Piece[] = this.pieces[color][type];
+    const { row: rowToFind, column: columnToFind } = chessPosition;
+
+    return pieceSet.find((el) => {
+      const { row, column } = el.chessPosition;
+
+      return row === rowToFind && column === columnToFind;
+    });
   }
 
   getAllPieces(): Piece[] {
     return [...this.reducePieces("w"), ...this.reducePieces("b")];
   }
 
-  updatePieces(set: keyof PiecesContainer): void {
-    for (const pieceSet of Object.values(this.pieces[set])) {
+  updatePieces(color: PieceColor): void {
+    for (const pieceSet of Object.values(this.pieces[color])) {
       pieceSet.forEach((el: Piece) => el.update());
     }
   }

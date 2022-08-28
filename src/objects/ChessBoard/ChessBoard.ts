@@ -15,6 +15,7 @@ import {
   Mesh,
   MeshLambertMaterial,
   MeshPhongMaterial,
+  Object3D,
   PlaneGeometry,
 } from "three";
 import { BLACK_COLOR_FIELD, WHITE_COLOR_FIELD } from "constants/colors";
@@ -124,6 +125,12 @@ export class ChessBoard extends BaseGroup {
 
   getFieldId(row: number, column: number): number {
     return this.boardMatrix[row][column];
+  }
+
+  getField(row: number, column: number): Object3D {
+    const fieldId = this.getFieldId(row, column);
+
+    return this.getObjectById(fieldId);
   }
 
   init(): Body {

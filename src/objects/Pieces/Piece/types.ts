@@ -1,8 +1,4 @@
-export enum PieceColor {
-  WHITE,
-  BLACK,
-}
-
+import { PieceColor } from "chess.js";
 export interface PieceChessPosition {
   row: number;
   column: number;

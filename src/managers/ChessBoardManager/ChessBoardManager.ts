@@ -6,8 +6,8 @@ import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { getChessNotation, getMatrixPosition } from "./chessboard-utils";
 import { convertThreeVector } from "utils/general";
-import { Chess, ChessInstance, Move } from "chess.js";
-import { PiecesContainer, PieceSet } from "managers/PiecesManager/types";
+import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
+import { PieceSet } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
 
 export class ChessBoardManager {
@@ -47,12 +47,12 @@ export class ChessBoardManager {
   }
 
   private capturePiece(
-    color: keyof PiecesContainer,
+    color: PieceColor,
     captured: keyof PieceSet,
     to: string
   ): number | undefined {
     const capturedChessPosition = getMatrixPosition(to);
-    let capturedColor: keyof PiecesContainer = "b";
+    let capturedColor: PieceColor = "b";
 
     if (color === "b") {
       capturedColor = "w";
@@ -65,28 +65,48 @@ export class ChessBoardManager {
     );
   }
 
-  private handleNormalMove(droppedField: Object3D): void {
-    const { chessPosition } = droppedField.userData;
+  private movePieceToField(field: Object3D, piece: Piece): void {
+    const { chessPosition } = field.userData;
     const worldPosition = new Vector3();
 
-    droppedField.getWorldPosition(worldPosition);
+    field.getWorldPosition(worldPosition);
     worldPosition.y += 0.1;
 
-    this.selected.changePosition(
+    piece.changePosition(
       chessPosition,
       convertThreeVector(worldPosition),
       true
     );
   }
 
+  private handleCastling(
+    droppedField: Object3D,
+    color: PieceColor,
+    castlingType: "k" | "q"
+  ): void {
+    const rookRow = color === "w" ? 0 : 7;
+    const rookColumn = castlingType === "q" ? 0 : 7;
+    const castlingRook = this.piecesManager.getPiece(color, "r", {
+      row: rookRow,
+      column: rookColumn,
+    });
+
+    const rookCastlingColumn = castlingType === "q" ? 3 : 5;
+    const castlingField = this.chessBoard.getField(rookRow, rookCastlingColumn);
+
+    this.movePieceToField(castlingField, castlingRook);
+    this.movePieceToField(droppedField, this.selected);
+  }
+
   private handleFlags(result: Move, droppedField: Object3D): void {
-    const { flags } = result;
+    const { flags, color } = result;
     switch (flags) {
+      case "q":
       case "k":
-        console.log("hello");
+        this.handleCastling(droppedField, color, flags);
         break;
       default:
-        this.handleNormalMove(droppedField);
+        this.movePieceToField(droppedField, this.selected);
     }
   }
 

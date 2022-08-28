@@ -1,3 +1,4 @@
+import { PieceColor } from "chess.js";
 import { Bishop } from "objects/Bishop/Bishop";
 import { King } from "objects/Pieces/King/King";
 import { Knight } from "objects/Pieces/Knight/Knight";
@@ -15,7 +16,9 @@ export interface PieceSet {
   k: King[];
 }
 
-export interface PiecesContainer {
+export type PiecesContainer = {
+  [key in PieceColor]: PieceSet;
+} & {
   b: PieceSet;
   w: PieceSet;
-}
+};
