@@ -83,7 +83,7 @@ export abstract class BasicScene extends Scene {
       0.1,
       1000
     );
-    this.camera.position.set(0, 11, 8);
+    this.camera.position.set(0, 0, 0);
   }
 
   setupGridHelper(): void {

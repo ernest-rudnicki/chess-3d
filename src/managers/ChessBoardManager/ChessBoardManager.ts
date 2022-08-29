@@ -14,6 +14,7 @@ export class ChessBoardManager {
   private _chessBoard: ChessBoard;
   private piecesManager: PiecesManager;
   private chessEngine: ChessInstance;
+  private startingPlayerSide: PieceColor;
 
   private selectedInitialPosition: Vec3;
   private selected: Piece | null;
@@ -26,6 +27,13 @@ export class ChessBoardManager {
       this.loader,
       this.world
     );
+  }
+
+  private drawSide(): PieceColor {
+    const coinFlip = Math.round(Math.random());
+    this.startingPlayerSide = coinFlip === 0 ? "w" : "b";
+
+    return this.startingPlayerSide;
   }
 
   private markPossibleFields(chessPosition: PieceChessPosition): void {
@@ -196,9 +204,11 @@ export class ChessBoardManager {
     return this.piecesManager.getAllPieces();
   }
 
-  init(): void {
+  init(): PieceColor {
     this.initChessBoard();
     this.piecesManager.initPieces();
+
+    return this.drawSide();
   }
 
   moveSelectedPiece(x: number, z: number): void {

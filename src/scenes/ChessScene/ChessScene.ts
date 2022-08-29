@@ -1,3 +1,4 @@
+import { PieceColor } from "chess.js";
 import { isPiece } from "managers/ChessBoardManager/chessboard-utils";
 import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
 import { Piece } from "objects/Pieces/Piece/Piece";
@@ -127,9 +128,16 @@ export class ChessScene extends BasicScene {
     this.chessBoardManager.select(lastParent);
   }
 
+  private setCameraPosition(playerStartingSide: PieceColor): void {
+    const z = playerStartingSide === "w" ? -8 : 8;
+    this.camera.position.set(0, 11, z);
+    this.camera.lookAt(0, 0, 0);
+  }
+
   init(): void {
+    const playerStartingSide = this.chessBoardManager.init();
+    this.setCameraPosition(playerStartingSide);
     this.setupLights();
-    this.chessBoardManager.init();
     this.setupRaycaster();
 
     this.setupScene();
