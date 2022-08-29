@@ -119,8 +119,8 @@ export class ChessBoardManager {
     });
   }
 
-  private handleFlags(result: Move, droppedField: Object3D): number[] {
-    const { flags, color } = result;
+  private handleFlags(move: Move, droppedField: Object3D): number[] {
+    const { flags, color } = move;
     const removedPiecesIds: number[] = [];
 
     switch (flags) {
@@ -144,17 +144,17 @@ export class ChessBoardManager {
     const from = getChessNotation(fromPosition);
     const to = getChessNotation(toPosition);
 
-    const result = this.chessEngine.move(`${from}${to}`, {
+    const move = this.chessEngine.move(`${from}${to}`, {
       sloppy: true,
     });
 
-    if (result.captured) {
-      const { color, captured, to: movedTo } = result;
+    if (move.captured) {
+      const { color, captured, to: movedTo } = move;
       const capturedPieceId = this.capturePiece(color, captured, movedTo);
       removedPiecesIds.push(capturedPieceId);
     }
 
-    const specialRemoved = this.handleFlags(result, droppedField);
+    const specialRemoved = this.handleFlags(move, droppedField);
 
     this.movePieceToField(droppedField, this.selected);
 
