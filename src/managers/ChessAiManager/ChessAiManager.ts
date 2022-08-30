@@ -1,15 +1,20 @@
-import { Move, PieceColor } from "chess.js";
+import { ChessInstance, Move, PieceColor } from "chess.js";
 import { pieceSquareTables, pieceWeights } from "constants/chess-weights";
 import { PieceSquareTables } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
+import { getMatrixPosition } from "managers/ChessBoardManager/chessboard-utils";
 import { PieceSet } from "managers/PiecesManager/types";
-import { PieceChessPosition } from "objects/Pieces/Piece/types";
 
+// based on https://dev.to/zeyu2001/build-a-simple-chess-ai-in-javascript-18eg
 export class ChessAiManager {
   private color: PieceColor;
   private pieceSquareTables: PieceSquareTables;
   private opponentSquareTables: PieceSquareTables;
+  private chessEngine: ChessInstance;
   private prevSum = 0;
+  constructor(chessEngine: ChessInstance) {
+    this.chessEngine = chessEngine;
+  }
 
   private reverseSquareTablesForBlack(): PieceSquareTables {
     const cloned = cloneDeep(pieceSquareTables);
@@ -24,14 +29,14 @@ export class ChessAiManager {
   init(color: PieceColor): void {
     this.color = color;
 
-    if (this.color === "w") {
+    if (this.color === "b") {
       this.pieceSquareTables = cloneDeep(pieceSquareTables);
       this.opponentSquareTables = this.reverseSquareTablesForBlack();
       return;
     }
 
     this.pieceSquareTables = cloneDeep(pieceSquareTables);
-    this.pieceSquareTables = this.reverseSquareTablesForBlack();
+    this.opponentSquareTables = this.reverseSquareTablesForBlack();
   }
 
   private getValueFromSquareTable(
@@ -47,10 +52,10 @@ export class ChessAiManager {
     return this.pieceSquareTables[piece][row][column];
   }
 
-  evaluateBoard(move: Move, from: PieceChessPosition, to: PieceChessPosition) {
-    let newSum = this.prevSum;
-    const { row: fromRow, column: fromColumn } = from;
-    const { row: toRow, column: toColumn } = to;
+  private evaluateBoard(move: Move, prevSum: number): number {
+    let newSum = prevSum;
+    const { row: fromRow, column: fromColumn } = getMatrixPosition(move.from);
+    const { row: toRow, column: toColumn } = getMatrixPosition(move.to);
     const { captured, color: moveColor, piece } = move;
 
     if (captured) {
@@ -107,6 +112,83 @@ export class ChessAiManager {
       }
     }
 
-    this.prevSum = newSum;
+    return newSum;
+  }
+
+  private minimax(
+    depth: number,
+    sum: number,
+    isMaximizingPlayer: boolean,
+    alpha: number,
+    beta: number
+  ): [Move, number] {
+    let maxVal = -Infinity;
+    let bestMove: Move;
+    let minVal = +Infinity;
+    let currentMove: Move;
+    const moves = this.chessEngine.moves();
+
+    if (depth === 0 || moves.length === 0) {
+      return [null, sum];
+    }
+
+    for (const moveNotation of moves) {
+      currentMove = this.chessEngine.move(moveNotation);
+      const newSum = this.evaluateBoard(currentMove, sum);
+      const [_, childValue] = this.minimax(
+        depth - 1,
+        newSum,
+        !isMaximizingPlayer,
+        alpha,
+        beta
+      );
+
+      this.chessEngine.undo();
+
+      if (isMaximizingPlayer) {
+        if (childValue > maxVal) {
+          maxVal = childValue;
+          bestMove = currentMove;
+        }
+
+        alpha = Math.max(alpha, childValue);
+        if (beta <= alpha) {
+          break;
+        }
+      } else {
+        if (childValue < minVal) {
+          minVal = childValue;
+          bestMove = currentMove;
+        }
+        beta = Math.min(childValue, beta);
+
+        if (beta <= alpha) {
+          break;
+        }
+      }
+    }
+
+    if (isMaximizingPlayer) {
+      return [bestMove, maxVal];
+    }
+
+    return [bestMove, minVal];
+  }
+
+  calcPlayerMove(move: Move): void {
+    this.prevSum = this.evaluateBoard(move, this.prevSum);
+  }
+
+  calcAiMove(): Move {
+    const [move, sum] = this.minimax(
+      3,
+      this.prevSum,
+      true,
+      -Infinity,
+      +Infinity
+    );
+
+    this.prevSum = sum;
+    return move;
   }
 }

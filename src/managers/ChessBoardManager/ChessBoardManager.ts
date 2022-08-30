@@ -9,12 +9,14 @@ import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PieceSet } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
+import { ChessAiManager } from "managers/ChessAiManager/ChessAiManager";
 
 export class ChessBoardManager {
   private _chessBoard: ChessBoard;
   private piecesManager: PiecesManager;
   private chessEngine: ChessInstance;
   private startingPlayerSide: PieceColor;
+  private chessAi: ChessAiManager;
 
   private selectedInitialPosition: Vec3;
   private selected: Piece | null;
@@ -27,13 +29,12 @@ export class ChessBoardManager {
       this.loader,
       this.world
     );
+    this.chessAi = new ChessAiManager(this.chessEngine);
   }
 
-  private drawSide(): PieceColor {
+  private drawSide() {
     const coinFlip = Math.round(Math.random());
     this.startingPlayerSide = coinFlip === 0 ? "w" : "b";
-
-    return this.startingPlayerSide;
   }
 
   private markPossibleFields(chessPosition: PieceChessPosition): void {
@@ -136,9 +137,25 @@ export class ChessBoardManager {
     return removedPiecesIds;
   }
 
-  private dropPiece(droppedField: Object3D): number[] {
-    const { chessPosition: toPosition } = droppedField.userData;
-    const { chessPosition: fromPosition } = this.selected;
+  private performAiMove(): number[] {
+    const move = this.chessAi.calcAiMove();
+    const { from, to, color, piece } = move;
+    const fromPos = getMatrixPosition(from);
+    const toPos = getMatrixPosition(to);
+
+    const toField = this.chessBoard.getField(toPos.row, toPos.column);
+    const movedPiece = this.piecesManager.getPiece(color, piece, fromPos);
+
+    return this.handlePieceMove(toField, movedPiece);
+  }
+
+  private handlePieceMove(
+    field: Object3D,
+    piece: Piece,
+    playerMove?: boolean
+  ): number[] {
+    const { chessPosition: toPosition } = field.userData;
+    const { chessPosition: fromPosition } = piece;
     const removedPiecesIds: number[] = [];
 
     const from = getChessNotation(fromPosition);
@@ -154,11 +171,25 @@ export class ChessBoardManager {
       removedPiecesIds.push(capturedPieceId);
     }
 
-    const specialRemoved = this.handleFlags(move, droppedField);
+    if (playerMove) {
+      this.chessAi.calcPlayerMove(move);
+    }
 
-    this.movePieceToField(droppedField, this.selected);
+    const specialRemoved = this.handleFlags(move, field);
+    this.movePieceToField(field, piece);
 
     return [...removedPiecesIds, ...specialRemoved];
+  }
+
+  private dropPiece(droppedField: Object3D): number[] {
+    const opponentPieces = this.handlePieceMove(
+      droppedField,
+      this.selected,
+      true
+    );
+    const playerPieces = this.performAiMove();
+
+    return [...opponentPieces, ...playerPieces];
   }
 
   get chessBoard(): ChessBoard {
@@ -207,8 +238,10 @@ export class ChessBoardManager {
   init(): PieceColor {
     this.initChessBoard();
     this.piecesManager.initPieces();
+    this.drawSide();
+    this.chessAi.init(this.getOppositeColor(this.startingPlayerSide));
 
-    return this.drawSide();
+    return this.startingPlayerSide;
   }
 
   moveSelectedPiece(x: number, z: number): void {
