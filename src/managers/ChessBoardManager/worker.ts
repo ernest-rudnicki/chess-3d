@@ -10,10 +10,8 @@ addEventListener("message", (e: any) => {
       chessAiManager = new ChessAiManager(e.data.fen);
       chessAiManager.init(e.data.color);
       break;
-    case "playerMove":
-      chessAiManager.calcPlayerMove(e.data.move);
-      break;
     case "aiMove":
+      chessAiManager.updateBoardWithPlayerMove(e.data.playerMove);
       postMessage(chessAiManager.calcAiMove());
       break;
     default:

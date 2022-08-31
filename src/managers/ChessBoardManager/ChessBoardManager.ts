@@ -10,7 +10,7 @@ import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PieceSet } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
 import Worker from "web-worker";
-import { AiMoveCallback } from "./types";
+import { AiMoveCallback, MoveResult } from "./types";
 
 export class ChessBoardManager {
   private _chessBoard: ChessBoard;
@@ -148,14 +148,14 @@ export class ChessBoardManager {
 
     movedPiece.removeMass();
 
-    const idsToRemove = this.handlePieceMove(toField, movedPiece);
+    const { removedPiecesIds } = this.handlePieceMove(toField, movedPiece);
 
     movedPiece.resetMass();
 
-    return idsToRemove;
+    return removedPiecesIds;
   }
 
-  private handlePieceMove(field: Object3D, piece: Piece): number[] {
+  private handlePieceMove(field: Object3D, piece: Piece): MoveResult {
     const { chessPosition: toPosition } = field.userData;
     const { chessPosition: fromPosition } = piece;
     const removedPiecesIds: number[] = [];
@@ -173,18 +173,27 @@ export class ChessBoardManager {
       removedPiecesIds.push(capturedPieceId);
     }
 
-    this.worker.postMessage({ type: "playerMove", move });
-
     const specialRemoved = this.handleFlags(move, field);
     this.movePieceToField(field, piece);
 
-    return [...removedPiecesIds, ...specialRemoved];
+    return { removedPiecesIds: [...removedPiecesIds, ...specialRemoved], move };
+  }
+
+  private notifyAiToMove(playerMove: Move) {
+    this.worker.postMessage({ type: "aiMove", playerMove });
+  }
+
+  private performPlayerMove(droppedField: Object3D): MoveResult {
+    return this.handlePieceMove(droppedField, this.selected);
   }
 
   private dropPiece(droppedField: Object3D): number[] {
-    const opponentPieces = this.handlePieceMove(droppedField, this.selected);
-    this.worker.postMessage({ type: "aiMove" });
-    return opponentPieces;
+    const { removedPiecesIds, move: playerMove } =
+      this.performPlayerMove(droppedField);
+
+    this.notifyAiToMove(playerMove);
+
+    return removedPiecesIds;
   }
 
   private addWebWorkerListener(cb: AiMoveCallback): void {

@@ -175,7 +175,7 @@ export class ChessAiManager {
     return [bestMove, minVal];
   }
 
-  calcPlayerMove(move: Move): void {
+  updateBoardWithPlayerMove(move: Move): void {
     this.chessEngine.move(move);
     this.prevSum = this.evaluateBoard(move, this.prevSum);
   }
@@ -190,6 +190,7 @@ export class ChessAiManager {
     );
 
     this.prevSum = sum;
+    this.chessEngine.move(move);
     return move;
   }
 }
