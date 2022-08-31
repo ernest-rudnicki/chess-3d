@@ -1,4 +1,4 @@
-import { ChessInstance, Move, PieceColor } from "chess.js";
+import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { pieceSquareTables, pieceWeights } from "constants/chess-weights";
 import { PieceSquareTables } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
@@ -12,8 +12,8 @@ export class ChessAiManager {
   private opponentSquareTables: PieceSquareTables;
   private chessEngine: ChessInstance;
   private prevSum = 0;
-  constructor(chessEngine: ChessInstance) {
-    this.chessEngine = chessEngine;
+  constructor(fen: string) {
+    this.chessEngine = new Chess(fen);
   }
 
   private reverseSquareTablesForBlack(): PieceSquareTables {
@@ -176,6 +176,7 @@ export class ChessAiManager {
   }
 
   calcPlayerMove(move: Move): void {
+    this.chessEngine.move(move);
     this.prevSum = this.evaluateBoard(move, this.prevSum);
   }
 

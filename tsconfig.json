@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": "src",
-    "target": "ES6",
-    "module": "commonjs",
+    "target": "ES2020",
+    "module": "ES2020",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
@@ -22,6 +22,6 @@
       "colors/*": ["colors/*"]
     }
   },
-  "include": [ "src/**/*.ts", "global.d.ts", "global.d.ts" ],
+  "include": [ "src/**/*.ts", "global.d.ts", "global.d.ts", "src/managers/ChessBoardManager/worker.js", "src/managers/ChessBoardManager/worker.js" ],
   "exclude": [ "node_modules" ]
 }

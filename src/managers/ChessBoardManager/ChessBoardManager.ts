@@ -9,14 +9,15 @@ import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PieceSet } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
-import { ChessAiManager } from "managers/ChessAiManager/ChessAiManager";
+import Worker from "web-worker";
+import { AiMoveCallback } from "./types";
 
 export class ChessBoardManager {
   private _chessBoard: ChessBoard;
   private piecesManager: PiecesManager;
   private chessEngine: ChessInstance;
   private startingPlayerSide: PieceColor;
-  private chessAi: ChessAiManager;
+  private worker: Worker;
 
   private selectedInitialPosition: Vec3;
   private selected: Piece | null;
@@ -29,7 +30,7 @@ export class ChessBoardManager {
       this.loader,
       this.world
     );
-    this.chessAi = new ChessAiManager(this.chessEngine);
+    this.worker = new Worker(new URL("./worker.ts", import.meta.url));
   }
 
   private drawSide() {
@@ -137,8 +138,7 @@ export class ChessBoardManager {
     return removedPiecesIds;
   }
 
-  private performAiMove(): number[] {
-    const move = this.chessAi.calcAiMove();
+  private performAiMove(move: Move): number[] {
     const { from, to, color, piece } = move;
     const fromPos = getMatrixPosition(from);
     const toPos = getMatrixPosition(to);
@@ -146,14 +146,16 @@ export class ChessBoardManager {
     const toField = this.chessBoard.getField(toPos.row, toPos.column);
     const movedPiece = this.piecesManager.getPiece(color, piece, fromPos);
 
-    return this.handlePieceMove(toField, movedPiece);
+    movedPiece.removeMass();
+
+    const idsToRemove = this.handlePieceMove(toField, movedPiece);
+
+    movedPiece.resetMass();
+
+    return idsToRemove;
   }
 
-  private handlePieceMove(
-    field: Object3D,
-    piece: Piece,
-    playerMove?: boolean
-  ): number[] {
+  private handlePieceMove(field: Object3D, piece: Piece): number[] {
     const { chessPosition: toPosition } = field.userData;
     const { chessPosition: fromPosition } = piece;
     const removedPiecesIds: number[] = [];
@@ -171,9 +173,7 @@ export class ChessBoardManager {
       removedPiecesIds.push(capturedPieceId);
     }
 
-    if (playerMove) {
-      this.chessAi.calcPlayerMove(move);
-    }
+    this.worker.postMessage({ type: "playerMove", move });
 
     const specialRemoved = this.handleFlags(move, field);
     this.movePieceToField(field, piece);
@@ -182,14 +182,24 @@ export class ChessBoardManager {
   }
 
   private dropPiece(droppedField: Object3D): number[] {
-    const opponentPieces = this.handlePieceMove(
-      droppedField,
-      this.selected,
-      true
-    );
-    const playerPieces = this.performAiMove();
+    const opponentPieces = this.handlePieceMove(droppedField, this.selected);
+    this.worker.postMessage({ type: "aiMove" });
+    return opponentPieces;
+  }
 
-    return [...opponentPieces, ...playerPieces];
+  private addWebWorkerListener(cb: AiMoveCallback): void {
+    this.worker.addEventListener("message", (e: any) => {
+      const idsToRemove = this.performAiMove(e.data);
+      cb(idsToRemove);
+    });
+  }
+
+  private initChessAi() {
+    this.worker.postMessage({
+      type: "init",
+      fen: this.chessEngine.fen(),
+      color: this.getOppositeColor(this.startingPlayerSide),
+    });
   }
 
   get chessBoard(): ChessBoard {
@@ -210,9 +220,9 @@ export class ChessBoardManager {
     this.selected = piece;
   }
 
-  deselect(intersectedField: Object3D): number[] | undefined {
+  deselect(intersectedField: Object3D): number[] {
     const { droppable } = intersectedField.userData;
-    let removedPiecesIds: number[];
+    let removedPiecesIds: number[] = [];
 
     if (!droppable) {
       const { x, y, z } = this.selectedInitialPosition;
@@ -235,11 +245,12 @@ export class ChessBoardManager {
     return this.piecesManager.getAllPieces();
   }
 
-  init(): PieceColor {
+  init(aiMoveCallback: AiMoveCallback): PieceColor {
     this.initChessBoard();
     this.piecesManager.initPieces();
     this.drawSide();
-    this.chessAi.init(this.getOppositeColor(this.startingPlayerSide));
+    this.initChessAi();
+    this.addWebWorkerListener(aiMoveCallback);
 
     return this.startingPlayerSide;
   }

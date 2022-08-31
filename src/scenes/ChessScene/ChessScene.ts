@@ -35,13 +35,6 @@ export class ChessScene extends BasicScene {
     this.selectPiece();
   };
 
-  private removePiecesFromScene(piecesIds: number[]) {
-    piecesIds.forEach((id) => {
-      const pieceToRemove = this.getObjectById(id);
-      this.remove(pieceToRemove);
-    });
-  }
-
   private onMouseUp = (): void => {
     if (!this.chessBoardManager.isAnySelected()) {
       return;
@@ -50,10 +43,6 @@ export class ChessScene extends BasicScene {
     const item = intersects.find((el) => el.object.userData.ground);
 
     const removedPiecesIds = this.chessBoardManager.deselect(item.object);
-
-    if (!removedPiecesIds) {
-      return;
-    }
     this.removePiecesFromScene(removedPiecesIds);
   };
 
@@ -134,8 +123,17 @@ export class ChessScene extends BasicScene {
     this.camera.lookAt(0, 0, 0);
   }
 
+  removePiecesFromScene = (piecesIds: number[]) => {
+    piecesIds.forEach((id) => {
+      const pieceToRemove = this.getObjectById(id);
+      this.remove(pieceToRemove);
+    });
+  };
+
   init(): void {
-    const playerStartingSide = this.chessBoardManager.init();
+    const playerStartingSide = this.chessBoardManager.init(
+      this.removePiecesFromScene
+    );
     this.setCameraPosition(playerStartingSide);
     this.setupLights();
     this.setupRaycaster();

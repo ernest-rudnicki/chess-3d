@@ -21,7 +21,8 @@
     "cannon-es-debugger": "^1.0.0",
     "chess.js": "^0.13.4",
     "lodash.clonedeep": "^4.5.0",
-    "three": "^0.143.0"
+    "three": "^0.143.0",
+    "web-worker": "^1.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
