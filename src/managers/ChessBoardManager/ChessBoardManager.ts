@@ -10,7 +10,7 @@ import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PieceSet } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
 import Worker from "web-worker";
-import { AiMoveCallback, MoveResult } from "./types";
+import { AiMoveCallback, MoveResult, WebWorkerEvent } from "./types";
 
 export class ChessBoardManager {
   private _chessBoard: ChessBoard;
@@ -200,8 +200,11 @@ export class ChessBoardManager {
   }
 
   private addWebWorkerListener(cb: AiMoveCallback): void {
-    this.worker.addEventListener("message", (e: any) => {
-      const idsToRemove = this.performAiMove(e.data);
+    this.worker.addEventListener("message", (e: WebWorkerEvent) => {
+      if (e.data.type !== "aiMovePerformed") {
+        return;
+      }
+      const idsToRemove = this.performAiMove(e.data.aiMove);
       cb(idsToRemove);
     });
   }

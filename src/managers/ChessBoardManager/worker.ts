@@ -1,8 +1,9 @@
 import { ChessAiManager } from "managers/ChessAiManager/ChessAiManager";
+import { WebWorkerEvent } from "./types";
 
 let chessAiManager: ChessAiManager;
 
-addEventListener("message", (e: any) => {
+addEventListener("message", (e: WebWorkerEvent) => {
   const type = e.data.type;
 
   switch (type) {
@@ -12,7 +13,10 @@ addEventListener("message", (e: any) => {
       break;
     case "aiMove":
       chessAiManager.updateBoardWithPlayerMove(e.data.playerMove);
-      postMessage(chessAiManager.calcAiMove());
+      postMessage({
+        type: "aiMovePerformed",
+        aiMove: chessAiManager.calcAiMove(),
+      });
       break;
     default:
       return;

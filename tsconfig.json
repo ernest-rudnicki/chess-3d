@@ -22,6 +22,6 @@
       "colors/*": ["colors/*"]
     }
   },
-  "include": [ "src/**/*.ts", "global.d.ts", "global.d.ts", "src/managers/ChessBoardManager/worker.js", "src/managers/ChessBoardManager/worker.js" ],
+  "include": [ "src/**/*.ts", "global.d.ts"],
   "exclude": [ "node_modules" ]
 }
