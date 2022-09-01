@@ -11,12 +11,14 @@ addEventListener("message", (e: WebWorkerEvent) => {
       chessAiManager = new ChessAiManager(e.data.fen);
       chessAiManager.init(e.data.color);
 
-      if (e.data.color === "w") {
-        postMessage({
-          type: "aiMovePerformed",
-          aiMove: chessAiManager.calcAiMove(),
-        });
+      if (e.data.color !== "w") {
+        return;
       }
+
+      postMessage({
+        type: "aiMovePerformed",
+        aiMove: chessAiManager.calcAiMove(),
+      });
 
       break;
     case "aiMove":
