@@ -223,6 +223,10 @@ export class ChessBoardManager {
     this.selectedInitialPosition = null;
   }
 
+  private isPlayerPiece(piece: Piece): boolean {
+    return piece.color === this.startingPlayerSide;
+  }
+
   get chessBoard(): ChessBoard {
     return this._chessBoard;
   }
@@ -232,6 +236,10 @@ export class ChessBoardManager {
   }
 
   select(piece: Piece): void {
+    if (!this.isPlayerPiece(piece)) {
+      return;
+    }
+
     piece.removeMass();
     this.markPossibleFields(piece.chessPosition);
 

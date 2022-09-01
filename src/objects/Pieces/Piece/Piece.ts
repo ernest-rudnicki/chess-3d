@@ -10,7 +10,7 @@ import { PieceChessPosition, PieceOptions } from "./types";
 export abstract class Piece extends BaseObject {
   private initialMass = 0.1;
   private size: Vec3;
-  private color: PieceColor;
+  private _color: PieceColor;
 
   private _chessPosition: PieceChessPosition;
 
@@ -20,7 +20,7 @@ export abstract class Piece extends BaseObject {
     const { initialChessPosition, color } = options;
 
     this._chessPosition = initialChessPosition;
-    this.color = color;
+    this._color = color;
   }
 
   private changeMaterial(): void {
@@ -64,6 +64,10 @@ export abstract class Piece extends BaseObject {
 
   get chessPosition(): PieceChessPosition {
     return this._chessPosition;
+  }
+
+  get color(): PieceColor {
+    return this._color;
   }
 
   changePosition(
