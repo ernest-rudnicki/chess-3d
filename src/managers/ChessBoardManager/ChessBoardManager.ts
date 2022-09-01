@@ -276,8 +276,8 @@ export class ChessBoardManager {
     this.initChessBoard();
     this.piecesManager.initPieces();
     this.drawSide();
-    this.initChessAi();
     this.addWebWorkerListener(aiMoveCallback);
+    this.initChessAi();
 
     return this.startingPlayerSide;
   }

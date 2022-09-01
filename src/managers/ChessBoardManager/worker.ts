@@ -10,6 +10,14 @@ addEventListener("message", (e: WebWorkerEvent) => {
     case "init":
       chessAiManager = new ChessAiManager(e.data.fen);
       chessAiManager.init(e.data.color);
+
+      if (e.data.color === "w") {
+        postMessage({
+          type: "aiMovePerformed",
+          aiMove: chessAiManager.calcAiMove(),
+        });
+      }
+
       break;
     case "aiMove":
       chessAiManager.updateBoardWithPlayerMove(e.data.playerMove);
