@@ -11,6 +11,7 @@ import { PieceSet } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
 import Worker from "web-worker";
 import { AiMoveCallback, MoveResult, WebWorkerEvent } from "./types";
+import { UserInterfaceManager } from "managers/UserInterfaceManager/UserInterfaceManager";
 
 export class ChessBoardManager {
   private _chessBoard: ChessBoard;
@@ -18,6 +19,7 @@ export class ChessBoardManager {
   private chessEngine: ChessInstance;
   private startingPlayerSide: PieceColor;
   private worker: Worker;
+  private uiManager: UserInterfaceManager;
 
   private selectedInitialPosition: Vec3;
   private selected: Piece | null;
@@ -31,6 +33,7 @@ export class ChessBoardManager {
       this.world
     );
     this.worker = new Worker(new URL("./worker.ts", import.meta.url));
+    this.uiManager = new UserInterfaceManager();
   }
 
   private drawSide() {
@@ -66,6 +69,17 @@ export class ChessBoardManager {
     return newColor;
   }
 
+  private updateScoreBoard(
+    colorToUpdate: PieceColor,
+    captured: keyof PieceSet
+  ): void {
+    if (colorToUpdate === "w") {
+      this.uiManager.addToWhiteScore(captured);
+    } else {
+      this.uiManager.addToBlackScore(captured);
+    }
+  }
+
   private capturePiece(
     color: PieceColor,
     captured: keyof PieceSet,
@@ -73,6 +87,8 @@ export class ChessBoardManager {
   ): number | undefined {
     const capturedChessPosition = getMatrixPosition(to);
     const capturedColor = this.getOppositeColor(color);
+
+    this.updateScoreBoard(color, captured);
 
     return this.piecesManager.removePiece(
       capturedColor,
@@ -276,6 +292,7 @@ export class ChessBoardManager {
     this.initChessBoard();
     this.piecesManager.initPieces();
     this.drawSide();
+    this.uiManager.init(this.startingPlayerSide);
     this.addWebWorkerListener(aiMoveCallback);
     this.initChessAi();
 

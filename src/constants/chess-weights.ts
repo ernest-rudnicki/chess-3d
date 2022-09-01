@@ -2,7 +2,7 @@ import { PieceSquareTables, PieceWeights } from "./types";
 
 // values taken from https://github.com/thomasahle/sunfish/blob/master/sunfish.py
 
-export const pieceWeights: PieceWeights = {
+export const PIECE_WEIGHTS: PieceWeights = {
   p: 100,
   n: 280,
   b: 320,
@@ -12,7 +12,7 @@ export const pieceWeights: PieceWeights = {
 };
 
 // white perspective, reverse for black perspective
-export const pieceSquareTables: PieceSquareTables = {
+export const PIECE_SQUARE_TABLES: PieceSquareTables = {
   p: [
     [100, 100, 100, 100, 105, 100, 100, 100],
     [78, 83, 86, 73, 102, 82, 85, 90],

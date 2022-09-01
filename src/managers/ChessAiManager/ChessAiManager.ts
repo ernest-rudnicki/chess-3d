@@ -1,5 +1,5 @@
 import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
-import { pieceSquareTables, pieceWeights } from "constants/chess-weights";
+import { PIECE_SQUARE_TABLES, PIECE_WEIGHTS } from "constants/chess-weights";
 import { PieceSquareTables } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
 import { getMatrixPosition } from "managers/ChessBoardManager/chessboard-utils";
@@ -17,7 +17,7 @@ export class ChessAiManager {
   }
 
   private reverseSquareTablesForBlack(): PieceSquareTables {
-    const cloned = cloneDeep(pieceSquareTables);
+    const cloned = cloneDeep(PIECE_SQUARE_TABLES);
 
     for (const value of Object.values(cloned)) {
       value.reverse();
@@ -30,12 +30,12 @@ export class ChessAiManager {
     this.color = color;
 
     if (this.color === "b") {
-      this.pieceSquareTables = cloneDeep(pieceSquareTables);
+      this.pieceSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
       this.opponentSquareTables = this.reverseSquareTablesForBlack();
       return;
     }
 
-    this.pieceSquareTables = cloneDeep(pieceSquareTables);
+    this.pieceSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
     this.opponentSquareTables = this.reverseSquareTablesForBlack();
   }
 
@@ -62,13 +62,13 @@ export class ChessAiManager {
       // ai captured a piece
       if (moveColor === this.color) {
         newSum +=
-          pieceWeights[captured] +
+          PIECE_WEIGHTS[captured] +
           this.getValueFromSquareTable(captured, toRow, toColumn);
       }
       // player captured a piece
       else {
         newSum -=
-          pieceWeights[captured] +
+          PIECE_WEIGHTS[captured] +
           this.getValueFromSquareTable(captured, toRow, toColumn, true);
       }
     }
@@ -80,21 +80,21 @@ export class ChessAiManager {
       // ai piece was promoted
       if (moveColor === this.color) {
         newSum -=
-          pieceWeights[piece] +
+          PIECE_WEIGHTS[piece] +
           this.getValueFromSquareTable(piece, fromRow, fromColumn);
 
         newSum +=
-          pieceWeights[promoted] +
+          PIECE_WEIGHTS[promoted] +
           this.getValueFromSquareTable(promoted, toRow, toColumn);
       }
       // player piece was promoted
       else {
         newSum +=
-          pieceWeights[piece] +
+          PIECE_WEIGHTS[piece] +
           this.getValueFromSquareTable(piece, fromRow, fromColumn, true);
 
         newSum -=
-          pieceWeights[promoted] +
+          PIECE_WEIGHTS[promoted] +
           this.getValueFromSquareTable(piece, toRow, toColumn, true);
       }
     }

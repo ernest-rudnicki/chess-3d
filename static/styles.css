@@ -1,7 +1,33 @@
 html, body, canvas {
-  margin: 0;padding: 0;border: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  position: relative;
 }
 
 canvas { 
   display: block; 
+}
+
+.score {
+ font-size: 40px;
+ position: absolute;
+ width: 350px;
+ height: 45px;
+ padding: 0 10px;
+ background-color: rgb(227, 204, 175);
+ border-radius: 3px;
+ border: 1px solid rgb(166, 165, 165);
+ box-shadow: 0px 0px 5px 0px rgba(66, 68, 90, 1);
+ display: flex;
+}
+
+.score.player-score {
+  bottom: 10px;
+  right: 10px;
+}
+
+.score.opponent-score {
+  top: 10px;
+  right: 10px;
 }
