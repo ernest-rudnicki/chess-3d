@@ -169,11 +169,14 @@ export class ChessBoardManager {
 
     if (move.captured) {
       const { color, captured, to: movedTo } = move;
+
       const capturedPieceId = this.capturePiece(color, captured, movedTo);
+
       removedPiecesIds.push(capturedPieceId);
     }
 
     const specialRemoved = this.handleFlags(move, field);
+
     this.movePieceToField(field, piece);
 
     return { removedPiecesIds: [...removedPiecesIds, ...specialRemoved], move };
@@ -211,6 +214,12 @@ export class ChessBoardManager {
     });
   }
 
+  private resetSelectedPiecePos(): void {
+    const { x, y, z } = this.selectedInitialPosition;
+    this.selected.changeWorldPosition(x, y, z);
+    this.selectedInitialPosition = null;
+  }
+
   get chessBoard(): ChessBoard {
     return this._chessBoard;
   }
@@ -234,9 +243,7 @@ export class ChessBoardManager {
     let removedPiecesIds: number[] = [];
 
     if (!droppable) {
-      const { x, y, z } = this.selectedInitialPosition;
-      this.selected.changeWorldPosition(x, y, z);
-      this.selectedInitialPosition = null;
+      this.resetSelectedPiecePos();
     } else {
       removedPiecesIds = this.dropPiece(intersectedField);
     }
