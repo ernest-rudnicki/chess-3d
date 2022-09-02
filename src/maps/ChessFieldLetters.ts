@@ -1,10 +1,10 @@
 export const ChessFieldLetters: { [key: number]: string } = {
-  0: "a",
-  1: "b",
-  2: "c",
-  3: "d",
-  4: "e",
-  5: "f",
-  6: "g",
-  7: "h",
+  7: "a",
+  6: "b",
+  5: "c",
+  4: "d",
+  3: "e",
+  2: "f",
+  1: "g",
+  0: "h",
 };

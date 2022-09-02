@@ -66,7 +66,7 @@ export class PiecesManager {
     const pawns: Pawn[] = [];
     const row = color === "w" ? 1 : 6;
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 7; i >= 0; i--) {
       const name = this.concatPieceName(PAWN_NAME, color, i);
       const pawn = new Pawn(name, {
         initialChessPosition: { row, column: i },
@@ -154,7 +154,7 @@ export class PiecesManager {
   }
 
   private initQueen(color: PieceColor): Queen[] {
-    const column = 3;
+    const column = 4;
     const name = this.concatPieceName(QUEEN_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 
@@ -169,7 +169,7 @@ export class PiecesManager {
   }
 
   private initKing(color: PieceColor): King[] {
-    const column = 4;
+    const column = 3;
     const name = this.concatPieceName(KING_NAME, color, column);
     const row = this.getMajorPieceInitialRow(color);
 

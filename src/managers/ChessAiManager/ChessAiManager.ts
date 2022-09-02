@@ -12,6 +12,7 @@ export class ChessAiManager {
   private opponentSquareTables: PieceSquareTables;
   private chessEngine: ChessInstance;
   private prevSum = 0;
+
   constructor(fen: string) {
     this.chessEngine = new Chess(fen);
   }

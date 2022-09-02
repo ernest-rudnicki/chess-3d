@@ -113,13 +113,13 @@ export class ChessBoardManager {
 
   private handleCastling(color: PieceColor, castlingType: "k" | "q"): void {
     const rookRow = color === "w" ? 0 : 7;
-    const rookColumn = castlingType === "q" ? 0 : 7;
+    const rookColumn = castlingType === "q" ? 7 : 0;
     const castlingRook = this.piecesManager.getPiece(color, "r", {
       row: rookRow,
       column: rookColumn,
     });
 
-    const rookCastlingColumn = castlingType === "q" ? 3 : 5;
+    const rookCastlingColumn = castlingType === "q" ? 4 : 2;
     const castlingField = this.chessBoard.getField(rookRow, rookCastlingColumn);
 
     this.movePieceToField(castlingField, castlingRook);
