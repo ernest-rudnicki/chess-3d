@@ -59,7 +59,7 @@ export abstract class Piece extends BaseObject {
       shape: new Box(this.size),
     });
 
-    this.body.sleepSpeedLimit = 1;
+    this.body.sleepSpeedLimit = 5.0;
   }
 
   get chessPosition(): PieceChessPosition {
@@ -101,7 +101,6 @@ export abstract class Piece extends BaseObject {
 
     this.position.copy(initialPosition);
     this.scale.set(15, 15, 15);
-
     return this.body;
   }
 
