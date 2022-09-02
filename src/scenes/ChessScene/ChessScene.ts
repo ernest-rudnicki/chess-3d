@@ -1,5 +1,5 @@
 import { PieceColor } from "chess.js";
-import { isPiece } from "managers/ChessBoardManager/chessboard-utils";
+import { isPiece } from "utils/chess";
 import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";

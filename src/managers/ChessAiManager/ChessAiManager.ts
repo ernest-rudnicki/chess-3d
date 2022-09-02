@@ -2,7 +2,7 @@ import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PIECE_SQUARE_TABLES, PIECE_WEIGHTS } from "constants/chess-weights";
 import { PieceSquareTables } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
-import { getMatrixPosition } from "managers/ChessBoardManager/chessboard-utils";
+import { getMatrixPosition } from "utils/chess";
 import { PieceSet } from "managers/PiecesManager/types";
 
 // based on https://dev.to/zeyu2001/build-a-simple-chess-ai-in-javascript-18eg

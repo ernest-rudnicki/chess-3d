@@ -4,7 +4,7 @@ import { Piece } from "objects/Pieces/Piece/Piece";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { getChessNotation, getMatrixPosition } from "./chessboard-utils";
+import { getChessNotation, getMatrixPosition } from "../../utils/chess";
 import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PieceSet } from "managers/PiecesManager/types";
