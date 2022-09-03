@@ -3,9 +3,16 @@ import { Object3D } from "three";
 import { ChessFieldLetters } from "maps/ChessFieldLetters";
 import { ChessFieldColumns } from "maps/ChessFieldColumns";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
+import { PromotionResult } from "managers/ChessBoardManager/types";
 
 export function isPiece(object: Object3D): object is Piece {
   return !!(object as Piece).chessPosition;
+}
+
+export function isPromotionResult(
+  result: number | PromotionResult
+): result is PromotionResult {
+  return !!(result as PromotionResult).promotedPiece;
 }
 
 export function getChessNotation(chessPosition: PieceChessPosition): string {

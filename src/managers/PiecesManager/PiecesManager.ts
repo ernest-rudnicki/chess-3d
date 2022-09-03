@@ -11,7 +11,7 @@ import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { PiecesContainer, PieceSet } from "./types";
+import { PiecesContainer, PieceSet, PromotablePieces } from "./types";
 
 export const CHESS_BOARD_NAME = "ChessBoard";
 export const PAWN_NAME = "Pawn";
@@ -33,9 +33,11 @@ export class PiecesManager {
   private concatPieceName(
     name: string,
     color: PieceColor,
-    column: number
+    column: number,
+    promoted?: boolean
   ): string {
-    return `${name}${column}${color === "w" ? "White" : "Black"}`;
+    const promotedMsg = promoted ? "Promoted" : "";
+    return `${name}${column}${color === "w" ? "White" : "Black"}` + promotedMsg;
   }
 
   private getMajorPieceInitialRow(color: PieceColor): number {
@@ -79,38 +81,55 @@ export class PiecesManager {
     return pawns;
   }
 
-  private createRook(color: PieceColor, column: number): Rook {
-    const name = this.concatPieceName(ROOK_NAME, color, column);
-    const row = this.getMajorPieceInitialRow(color);
+  private createRook(
+    color: PieceColor,
+    chessPosition: PieceChessPosition,
+    promoted?: boolean
+  ): Rook {
+    const name = this.concatPieceName(
+      ROOK_NAME,
+      color,
+      chessPosition.column,
+      promoted
+    );
 
     const rook = new Rook(name, {
-      initialChessPosition: { row, column },
+      initialChessPosition: chessPosition,
       color,
     });
 
-    this.setupPiecePosition(rook, { row, column });
+    this.setupPiecePosition(rook, chessPosition);
     return rook;
   }
 
   private initRooks(color: PieceColor): Rook[] {
     const rooks: Rook[] = [];
+    const row = this.getMajorPieceInitialRow(color);
 
-    rooks.push(this.createRook(color, 0));
-    rooks.push(this.createRook(color, 7));
+    rooks.push(this.createRook(color, { row, column: 0 }));
+    rooks.push(this.createRook(color, { row, column: 7 }));
 
     return rooks;
   }
 
-  private createKnight(color: PieceColor, column: number): Knight {
-    const name = this.concatPieceName(KNIGHT_NAME, color, column);
-    const row = this.getMajorPieceInitialRow(color);
+  private createKnight(
+    color: PieceColor,
+    chessPosition: PieceChessPosition,
+    promoted?: boolean
+  ): Knight {
+    const name = this.concatPieceName(
+      KNIGHT_NAME,
+      color,
+      chessPosition.column,
+      promoted
+    );
 
     const knight = new Knight(name, {
-      initialChessPosition: { row, column },
+      initialChessPosition: chessPosition,
       color,
     });
 
-    this.setupPiecePosition(knight, { row, column });
+    this.setupPiecePosition(knight, chessPosition);
 
     if (color === "b") {
       knight.body.quaternion.set(0, Math.PI, 0, 0);
@@ -120,24 +139,33 @@ export class PiecesManager {
   }
 
   private initKnights(color: PieceColor): Knight[] {
+    const row = this.getMajorPieceInitialRow(color);
     const knights = [];
 
-    knights.push(this.createKnight(color, 1));
-    knights.push(this.createKnight(color, 6));
+    knights.push(this.createKnight(color, { row, column: 1 }));
+    knights.push(this.createKnight(color, { row, column: 6 }));
 
     return knights;
   }
 
-  private createBishop(color: PieceColor, column: number): Bishop {
-    const name = this.concatPieceName(BISHOP_NAME, color, column);
-    const row = this.getMajorPieceInitialRow(color);
+  private createBishop(
+    color: PieceColor,
+    chessPosition: PieceChessPosition,
+    promoted?: boolean
+  ): Bishop {
+    const name = this.concatPieceName(
+      BISHOP_NAME,
+      color,
+      chessPosition.column,
+      promoted
+    );
 
     const bishop = new Bishop(name, {
-      initialChessPosition: { row, column },
+      initialChessPosition: chessPosition,
       color,
     });
 
-    this.setupPiecePosition(bishop, { row, column });
+    this.setupPiecePosition(bishop, chessPosition);
 
     bishop.body.quaternion.y = Math.PI / 3;
 
@@ -145,26 +173,42 @@ export class PiecesManager {
   }
 
   private initBishops(color: PieceColor): Bishop[] {
+    const row = this.getMajorPieceInitialRow(color);
     const bishops = [];
 
-    bishops.push(this.createBishop(color, 2));
-    bishops.push(this.createBishop(color, 5));
+    bishops.push(this.createBishop(color, { row, column: 2 }));
+    bishops.push(this.createBishop(color, { row, column: 5 }));
 
     return bishops;
   }
 
-  private initQueen(color: PieceColor): Queen[] {
-    const column = 4;
-    const name = this.concatPieceName(QUEEN_NAME, color, column);
-    const row = this.getMajorPieceInitialRow(color);
+  private createQueen(
+    color: PieceColor,
+    position: PieceChessPosition,
+    promoted?: boolean
+  ): Queen {
+    const name = this.concatPieceName(
+      QUEEN_NAME,
+      color,
+      position.column,
+      promoted
+    );
 
     const queen = new Queen(name, {
-      initialChessPosition: { row, column },
+      initialChessPosition: position,
       color,
     });
 
-    this.setupPiecePosition(queen, { row, column });
+    this.setupPiecePosition(queen, position);
 
+    return queen;
+  }
+
+  private initQueen(color: PieceColor): Queen[] {
+    const column = 4;
+    const row = this.getMajorPieceInitialRow(color);
+
+    const queen = this.createQueen(color, { row, column });
     return [queen];
   }
 
@@ -217,6 +261,32 @@ export class PiecesManager {
     pieceSet.splice(capturedPieceIndex, 1);
 
     return capturedPiece.id;
+  }
+
+  addPromotedPiece(
+    color: PieceColor,
+    type: PromotablePieces,
+    chessPosition: PieceChessPosition
+  ): Piece {
+    let promotedPiece: Piece;
+    switch (type) {
+      case "q":
+        promotedPiece = this.createQueen(color, chessPosition, true);
+        break;
+      case "n":
+        promotedPiece = this.createKnight(color, chessPosition, true);
+        break;
+      case "b":
+        promotedPiece = this.createBishop(color, chessPosition, true);
+        break;
+      case "r":
+        promotedPiece = this.createRook(color, chessPosition, true);
+        break;
+    }
+
+    this.pieces[color][type].push(promotedPiece);
+
+    return promotedPiece;
   }
 
   initPieces(): void {

@@ -6,6 +6,8 @@ import { Pawn } from "objects/Pieces/Pawn/Pawn";
 import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 
+export type PromotablePieces = "r" | "n" | "q" | "b";
+
 // for simplicity queen and knight are also in arrays to not provide new methods for updating in scene
 export interface PieceSet {
   p: Pawn[];

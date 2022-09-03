@@ -5,7 +5,7 @@ import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
 import { Raycaster, Vector2, Vector3 } from "three";
-import { onEndGame } from "managers/ChessBoardManager/types";
+import { ActionResult, onEndGame } from "managers/ChessBoardManager/types";
 
 export class ChessScene extends BasicScene {
   private chessBoardManager: ChessBoardManager;
@@ -43,8 +43,8 @@ export class ChessScene extends BasicScene {
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
-    const removedPiecesIds = this.chessBoardManager.deselect(item.object);
-    this.removePiecesFromScene(removedPiecesIds);
+    const actionResult = this.chessBoardManager.deselect(item.object);
+    this.onActionPerformed(actionResult);
   };
 
   private setupRaycaster(): void {
@@ -124,12 +124,24 @@ export class ChessScene extends BasicScene {
     this.camera.lookAt(0, 0, 0);
   }
 
-  removePiecesFromScene = (piecesIds: number[]) => {
+  private removePiecesFromScene(piecesIds: number[]): void {
     piecesIds.forEach((id) => {
       const pieceToRemove = this.getObjectById(id);
       this.remove(pieceToRemove);
     });
-  };
+  }
+
+  private onActionPerformed(actionResult: ActionResult): void {
+    const { removedPiecesIds, promotedPiece } = actionResult;
+
+    this.removePiecesFromScene(removedPiecesIds);
+
+    if (!promotedPiece) {
+      return;
+    }
+
+    this.add(promotedPiece);
+  }
 
   init(): void {
     this.camera.position.set(0, 11, 8);
@@ -145,7 +157,9 @@ export class ChessScene extends BasicScene {
   start(onEndGame: onEndGame): void {
     this.orbitals.autoRotate = false;
     const playerStartingSide = this.chessBoardManager.start(
-      this.removePiecesFromScene,
+      (actionResult: ActionResult) => {
+        this.onActionPerformed(actionResult);
+      },
       onEndGame
     );
     this.setCameraPosition(playerStartingSide);

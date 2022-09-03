@@ -4,13 +4,24 @@ import { Piece } from "objects/Pieces/Piece/Piece";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { getChessNotation, getMatrixPosition } from "../../utils/chess";
+import {
+  getChessNotation,
+  getMatrixPosition,
+  isPromotionResult,
+} from "../../utils/chess";
 import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
-import { PieceSet } from "managers/PiecesManager/types";
+import { PieceSet, PromotablePieces } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
 import Worker from "web-worker";
-import { AiMoveCallback, MoveResult, onEndGame, WebWorkerEvent } from "./types";
+import {
+  ActionResult,
+  AiMoveCallback,
+  MoveResult,
+  onEndGame,
+  PromotionResult,
+  WebWorkerEvent,
+} from "./types";
 import { UserInterfaceManager } from "managers/UserInterfaceManager/UserInterfaceManager";
 
 export class ChessBoardManager {
@@ -138,24 +149,55 @@ export class ChessBoardManager {
     });
   }
 
-  private handleFlags(move: Move, droppedField: Object3D): number[] {
-    const { flags, color } = move;
-    const removedPiecesIds: number[] = [];
+  private handlePromotion(
+    color: PieceColor,
+    droppedField: Object3D,
+    piece: Piece
+  ): PromotionResult {
+    const { chessPosition: piecePosition } = piece;
+    const { chessPosition: droppedFieldPosition } = droppedField.userData;
+    let promotedPieceKey: PromotablePieces;
 
+    if (this.startingPlayerSide === color) {
+      promotedPieceKey = "q";
+    } else {
+      promotedPieceKey = "q";
+    }
+
+    const removedPieceId = this.piecesManager.removePiece(
+      color,
+      "p",
+      piecePosition
+    );
+
+    const promotedPiece = this.piecesManager.addPromotedPiece(
+      color,
+      promotedPieceKey,
+      droppedFieldPosition
+    );
+
+    return { removedPieceId, promotedPiece };
+  }
+
+  private handleFlags(
+    move: Move,
+    droppedField: Object3D,
+    piece: Piece
+  ): number | PromotionResult {
+    const { flags, color } = move;
     switch (flags) {
       case "q":
       case "k":
         this.handleCastling(color, flags);
         break;
       case "e":
-        removedPiecesIds.push(this.handleEnPassante(color, droppedField));
-        break;
+        return this.handleEnPassante(color, droppedField);
+      case "p":
+        return this.handlePromotion(color, droppedField, piece);
     }
-
-    return removedPiecesIds;
   }
 
-  private performAiMove(move: Move): number[] {
+  private performAiMove(move: Move): ActionResult {
     const { from, to, color, piece } = move;
     const fromPos = getMatrixPosition(from);
     const toPos = getMatrixPosition(to);
@@ -165,18 +207,19 @@ export class ChessBoardManager {
 
     movedPiece.removeMass();
 
-    const { removedPiecesIds } = this.handlePieceMove(toField, movedPiece);
+    const actionResult = this.handlePieceMove(toField, movedPiece);
 
     movedPiece.resetMass();
     this.uiManager.disableTurnInfo();
 
-    return removedPiecesIds;
+    return actionResult;
   }
 
   private handlePieceMove(field: Object3D, piece: Piece): MoveResult {
     const { chessPosition: toPosition } = field.userData;
     const { chessPosition: fromPosition } = piece;
     const removedPiecesIds: number[] = [];
+    let promoted: Piece;
 
     const from = getChessNotation(fromPosition);
     const to = getChessNotation(toPosition);
@@ -193,11 +236,22 @@ export class ChessBoardManager {
       removedPiecesIds.push(capturedPieceId);
     }
 
-    const specialRemoved = this.handleFlags(move, field);
+    const result = this.handleFlags(move, field, piece);
+
+    if (result && typeof result === "number") {
+      removedPiecesIds.push(result);
+    }
+
+    if (isPromotionResult(result)) {
+      const { removedPieceId, promotedPiece } = result;
+      promoted = promotedPiece;
+
+      removedPiecesIds.push(removedPieceId);
+    }
 
     this.movePieceToField(field, piece);
 
-    return { removedPiecesIds: [...removedPiecesIds, ...specialRemoved], move };
+    return { removedPiecesIds, move, promotedPiece: promoted };
   }
 
   private notifyAiToMove(playerMove: Move) {
@@ -209,19 +263,22 @@ export class ChessBoardManager {
     return this.handlePieceMove(droppedField, this.selected);
   }
 
-  private dropPiece(droppedField: Object3D): number[] {
-    const { removedPiecesIds, move: playerMove } =
-      this.performPlayerMove(droppedField);
+  private dropPiece(droppedField: Object3D): ActionResult {
+    const {
+      removedPiecesIds,
+      move: playerMove,
+      promotedPiece,
+    } = this.performPlayerMove(droppedField);
 
     if (this.chessEngine.game_over()) {
       this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
 
-      return removedPiecesIds;
+      return { removedPiecesIds, promotedPiece };
     }
 
     this.notifyAiToMove(playerMove);
 
-    return removedPiecesIds;
+    return { removedPiecesIds, promotedPiece };
   }
 
   private addWebWorkerListener(cb: AiMoveCallback): void {
@@ -229,8 +286,8 @@ export class ChessBoardManager {
       if (e.data.type !== "aiMovePerformed") {
         return;
       }
-      const idsToRemove = this.performAiMove(e.data.aiMove);
-      cb(idsToRemove);
+      const actionResult = this.performAiMove(e.data.aiMove);
+      cb(actionResult);
 
       this.uiManager.disableTurnInfo();
 
@@ -284,14 +341,14 @@ export class ChessBoardManager {
     this.selected = piece;
   }
 
-  deselect(intersectedField: Object3D): number[] {
+  deselect(intersectedField: Object3D): ActionResult {
     const { droppable } = intersectedField.userData;
-    let removedPiecesIds: number[] = [];
+    let actionResult: ActionResult;
 
     if (!droppable) {
       this.resetSelectedPiecePos();
     } else {
-      removedPiecesIds = this.dropPiece(intersectedField);
+      actionResult = this.dropPiece(intersectedField);
     }
 
     this._chessBoard.clearMarkedPlanes();
@@ -300,7 +357,7 @@ export class ChessBoardManager {
 
     this.selected = null;
 
-    return removedPiecesIds;
+    return actionResult;
   }
 
   getAllPieces(): Piece[] {
