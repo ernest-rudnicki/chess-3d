@@ -55,6 +55,8 @@ export abstract class BasicScene extends Scene {
     this.background = new Color(0xefefef);
     this.world = new World({ gravity: new Vec3(0, -9.82, 0) });
 
+    this.world.allowSleep = true;
+
     if (addGridHelper) {
       this.setupGridHelper();
     }

@@ -59,7 +59,7 @@ export abstract class Piece extends BaseObject {
       shape: new Box(this.size),
     });
 
-    this.body.sleepSpeedLimit = 5.0;
+    this.body.sleepSpeedLimit = 0.5;
   }
 
   get chessPosition(): PieceChessPosition {
@@ -77,6 +77,7 @@ export abstract class Piece extends BaseObject {
   ): void {
     const { x, y, z } = worldPosition;
     this._chessPosition = chessPosition;
+    this.body.applyForce(new Vec3(0, 1, 0));
 
     this.changeWorldPosition(x, y, z, useHeightOffset);
   }
