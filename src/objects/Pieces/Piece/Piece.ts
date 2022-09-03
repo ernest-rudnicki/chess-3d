@@ -40,6 +40,7 @@ export abstract class Piece extends BaseObject {
 
       color.convertSRGBToLinear();
       o.material = new MeshPhongMaterial({
+        shininess: 50,
         color,
       });
     });
