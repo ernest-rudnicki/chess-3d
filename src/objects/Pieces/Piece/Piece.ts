@@ -75,9 +75,10 @@ export abstract class Piece extends BaseObject {
     worldPosition: Vec3,
     useHeightOffset?: boolean
   ): void {
+    this.body.applyForce(new Vec3(0, 1, 0));
+
     const { x, y, z } = worldPosition;
     this._chessPosition = chessPosition;
-    this.body.applyForce(new Vec3(0, 1, 0));
 
     this.changeWorldPosition(x, y, z, useHeightOffset);
   }
