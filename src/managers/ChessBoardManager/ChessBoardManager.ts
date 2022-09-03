@@ -10,7 +10,7 @@ import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PieceSet } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
 import Worker from "web-worker";
-import { AiMoveCallback, MoveResult, WebWorkerEvent } from "./types";
+import { AiMoveCallback, MoveResult, onEndGame, WebWorkerEvent } from "./types";
 import { UserInterfaceManager } from "managers/UserInterfaceManager/UserInterfaceManager";
 
 export class ChessBoardManager {
@@ -23,6 +23,7 @@ export class ChessBoardManager {
 
   private selectedInitialPosition: Vec3;
   private selected: Piece | null;
+  private onEndGameCallback: onEndGame;
 
   constructor(private world: World, private loader: GLTFLoader) {
     this._chessBoard = new ChessBoard("ChessBoard");
@@ -205,13 +206,18 @@ export class ChessBoardManager {
   }
 
   private performPlayerMove(droppedField: Object3D): MoveResult {
-    const result = this.handlePieceMove(droppedField, this.selected);
-    return result;
+    return this.handlePieceMove(droppedField, this.selected);
   }
 
   private dropPiece(droppedField: Object3D): number[] {
     const { removedPiecesIds, move: playerMove } =
       this.performPlayerMove(droppedField);
+
+    if (this.chessEngine.game_over()) {
+      this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
+
+      return removedPiecesIds;
+    }
 
     this.notifyAiToMove(playerMove);
 
@@ -227,6 +233,10 @@ export class ChessBoardManager {
       cb(idsToRemove);
 
       this.uiManager.disableTurnInfo();
+
+      if (this.chessEngine.game_over()) {
+        this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
+      }
     });
   }
 
@@ -302,11 +312,12 @@ export class ChessBoardManager {
     this.piecesManager.initPieces();
   }
 
-  start(aiMoveCallback: AiMoveCallback): PieceColor {
+  start(aiMoveCallback: AiMoveCallback, onEndGame: onEndGame): PieceColor {
     this.drawSide();
     this.uiManager.init(this.startingPlayerSide);
     this.addWebWorkerListener(aiMoveCallback);
     this.initChessAi();
+    this.onEndGameCallback = onEndGame;
 
     return this.startingPlayerSide;
   }
@@ -323,5 +334,9 @@ export class ChessBoardManager {
     this._chessBoard.update();
     this.piecesManager.updatePieces("b");
     this.piecesManager.updatePieces("w");
+  }
+
+  cleanup(): void {
+    this.uiManager.cleanup();
   }
 }

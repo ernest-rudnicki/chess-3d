@@ -51,15 +51,20 @@ export class UserInterfaceManager {
     if (!el) {
       return;
     }
-    console.log(el);
     el.style.display = "none";
   }
 
-  init(playerColor: PieceColor) {
+  init(playerColor: PieceColor): void {
     const isPlayerWhiteColor = playerColor === "w";
 
     this.createScoreElement(this.whiteScoreElementId, isPlayerWhiteColor);
     this.createScoreElement(this.blackScoreElementId, !isPlayerWhiteColor);
     this.createOpponentTurnInfoElement(this.opponentTurnInfoElementId);
+  }
+
+  cleanup(): void {
+    document.getElementById(this.blackScoreElementId)?.remove();
+    document.getElementById(this.whiteScoreElementId)?.remove();
+    document.getElementById(this.opponentTurnInfoElementId)?.remove();
   }
 }

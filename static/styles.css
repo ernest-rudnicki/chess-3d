@@ -1,3 +1,14 @@
+:root {
+  --bg-color: rgb(227, 204, 175);
+  --font-size: 40px;
+  --popup-color: white;
+  --font-size-small: 20px;
+  --border-color: rgb(166, 165, 165);
+  --font-color: black;
+  --font-color-disappear: #00000000;
+  --box-shadow: 0px 0px 5px 0px rgba(66, 68, 90, 1);
+}
+
 html, body, canvas {
   margin: 0;
   padding: 0;
@@ -10,7 +21,7 @@ canvas {
   display: block; 
 }
 
-.game-buttons {
+.center-mid {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -18,20 +29,39 @@ canvas {
 }
 
 .btn {
-  background-color: rgb(227, 204, 175);
-  font-size: 40px;
+  background-color: var(--bg-color);
+  font-size: var(--font-size);
+}
+
+.end-popup {
+  padding: 10px;
+  background-color: var(--popup-color);
+  font-size: var(--font-size-small);
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.end-popup-btn {
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.btn-small {
+  background-color: var(--bg-color);
+  font-size: var(--font-size-small);
 }
 
 .score {
- font-size: 40px;
+ font-size: var(--font-size);
  position: absolute;
  width: 350px;
  height: 45px;
  padding: 0 10px;
- background-color: rgb(227, 204, 175);
+ background-color: var(--bg-color);
  border-radius: 3px;
- border: 1px solid rgb(166, 165, 165);
- box-shadow: 0px 0px 5px 0px rgba(66, 68, 90, 1);
+ border: 1px solid var(--border-color);
+ box-shadow: var(--box-shadow);
  display: flex;
 }
 
@@ -59,26 +89,26 @@ canvas {
 
 @keyframes dots {
   0%, 20% {
-    color: rgba(0,0,0,0);
+    color: var(--font-color);
     text-shadow:
-      .25em 0 0 rgba(0,0,0,0),
-      .5em 0 0 rgba(0,0,0,0);
+      .25em 0 0 var(--font-color-disappear),
+      .5em 0 0 var(--font-color-disappear);
   }
 
   40% {
-    color: black;
+    color: var(--font-color);
     text-shadow:
-      .25em 0 0 rgba(0,0,0,0),
-      .5em 0 0 rgba(0,0,0,0);
+      .25em 0 0 var(--font-color-disappear),
+      .5em 0 0 var(--font-color-disappear);
   }
   60% {
     text-shadow:
-      .25em 0 0 black,
-      .5em 0 0 rgba(0,0,0,0);
+      .25em 0 0 var(--font-color),
+      .5em 0 0 var(--font-color-disappear);
   }
 
   80%, 100% {
     text-shadow:
-      .25em 0 0 black,
-      .5em 0 0 black;}
+      .25em 0 0 var(--font-color),
+      .5em 0 0 var(--font-color);}
   }

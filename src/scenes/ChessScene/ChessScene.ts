@@ -5,6 +5,7 @@ import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
 import { Raycaster, Vector2, Vector3 } from "three";
+import { onEndGame } from "managers/ChessBoardManager/types";
 
 export class ChessScene extends BasicScene {
   private chessBoardManager: ChessBoardManager;
@@ -141,10 +142,11 @@ export class ChessScene extends BasicScene {
     this.setupScene();
   }
 
-  start(): void {
+  start(onEndGame: onEndGame): void {
     this.orbitals.autoRotate = false;
     const playerStartingSide = this.chessBoardManager.start(
-      this.removePiecesFromScene
+      this.removePiecesFromScene,
+      onEndGame
     );
     this.setCameraPosition(playerStartingSide);
   }
@@ -158,5 +160,6 @@ export class ChessScene extends BasicScene {
     window.removeEventListener("mousedown", this.onMouseDown);
     window.removeEventListener("mouseup", this.onMouseUp);
     window.removeEventListener("pointermove", this.onPointerMove);
+    this.chessBoardManager.cleanup();
   }
 }

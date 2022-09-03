@@ -1,6 +1,10 @@
-import { Move, PieceColor } from "chess.js";
+import { ChessInstance, Move, PieceColor } from "chess.js";
 
 export type AiMoveCallback = (removedPiecesIds: number[]) => void;
+export type onEndGame = (
+  chessInstance: ChessInstance,
+  playerColor: PieceColor
+) => void;
 
 export type WebWorkerEvent =
   | { data: { fen: string; color: PieceColor; type: "init" } }

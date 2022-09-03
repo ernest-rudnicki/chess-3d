@@ -1,3 +1,4 @@
+import { ChessInstance, PieceColor } from "chess.js";
 import { CustomLoadingManager } from "managers/LoadingManager/LoadingManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { ChessScene } from "scenes/ChessScene/ChessScene";
@@ -25,7 +26,11 @@ export class Game {
 
     this.addListenerOnResize(this.renderer);
 
-    this.activeScene = new ChessScene({
+    this.activeScene = this.createChessScene();
+  }
+
+  private createChessScene(): ChessScene {
+    return new ChessScene({
       renderer: this.renderer,
       loader: this.loader,
       options: {
@@ -64,18 +69,87 @@ export class Game {
     window.addEventListener("resize", this.resizeListener, false);
   }
 
-  private addControlButton(): void {
+  private getEndGameMessage(
+    chessInstance: ChessInstance,
+    playerColor: PieceColor
+  ): string {
+    const isPlayerColor = chessInstance.turn() === playerColor;
+
+    if (chessInstance.in_checkmate()) {
+      return isPlayerColor
+        ? "You lost the game by checkmate"
+        : "You won the game by checkmate";
+    }
+
+    if (chessInstance.in_stalemate()) {
+      return "The game ended with draw by stalemate";
+    }
+
+    if (chessInstance.in_draw()) {
+      return "The game ended with draw";
+    }
+  }
+
+  private restartGame(): void {
+    this.activeScene.cleanup();
+    this.activeScene = this.createChessScene();
+    this.activeScene.init();
+    this.activeScene.start(
+      (chessInstance: ChessInstance, playerColor: PieceColor) => {
+        this.onEndGame(chessInstance, playerColor);
+      }
+    );
+  }
+
+  private createEndPopup(endMsg: string): void {
+    const div = document.createElement("DIV");
+    const btnDiv = document.createElement("DIV");
+    const restartBtn = document.createElement("BUTTON");
+    const span = document.createElement("SPAN");
+
+    restartBtn.onclick = () => {
+      this.restartGame();
+      div.remove();
+    };
+
+    restartBtn.innerHTML = "Restart Game";
+    span.innerHTML = endMsg;
+
+    btnDiv.classList.add("end-popup-btn");
+    restartBtn.classList.add("btn-small");
+
+    div.classList.add("center-mid");
+    div.classList.add("end-popup");
+
+    div.appendChild(span);
+    btnDiv.appendChild(restartBtn);
+    div.appendChild(btnDiv);
+
+    document.body.appendChild(div);
+  }
+
+  private onEndGame(chessInstance: ChessInstance, playerColor: PieceColor) {
+    const endMsg = this.getEndGameMessage(chessInstance, playerColor);
+
+    this.createEndPopup(endMsg);
+  }
+
+  private addStartButton(): void {
     const div = document.createElement("DIV");
     const startBtn = document.createElement("BUTTON");
     startBtn.classList.add("btn");
     startBtn.innerHTML = "Start Game";
 
     startBtn.onclick = () => {
-      this.activeScene.start();
+      this.activeScene.start(
+        (chessInstance: ChessInstance, playerColor: PieceColor) => {
+          this.onEndGame(chessInstance, playerColor);
+        }
+      );
       div.remove();
     };
 
-    div.classList.add("game-buttons");
+    div.classList.add("center-mid");
     div.appendChild(startBtn);
 
     document.body.appendChild(div);
@@ -92,7 +166,7 @@ export class Game {
 
     this.activeScene.init();
 
-    this.addControlButton();
+    this.addStartButton();
   }
 
   update(): void {
