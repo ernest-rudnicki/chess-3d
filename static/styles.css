@@ -18,9 +18,8 @@ canvas {
 }
 
 .btn {
-  background-color: none;
+  background-color: rgb(227, 204, 175);
   font-size: 40px;
-  
 }
 
 .score {
