@@ -131,14 +131,22 @@ export class ChessScene extends BasicScene {
   };
 
   init(): void {
-    const playerStartingSide = this.chessBoardManager.init(
+    this.camera.position.set(0, 11, 8);
+    this.camera.lookAt(0, 0, 0);
+
+    this.orbitals.autoRotate = true;
+    this.setupLights();
+    this.setupRaycaster();
+    this.chessBoardManager.init();
+    this.setupScene();
+  }
+
+  start(): void {
+    this.orbitals.autoRotate = false;
+    const playerStartingSide = this.chessBoardManager.start(
       this.removePiecesFromScene
     );
     this.setCameraPosition(playerStartingSide);
-    this.setupLights();
-    this.setupRaycaster();
-
-    this.setupScene();
   }
 
   update(): void {

@@ -297,9 +297,12 @@ export class ChessBoardManager {
     return this.piecesManager.getAllPieces();
   }
 
-  init(aiMoveCallback: AiMoveCallback): PieceColor {
+  init(): void {
     this.initChessBoard();
     this.piecesManager.initPieces();
+  }
+
+  start(aiMoveCallback: AiMoveCallback): PieceColor {
     this.drawSide();
     this.uiManager.init(this.startingPlayerSide);
     this.addWebWorkerListener(aiMoveCallback);

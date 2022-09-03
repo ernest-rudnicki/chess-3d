@@ -1,3 +1,4 @@
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { BasicSceneProps } from "./types";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { World, Vec3 } from "cannon-es";
@@ -22,6 +23,7 @@ export abstract class BasicScene extends Scene {
   loader: GLTFLoader;
 
   camera: PerspectiveCamera;
+  orbitals: OrbitControls;
   world: World;
   cannonDebugger?: ReturnType<typeof createCannonDebugger>;
 
@@ -34,6 +36,7 @@ export abstract class BasicScene extends Scene {
   resizeListener: () => void;
 
   abstract init(): void;
+  abstract start(): void;
 
   constructor(props: BasicSceneProps) {
     super();
@@ -47,7 +50,9 @@ export abstract class BasicScene extends Scene {
     this.addWindowResizing(this.camera);
 
     this.loader = loader;
-
+    this.orbitals = new OrbitControls(this.camera, this._renderer.domElement);
+    this.orbitals.mouseButtons = {};
+    this.orbitals.enableZoom = false;
     this.background = new Color(0xefefef);
     this.world = new World({ gravity: new Vec3(0, -9.82, 0) });
 
@@ -122,6 +127,7 @@ export abstract class BasicScene extends Scene {
   }
 
   update(): void {
+    this.orbitals.update();
     this.camera.updateProjectionMatrix();
     this._renderer.render(this, this.camera);
     this.world.fixedStep();

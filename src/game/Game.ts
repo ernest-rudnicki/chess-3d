@@ -64,6 +64,23 @@ export class Game {
     window.addEventListener("resize", this.resizeListener, false);
   }
 
+  private addControlButton(): void {
+    const div = document.createElement("DIV");
+    const startBtn = document.createElement("BUTTON");
+    startBtn.classList.add("btn");
+    startBtn.innerHTML = "Start Game";
+
+    startBtn.onclick = () => {
+      this.activeScene.start();
+      div.remove();
+    };
+
+    div.classList.add("game-buttons");
+    div.appendChild(startBtn);
+
+    document.body.appendChild(div);
+  }
+
   init() {
     if (!this.activeScene) {
       throw Error("There is no active scene at the moment");
@@ -74,6 +91,8 @@ export class Game {
     }
 
     this.activeScene.init();
+
+    this.addControlButton();
   }
 
   update(): void {
