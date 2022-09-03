@@ -167,6 +167,7 @@ export class ChessBoardManager {
     const { removedPiecesIds } = this.handlePieceMove(toField, movedPiece);
 
     movedPiece.resetMass();
+    this.uiManager.disableTurnInfo();
 
     return removedPiecesIds;
   }
@@ -199,11 +200,13 @@ export class ChessBoardManager {
   }
 
   private notifyAiToMove(playerMove: Move) {
+    this.uiManager.enableTurnInfo();
     this.worker.postMessage({ type: "aiMove", playerMove });
   }
 
   private performPlayerMove(droppedField: Object3D): MoveResult {
-    return this.handlePieceMove(droppedField, this.selected);
+    const result = this.handlePieceMove(droppedField, this.selected);
+    return result;
   }
 
   private dropPiece(droppedField: Object3D): number[] {
@@ -222,10 +225,16 @@ export class ChessBoardManager {
       }
       const idsToRemove = this.performAiMove(e.data.aiMove);
       cb(idsToRemove);
+
+      this.uiManager.disableTurnInfo();
     });
   }
 
   private initChessAi() {
+    if (this.startingPlayerSide !== "w") {
+      this.uiManager.enableTurnInfo();
+    }
+
     this.worker.postMessage({
       type: "init",
       fen: this.chessEngine.fen(),
