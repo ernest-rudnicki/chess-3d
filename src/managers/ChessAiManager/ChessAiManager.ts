@@ -192,6 +192,9 @@ export class ChessAiManager {
 
     this.chessEngine.remove(chessNotationPos);
     this.chessEngine.put({ type: pieceType, color }, chessNotationPos);
+
+    // related to bug https://github.com/jhlywa/chess.js/issues/250
+    this.chessEngine.load(this.chessEngine.fen());
   }
 
   calcAiMove(): Move {

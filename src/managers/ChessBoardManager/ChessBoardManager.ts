@@ -162,6 +162,7 @@ export class ChessBoardManager {
     const { chessPosition: piecePosition } = piece;
     const { chessPosition: droppedFieldPosition } = droppedField.userData;
     const chessNotationPos = getChessNotation(droppedFieldPosition);
+
     const removedPieceId = this.piecesManager.removePiece(
       color,
       "p",
@@ -176,6 +177,10 @@ export class ChessBoardManager {
 
     this.chessEngine.remove(chessNotationPos);
     this.chessEngine.put({ type: promotedPieceKey, color }, chessNotationPos);
+
+    // related to bug https://github.com/jhlywa/chess.js/issues/250
+    this.chessEngine.load(this.chessEngine.fen());
+
     this.worker.postMessage({
       type: "promote",
       color,
@@ -370,9 +375,9 @@ export class ChessBoardManager {
   }
 
   select(piece: Piece): void {
-    // if (!this.isPlayerPiece(piece)) {
-    //   return;
-    // }
+    if (!this.isPlayerPiece(piece)) {
+      return;
+    }
 
     piece.removeMass();
     this.markPossibleFields(piece.chessPosition);

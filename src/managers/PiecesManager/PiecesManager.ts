@@ -59,9 +59,9 @@ export class PiecesManager {
     chessPosition: PieceChessPosition
   ): void {
     const initialPosition = this.getFieldPosition(chessPosition);
-    const rookBody = piece.init(initialPosition, this.loader);
+    const pieceBody = piece.init(initialPosition, this.loader);
 
-    this.world.addBody(rookBody);
+    this.world.addBody(pieceBody);
   }
 
   private initPawns(color: PieceColor): Pawn[] {
@@ -246,21 +246,20 @@ export class PiecesManager {
     const pieceSet: Piece[] = this.pieces[color][type];
     const { row: rowToRemove, column: columnToRemove } = chessPosition;
 
-    const capturedPieceIndex = pieceSet.findIndex((piece) => {
+    const removedPieceIndex = pieceSet.findIndex((piece) => {
       const { row, column } = piece.chessPosition;
 
       return row === rowToRemove && column === columnToRemove;
     });
 
-    if (capturedPieceIndex === -1) {
+    if (removedPieceIndex === -1) {
       return;
     }
-    const capturedPiece = pieceSet[capturedPieceIndex];
+    const removedPiece = pieceSet[removedPieceIndex];
+    this.world.removeBody(removedPiece.body);
+    pieceSet.splice(removedPieceIndex, 1);
 
-    this.world.removeBody(capturedPiece.body);
-    pieceSet.splice(capturedPieceIndex, 1);
-
-    return capturedPiece.id;
+    return removedPiece.id;
   }
 
   addPromotedPiece(
