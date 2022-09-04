@@ -28,7 +28,7 @@ addEventListener("message", (e: WebWorkerEvent) => {
       });
       break;
     case "promote":
-      chessAiManager.updateBoardWithPromotion(
+      chessAiManager.updateChessEngineWithPromotion(
         e.data.color,
         e.data.pieceType,
         e.data.chessNotationPos,

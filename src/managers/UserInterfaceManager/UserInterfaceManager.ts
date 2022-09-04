@@ -6,7 +6,7 @@ import { OnPromoteBtnClick } from "./types";
 export class UserInterfaceManager {
   private whiteScoreElementId = "white-score";
   private blackScoreElementId = "black-score";
-  private opponentTurnInfoElementId = "opponent-turn-info";
+  private opponentTurnNotificationElementId = "opponent-turn-notification";
   private promotionElementId = "promotion-element-id";
   private promotable: PromotablePieces[] = ["q", "r", "b", "n"];
 
@@ -19,7 +19,7 @@ export class UserInterfaceManager {
     document.body.appendChild(div);
   }
 
-  private createOpponentTurnInfoElement(id: string): void {
+  private createOpponentTurnNotificationElement(id: string): void {
     const div = document.createElement("DIV");
     div.setAttribute("id", id);
     div.style.display = "none";
@@ -82,12 +82,12 @@ export class UserInterfaceManager {
     scoreElement.innerHTML += WHITE_ICONS[pieceType];
   }
 
-  enablePromotion(playerColor: PieceColor, cb: OnPromoteBtnClick): void {
+  enablePromotionButtons(playerColor: PieceColor, cb: OnPromoteBtnClick): void {
     this.createPromotionElement(this.promotionElementId, playerColor, cb);
   }
 
-  enableTurnInfo(): void {
-    const el = document.getElementById(this.opponentTurnInfoElementId);
+  enableOpponentTurnNotification(): void {
+    const el = document.getElementById(this.opponentTurnNotificationElementId);
 
     if (!el) {
       return;
@@ -96,8 +96,8 @@ export class UserInterfaceManager {
     el.style.display = "block";
   }
 
-  disableTurnInfo(): void {
-    const el = document.getElementById(this.opponentTurnInfoElementId);
+  disableOpponentTurnNotification(): void {
+    const el = document.getElementById(this.opponentTurnNotificationElementId);
 
     if (!el) {
       return;
@@ -110,12 +110,14 @@ export class UserInterfaceManager {
 
     this.createScoreElement(this.whiteScoreElementId, isPlayerWhiteColor);
     this.createScoreElement(this.blackScoreElementId, !isPlayerWhiteColor);
-    this.createOpponentTurnInfoElement(this.opponentTurnInfoElementId);
+    this.createOpponentTurnNotificationElement(
+      this.opponentTurnNotificationElementId
+    );
   }
 
   cleanup(): void {
     document.getElementById(this.blackScoreElementId)?.remove();
     document.getElementById(this.whiteScoreElementId)?.remove();
-    document.getElementById(this.opponentTurnInfoElementId)?.remove();
+    document.getElementById(this.opponentTurnNotificationElementId)?.remove();
   }
 }

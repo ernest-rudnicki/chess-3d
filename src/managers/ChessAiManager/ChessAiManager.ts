@@ -181,7 +181,7 @@ export class ChessAiManager {
     this.prevSum = this.evaluateBoard(move, this.prevSum);
   }
 
-  updateBoardWithPromotion(
+  updateChessEngineWithPromotion(
     color: PieceColor,
     pieceType: PromotablePieces,
     chessNotationPos: Square,

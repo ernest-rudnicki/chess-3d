@@ -5,7 +5,7 @@ import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { convertThreeVector } from "utils/general";
-import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
+import { Chess, ChessInstance, Move, PieceColor, Square } from "chess.js";
 import { PieceSet, PromotablePieces } from "managers/PiecesManager/types";
 import { PiecesManager } from "managers/PiecesManager/PiecesManager";
 import Worker from "web-worker";
@@ -56,12 +56,13 @@ export class ChessBoardManager {
     this.startingPlayerSide = coinFlip === 0 ? "w" : "b";
   }
 
-  private markPossibleFields(chessPosition: PieceChessPosition): void {
+  private markPossibleMoveFields(chessPosition: PieceChessPosition): void {
     const chessNotation = getChessNotation(chessPosition);
     const possibleMoves = this.chessEngine.moves({
       square: chessNotation,
       verbose: true,
     });
+
     possibleMoves.forEach((move) => {
       const { row, column } = getMatrixPosition(move.to);
 
@@ -152,6 +153,33 @@ export class ChessBoardManager {
     });
   }
 
+  private updateAiWithPromotion(
+    color: PieceColor,
+    pieceType: PromotablePieces,
+    chessNotationPos: Square,
+    move: Move
+  ): void {
+    this.worker.postMessage({
+      type: "promote",
+      color,
+      pieceType,
+      chessNotationPos,
+      move,
+    });
+  }
+
+  updateChessEngineWithPromotion(
+    color: PieceColor,
+    type: PromotablePieces,
+    chessNotationPos: Square
+  ): void {
+    this.chessEngine.remove(chessNotationPos);
+    this.chessEngine.put({ type, color }, chessNotationPos);
+
+    // related to bug https://github.com/jhlywa/chess.js/issues/250
+    this.chessEngine.load(this.chessEngine.fen());
+  }
+
   private promotePiece(
     color: PieceColor,
     droppedField: Object3D,
@@ -175,19 +203,13 @@ export class ChessBoardManager {
       droppedFieldPosition
     );
 
-    this.chessEngine.remove(chessNotationPos);
-    this.chessEngine.put({ type: promotedPieceKey, color }, chessNotationPos);
-
-    // related to bug https://github.com/jhlywa/chess.js/issues/250
-    this.chessEngine.load(this.chessEngine.fen());
-
-    this.worker.postMessage({
-      type: "promote",
+    this.updateChessEngineWithPromotion(
       color,
-      pieceType: promotedPieceKey,
-      chessNotationPos,
-      move,
-    });
+      promotedPieceKey,
+      chessNotationPos
+    );
+
+    this.updateAiWithPromotion(color, promotedPieceKey, chessNotationPos, move);
 
     return { removedPieceId, promotedPiece };
   }
@@ -199,17 +221,21 @@ export class ChessBoardManager {
     move: Move
   ): PromotionResult | boolean {
     if (this.startingPlayerSide === color) {
-      this.uiManager.enablePromotion(color, (promotedTo: PromotablePieces) => {
-        const result = this.promotePiece(
-          color,
-          droppedField,
-          piece,
-          promotedTo,
-          move
-        );
-        this.onPromotionCallback(result);
-        this.notifyAiToMove(move);
-      });
+      this.uiManager.enablePromotionButtons(
+        color,
+        (promotedTo: PromotablePieces) => {
+          const result = this.promotePiece(
+            color,
+            droppedField,
+            piece,
+            promotedTo,
+            move
+          );
+
+          this.onPromotionCallback(result);
+          this.notifyAiToMove(move);
+        }
+      );
       return true;
     }
     // for simplicity ai will always promote to queen
@@ -249,9 +275,14 @@ export class ChessBoardManager {
     const actionResult = this.handlePieceMove(toField, movedPiece);
 
     movedPiece.resetMass();
-    this.uiManager.disableTurnInfo();
+
+    this.uiManager.disableOpponentTurnNotification();
 
     return actionResult;
+  }
+
+  private isObjectId(id?: unknown): id is number {
+    return id && typeof id === "number";
   }
 
   private handlePieceMove(field: Object3D, piece: Piece): MoveResult {
@@ -277,7 +308,7 @@ export class ChessBoardManager {
 
     const result = this.handleFlags(move, field, piece);
 
-    if (result && typeof result === "number") {
+    if (this.isObjectId(result)) {
       removedPiecesIds.push(result);
     } else if (isPromotionResult(result)) {
       const { removedPieceId, promotedPiece } = result;
@@ -297,7 +328,7 @@ export class ChessBoardManager {
   }
 
   private notifyAiToMove(playerMove: Move) {
-    this.uiManager.enableTurnInfo();
+    this.uiManager.enableOpponentTurnNotification();
     this.worker.postMessage({ type: "aiMove", playerMove });
   }
 
@@ -312,14 +343,13 @@ export class ChessBoardManager {
       promotedPiece,
       stopAi,
     } = this.performPlayerMove(droppedField);
+    const isGameOver = this.chessEngine.game_over();
 
-    if (this.chessEngine.game_over()) {
+    if (isGameOver) {
       this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
-
-      return { removedPiecesIds, promotedPiece };
     }
 
-    if (!stopAi) {
+    if (!stopAi && !isGameOver) {
       this.notifyAiToMove(playerMove);
     }
 
@@ -331,20 +361,25 @@ export class ChessBoardManager {
       if (e.data.type !== "aiMovePerformed") {
         return;
       }
+
+      const isGameOver = this.chessEngine.game_over();
       const actionResult = this.performAiMove(e.data.aiMove);
+
       cb(actionResult);
 
-      this.uiManager.disableTurnInfo();
+      this.uiManager.disableOpponentTurnNotification();
 
-      if (this.chessEngine.game_over()) {
-        this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
+      if (!isGameOver) {
+        return;
       }
+
+      this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
     });
   }
 
   private initChessAi() {
     if (this.startingPlayerSide !== "w") {
-      this.uiManager.enableTurnInfo();
+      this.uiManager.enableOpponentTurnNotification();
     }
 
     this.worker.postMessage({
@@ -354,8 +389,9 @@ export class ChessBoardManager {
     });
   }
 
-  private resetSelectedPiecePos(): void {
+  private resetSelectedPiecePosition(): void {
     const { x, y, z } = this.selectedInitialPosition;
+
     this.selected.changeWorldPosition(x, y, z);
     this.selectedInitialPosition = null;
   }
@@ -378,7 +414,7 @@ export class ChessBoardManager {
     }
 
     piece.removeMass();
-    this.markPossibleFields(piece.chessPosition);
+    this.markPossibleMoveFields(piece.chessPosition);
 
     this.selectedInitialPosition = piece.body.position.clone();
     this.world.removeBody(piece.body);
@@ -391,7 +427,7 @@ export class ChessBoardManager {
     let actionResult: ActionResult;
 
     if (!droppable) {
-      this.resetSelectedPiecePos();
+      this.resetSelectedPiecePosition();
     } else {
       actionResult = this.dropPiece(intersectedField);
     }
