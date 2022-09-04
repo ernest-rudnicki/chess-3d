@@ -1,9 +1,9 @@
-import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
+import { Chess, ChessInstance, Move, PieceColor, Square } from "chess.js";
 import { PIECE_SQUARE_TABLES, PIECE_WEIGHTS } from "constants/chess-weights";
 import { PieceSquareTables } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
 import { getMatrixPosition } from "utils/chess";
-import { PieceSet } from "managers/PiecesManager/types";
+import { PieceSet, PromotablePieces } from "managers/PiecesManager/types";
 
 // based on https://dev.to/zeyu2001/build-a-simple-chess-ai-in-javascript-18eg
 export class ChessAiManager {
@@ -75,7 +75,6 @@ export class ChessAiManager {
     }
 
     if (move.flags === "p") {
-      // TODO when promotion implemented change it to get from function params
       const promoted = "q";
 
       // ai piece was promoted
@@ -179,6 +178,20 @@ export class ChessAiManager {
   updateBoardWithPlayerMove(move: Move): void {
     this.chessEngine.move(move);
     this.prevSum = this.evaluateBoard(move, this.prevSum);
+  }
+
+  updateBoardWithPromotion(
+    color: PieceColor,
+    pieceType: PromotablePieces,
+    chessNotationPos: Square,
+    move?: Move
+  ): void {
+    if (move) {
+      this.chessEngine.move(move);
+    }
+
+    this.chessEngine.remove(chessNotationPos);
+    this.chessEngine.put({ type: pieceType, color }, chessNotationPos);
   }
 
   calcAiMove(): Move {

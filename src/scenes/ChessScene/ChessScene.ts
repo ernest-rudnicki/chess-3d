@@ -5,7 +5,11 @@ import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
 import { Raycaster, Vector2, Vector3 } from "three";
-import { ActionResult, onEndGame } from "managers/ChessBoardManager/types";
+import {
+  ActionResult,
+  OnEndGame,
+  PromotionResult,
+} from "managers/ChessBoardManager/types";
 
 export class ChessScene extends BasicScene {
   private chessBoardManager: ChessBoardManager;
@@ -44,6 +48,11 @@ export class ChessScene extends BasicScene {
     const item = intersects.find((el) => el.object.userData.ground);
 
     const actionResult = this.chessBoardManager.deselect(item.object);
+
+    if (!actionResult) {
+      return;
+    }
+
     this.onActionPerformed(actionResult);
   };
 
@@ -154,13 +163,20 @@ export class ChessScene extends BasicScene {
     this.setupScene();
   }
 
-  start(onEndGame: onEndGame): void {
+  start(onEndGame: OnEndGame): void {
     this.orbitals.autoRotate = false;
     const playerStartingSide = this.chessBoardManager.start(
       (actionResult: ActionResult) => {
         this.onActionPerformed(actionResult);
       },
-      onEndGame
+      onEndGame,
+      (promotionResult: PromotionResult) => {
+        const { removedPieceId, promotedPiece } = promotionResult;
+        this.onActionPerformed({
+          removedPiecesIds: [removedPieceId],
+          promotedPiece,
+        });
+      }
     );
     this.setCameraPosition(playerStartingSide);
   }

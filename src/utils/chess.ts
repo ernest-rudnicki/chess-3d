@@ -4,20 +4,23 @@ import { ChessFieldLetters } from "maps/ChessFieldLetters";
 import { ChessFieldColumns } from "maps/ChessFieldColumns";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { PromotionResult } from "managers/ChessBoardManager/types";
+import { Square } from "chess.js";
 
 export function isPiece(object: Object3D): object is Piece {
   return !!(object as Piece).chessPosition;
 }
 
 export function isPromotionResult(
-  result: number | PromotionResult
+  result: number | boolean | PromotionResult
 ): result is PromotionResult {
-  return !!(result as PromotionResult).promotedPiece;
+  return (
+    typeof result === "object" && !!(result as PromotionResult).promotedPiece
+  );
 }
 
-export function getChessNotation(chessPosition: PieceChessPosition): string {
+export function getChessNotation(chessPosition: PieceChessPosition): Square {
   const { row, column } = chessPosition;
-  return `${ChessFieldLetters[column]}${row + 1}`;
+  return `${ChessFieldLetters[column]}${row + 1}` as Square;
 }
 
 export function getMatrixPosition(chessNotation: string): PieceChessPosition {

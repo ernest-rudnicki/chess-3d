@@ -28,6 +28,14 @@ addEventListener("message", (e: WebWorkerEvent) => {
         aiMove: chessAiManager.calcAiMove(),
       });
       break;
+    case "promote":
+      chessAiManager.updateBoardWithPromotion(
+        e.data.color,
+        e.data.pieceType,
+        e.data.chessNotationPos,
+        e.data.move
+      );
+      break;
     default:
       return;
   }

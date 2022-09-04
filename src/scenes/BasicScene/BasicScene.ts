@@ -16,7 +16,7 @@ import {
   Vector3,
 } from "three";
 import createCannonDebugger from "cannon-es-debugger";
-import { onEndGame } from "managers/ChessBoardManager/types";
+import { OnEndGame } from "managers/ChessBoardManager/types";
 
 export abstract class BasicScene extends Scene {
   private _renderer: Renderer;
@@ -37,7 +37,7 @@ export abstract class BasicScene extends Scene {
   resizeListener: () => void;
 
   abstract init(): void;
-  abstract start(onEndGame: onEndGame): void;
+  abstract start(onEndGame: OnEndGame): void;
 
   constructor(props: BasicSceneProps) {
     super();

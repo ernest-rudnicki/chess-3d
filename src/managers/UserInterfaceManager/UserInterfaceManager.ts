@@ -1,11 +1,14 @@
 import { PieceColor } from "chess.js";
 import { BLACK_ICONS, WHITE_ICONS } from "constants/piece-icons";
-import { PieceSet } from "managers/PiecesManager/types";
+import { PieceSet, PromotablePieces } from "managers/PiecesManager/types";
+import { OnPromoteBtnClick } from "./types";
 
 export class UserInterfaceManager {
   private whiteScoreElementId = "white-score";
   private blackScoreElementId = "black-score";
   private opponentTurnInfoElementId = "opponent-turn-info";
+  private promotionElementId = "promotion-element-id";
+  private promotable: PromotablePieces[] = ["q", "r", "b", "n"];
 
   private createScoreElement(id: string, isPlayerScore: boolean): void {
     const div = document.createElement("DIV");
@@ -16,13 +19,57 @@ export class UserInterfaceManager {
     document.body.appendChild(div);
   }
 
-  private createOpponentTurnInfoElement(id: string) {
+  private createOpponentTurnInfoElement(id: string): void {
     const div = document.createElement("DIV");
     div.setAttribute("id", id);
     div.style.display = "none";
     div.innerHTML = "Opponent is thinking";
 
     document.body.appendChild(div);
+  }
+
+  private createPromotionButtons(playerColor: PieceColor): HTMLElement {
+    const btnContainer = document.createElement("DIV");
+
+    this.promotable.forEach((pieceType: PromotablePieces) => {
+      const btn = document.createElement("BUTTON");
+      btn.setAttribute("data-piece-type", pieceType);
+
+      btn.classList.add("btn");
+      btn.classList.add("promotion");
+
+      btn.innerHTML =
+        playerColor === "w" ? WHITE_ICONS[pieceType] : BLACK_ICONS[pieceType];
+      btnContainer.appendChild(btn);
+    });
+
+    return btnContainer;
+  }
+
+  private createPromotionElement(
+    id: string,
+    playerColor: PieceColor,
+    cb: OnPromoteBtnClick
+  ): void {
+    const div = document.createElement("DIV");
+    div.setAttribute("id", id);
+    div.classList.add("center-mid");
+
+    const btnContainer = this.createPromotionButtons(playerColor);
+
+    div.appendChild(btnContainer);
+    document.body.appendChild(div);
+
+    div.onclick = (event: MouseEvent): void => {
+      if (event.target instanceof Element) {
+        const pieceType = event.target.getAttribute(
+          "data-piece-type"
+        ) as PromotablePieces;
+
+        cb(pieceType);
+        div.remove();
+      }
+    };
   }
 
   addToWhiteScore(pieceType: keyof PieceSet): void {
@@ -35,7 +82,11 @@ export class UserInterfaceManager {
     scoreElement.innerHTML += WHITE_ICONS[pieceType];
   }
 
-  enableTurnInfo() {
+  enablePromotion(playerColor: PieceColor, cb: OnPromoteBtnClick): void {
+    this.createPromotionElement(this.promotionElementId, playerColor, cb);
+  }
+
+  enableTurnInfo(): void {
     const el = document.getElementById(this.opponentTurnInfoElementId);
 
     if (!el) {
@@ -45,7 +96,7 @@ export class UserInterfaceManager {
     el.style.display = "block";
   }
 
-  disableTurnInfo() {
+  disableTurnInfo(): void {
     const el = document.getElementById(this.opponentTurnInfoElementId);
 
     if (!el) {

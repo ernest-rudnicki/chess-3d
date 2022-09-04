@@ -33,6 +33,14 @@ canvas {
   font-size: var(--font-size);
 }
 
+.btn.promotion {
+  margin-left: 8px;
+}
+
+.btn.promotion:last-child {
+  margin-right: 8px;
+}
+
 .end-popup {
   padding: 10px;
   background-color: var(--popup-color);
