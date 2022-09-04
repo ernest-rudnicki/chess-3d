@@ -4,11 +4,6 @@ import { Piece } from "objects/Pieces/Piece/Piece";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import {
-  getChessNotation,
-  getMatrixPosition,
-  isPromotionResult,
-} from "../../utils/chess";
 import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PieceSet, PromotablePieces } from "managers/PiecesManager/types";
@@ -24,6 +19,11 @@ import {
   WebWorkerEvent,
 } from "./types";
 import { UserInterfaceManager } from "managers/UserInterfaceManager/UserInterfaceManager";
+import {
+  getChessNotation,
+  getMatrixPosition,
+  isPromotionResult,
+} from "utils/chess";
 
 export class ChessBoardManager {
   private _chessBoard: ChessBoard;
