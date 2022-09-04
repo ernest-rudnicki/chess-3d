@@ -37,7 +37,7 @@ export class ChessBoardManager {
   private selected: Piece | null;
 
   private onEndGameCallback: OnEndGame;
-  private onPromotion: OnPromotion;
+  private onPromotionCallback: OnPromotion;
 
   constructor(private world: World, private loader: GLTFLoader) {
     this._chessBoard = new ChessBoard("ChessBoard");
@@ -207,7 +207,7 @@ export class ChessBoardManager {
           promotedTo,
           move
         );
-        this.onPromotion(result);
+        this.onPromotionCallback(result);
         this.notifyAiToMove(move);
       });
       return true;
@@ -426,7 +426,7 @@ export class ChessBoardManager {
     this.addWebWorkerListener(aiMoveCallback);
     this.initChessAi();
     this.onEndGameCallback = onEndGame;
-    this.onPromotion = onPromotion;
+    this.onPromotionCallback = onPromotion;
 
     return this.startingPlayerSide;
   }
