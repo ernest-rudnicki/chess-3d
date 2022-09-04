@@ -2,13 +2,15 @@
   "name": "chess-3d",
   "version": "1.0.0",
   "description": "",
+
   "engines": {
     "node": "16.4.2"
   },
   "scripts": {
     "start:dev": "npm run build:dev && webpack serve --config webpack.dev.config.js",
     "build:dev": "webpack --config webpack.dev.config.js",
-    "build:prod": "webpack --config webpack.prod.config.js",
+    "build:prod": "webpack --config webpack.prod.config.js && npm run minify:css",
+    "minify:css": "npx postcss ./dist/styles.css > ./dist/styles.min.css && node ./scripts/post-minify-css.js",
     "lint": "npm run lint -- --fix",
     "prepare": "husky install"
   },
@@ -33,10 +35,13 @@
     "@typescript-eslint/eslint-plugin": "5.32.0",
     "@typescript-eslint/parser": "5.32.0",
     "copy-webpack-plugin": "11.0.0",
+    "cssnano": "5.1.13",
     "eslint": "8.21.0",
     "eslint-plugin-prettier": "4.2.1",
     "husky": "8.0.1",
     "lint-staged": "13.0.3",
+    "postcss": "8.4.16",
+    "postcss-cli": "10.0.0",
     "prettier": "2.7.1",
     "ts-loader": "9.3.1",
     "ts-node": "10.9.1",
