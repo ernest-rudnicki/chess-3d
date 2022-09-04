@@ -1,15 +1,14 @@
 import { ChessAiManager } from "managers/ChessAiManager/ChessAiManager";
 import { WebWorkerEvent } from "./types";
 
-let chessAiManager: ChessAiManager;
+const chessAiManager = new ChessAiManager();
 
 addEventListener("message", (e: WebWorkerEvent) => {
   const type = e.data.type;
 
   switch (type) {
     case "init":
-      chessAiManager = new ChessAiManager(e.data.fen);
-      chessAiManager.init(e.data.color);
+      chessAiManager.init(e.data.color, e.data.fen);
 
       if (e.data.color !== "w") {
         return;

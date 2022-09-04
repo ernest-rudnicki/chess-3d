@@ -279,9 +279,7 @@ export class ChessBoardManager {
 
     if (result && typeof result === "number") {
       removedPiecesIds.push(result);
-    }
-
-    if (isPromotionResult(result)) {
+    } else if (isPromotionResult(result)) {
       const { removedPieceId, promotedPiece } = result;
       promoted = promotedPiece;
 

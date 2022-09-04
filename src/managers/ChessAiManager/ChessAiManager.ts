@@ -13,8 +13,8 @@ export class ChessAiManager {
   private chessEngine: ChessInstance;
   private prevSum = 0;
 
-  constructor(fen: string) {
-    this.chessEngine = new Chess(fen);
+  constructor() {
+    this.chessEngine = new Chess();
   }
 
   private reverseSquareTablesForBlack(): PieceSquareTables {
@@ -27,8 +27,9 @@ export class ChessAiManager {
     return cloned;
   }
 
-  init(color: PieceColor): void {
+  init(color: PieceColor, fen: string): void {
     this.color = color;
+    this.chessEngine.load(fen);
 
     if (this.color === "b") {
       this.pieceSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
