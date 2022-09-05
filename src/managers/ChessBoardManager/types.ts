@@ -1,6 +1,7 @@
 import { ChessInstance, Move, PieceColor, Square } from "chess.js";
 import { PromotablePieces } from "managers/PiecesManager/types";
 import { Piece } from "objects/Pieces/Piece/Piece";
+import { Object3D } from "three";
 
 export type AiMoveCallback = (actionResult: ActionResult) => void;
 
@@ -11,6 +12,13 @@ export type OnEndGame = (
   playerColor: PieceColor
 ) => void;
 
+export interface PromotionPayload {
+  color: PieceColor;
+  droppedField: Object3D;
+  piece: Piece;
+  promotedPieceKey: PromotablePieces;
+  move?: Move;
+}
 export interface PromotionWebWorkerEvent {
   color: PieceColor;
   pieceType: PromotablePieces;

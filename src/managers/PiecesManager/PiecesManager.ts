@@ -238,6 +238,20 @@ export class PiecesManager {
     return pieces;
   }
 
+  private updatePieces(color: PieceColor): void {
+    for (const pieceSet of Object.values(this.pieces[color])) {
+      pieceSet.forEach((el: Piece) => el.update());
+    }
+  }
+
+  private updateWhitePieces(): void {
+    this.updatePieces("w");
+  }
+
+  private updateBlackPieces(): void {
+    this.updatePieces("b");
+  }
+
   removePiece(
     color: PieceColor,
     type: keyof PieceSet,
@@ -328,9 +342,8 @@ export class PiecesManager {
     return [...this.reducePieces("w"), ...this.reducePieces("b")];
   }
 
-  updatePieces(color: PieceColor): void {
-    for (const pieceSet of Object.values(this.pieces[color])) {
-      pieceSet.forEach((el: Piece) => el.update());
-    }
+  update(): void {
+    this.updateBlackPieces();
+    this.updateWhitePieces();
   }
 }

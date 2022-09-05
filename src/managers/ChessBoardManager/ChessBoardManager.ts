@@ -15,6 +15,7 @@ import {
   MoveResult,
   OnEndGame,
   OnPromotion,
+  PromotionPayload,
   PromotionResult,
   WebWorkerEvent,
 } from "./types";
@@ -91,16 +92,14 @@ export class ChessBoardManager {
   ): void {
     if (colorToUpdate === "w") {
       this.uiManager.addToWhiteScore(captured);
-    } else {
-      this.uiManager.addToBlackScore(captured);
+      return;
     }
+
+    this.uiManager.addToBlackScore(captured);
   }
 
-  private capturePiece(
-    color: PieceColor,
-    captured: keyof PieceSet,
-    to: string
-  ): number | undefined {
+  private capturePiece(move: Move): number | undefined {
+    const { to, color, captured } = move;
     const capturedChessPosition = getMatrixPosition(to);
     const capturedColor = this.getOppositeColor(color);
 
@@ -168,7 +167,7 @@ export class ChessBoardManager {
     });
   }
 
-  updateChessEngineWithPromotion(
+  private updateChessEngineWithPromotion(
     color: PieceColor,
     type: PromotablePieces,
     chessNotationPos: Square
@@ -180,13 +179,9 @@ export class ChessBoardManager {
     this.chessEngine.load(this.chessEngine.fen());
   }
 
-  private promotePiece(
-    color: PieceColor,
-    droppedField: Object3D,
-    piece: Piece,
-    promotedPieceKey: PromotablePieces,
-    move?: Move
-  ): PromotionResult {
+  private promotePiece(promotionPayload: PromotionPayload): PromotionResult {
+    const { piece, droppedField, color, promotedPieceKey, move } =
+      promotionPayload;
     const { chessPosition: piecePosition } = piece;
     const { chessPosition: droppedFieldPosition } = droppedField.userData;
     const chessNotationPos = getChessNotation(droppedFieldPosition);
@@ -214,6 +209,16 @@ export class ChessBoardManager {
     return { removedPieceId, promotedPiece };
   }
 
+  private promotePlayerPiece(
+    promotionPayload: PromotionPayload
+  ): PromotionResult {
+    return this.promotePiece(promotionPayload);
+  }
+
+  private promoteAiPiece(promotionPayload: PromotionPayload): PromotionResult {
+    return this.promotePiece(promotionPayload);
+  }
+
   private handlePromotion(
     color: PieceColor,
     droppedField: Object3D,
@@ -224,13 +229,13 @@ export class ChessBoardManager {
       this.uiManager.enablePromotionButtons(
         color,
         (promotedTo: PromotablePieces) => {
-          const result = this.promotePiece(
+          const result = this.promotePlayerPiece({
             color,
             droppedField,
             piece,
-            promotedTo,
-            move
-          );
+            promotedPieceKey: promotedTo,
+            move,
+          });
 
           this.onPromotionCallback(result);
           this.notifyAiToMove(move);
@@ -239,7 +244,12 @@ export class ChessBoardManager {
       return true;
     }
     // for simplicity ai will always promote to queen
-    return this.promotePiece(color, droppedField, piece, "q");
+    return this.promoteAiPiece({
+      color,
+      droppedField,
+      piece,
+      promotedPieceKey: "q",
+    });
   }
 
   private handleFlags(
@@ -262,6 +272,16 @@ export class ChessBoardManager {
     }
   }
 
+  private moveAiPiece(toField: Object3D, movedPiece: Piece): ActionResult {
+    movedPiece.removeMass();
+
+    const actionResult = this.handlePieceMove(toField, movedPiece);
+
+    movedPiece.resetMass();
+
+    return actionResult;
+  }
+
   private performAiMove(move: Move): ActionResult {
     const { from, to, color, piece } = move;
     const fromPos = getMatrixPosition(from);
@@ -270,15 +290,7 @@ export class ChessBoardManager {
     const toField = this.chessBoard.getField(toPos.row, toPos.column);
     const movedPiece = this.piecesManager.getPiece(color, piece, fromPos);
 
-    movedPiece.removeMass();
-
-    const actionResult = this.handlePieceMove(toField, movedPiece);
-
-    movedPiece.resetMass();
-
-    this.uiManager.disableOpponentTurnNotification();
-
-    return actionResult;
+    return this.moveAiPiece(toField, movedPiece);
   }
 
   private isObjectId(id?: unknown): id is number {
@@ -299,10 +311,7 @@ export class ChessBoardManager {
     });
 
     if (move.captured) {
-      const { color, captured, to: movedTo } = move;
-
-      const capturedPieceId = this.capturePiece(color, captured, movedTo);
-
+      const capturedPieceId = this.capturePiece(move);
       removedPiecesIds.push(capturedPieceId);
     }
 
@@ -393,11 +402,29 @@ export class ChessBoardManager {
     const { x, y, z } = this.selectedInitialPosition;
 
     this.selected.changeWorldPosition(x, y, z);
-    this.selectedInitialPosition = null;
+    this.setPieceInitialPosition(null);
   }
 
   private isPlayerPiece(piece: Piece): boolean {
     return piece.color === this.startingPlayerSide;
+  }
+
+  private removePieceFromWorld(piece: Piece): void {
+    piece.removeMass();
+    this.world.removeBody(piece.body);
+  }
+
+  private addPieceToWorld(piece: Piece): void {
+    piece.resetMass();
+    this.world.addBody(piece.body);
+  }
+
+  private setPieceInitialPosition(piece: Piece | null): void {
+    this.selectedInitialPosition = piece ? piece.body.position.clone() : null;
+  }
+
+  private setSelectedPiece(piece: Piece | null): void {
+    this.selected = piece;
   }
 
   get chessBoard(): ChessBoard {
@@ -413,13 +440,11 @@ export class ChessBoardManager {
       return;
     }
 
-    piece.removeMass();
+    this.removePieceFromWorld(piece);
     this.markPossibleMoveFields(piece.chessPosition);
 
-    this.selectedInitialPosition = piece.body.position.clone();
-    this.world.removeBody(piece.body);
-
-    this.selected = piece;
+    this.setPieceInitialPosition(piece);
+    this.setSelectedPiece(piece);
   }
 
   deselect(intersectedField: Object3D): ActionResult | undefined {
@@ -433,10 +458,9 @@ export class ChessBoardManager {
     }
 
     this._chessBoard.clearMarkedPlanes();
-    this.selected.resetMass();
-    this.world.addBody(this.selected.body);
 
-    this.selected = null;
+    this.addPieceToWorld(this.selected);
+    this.setSelectedPiece(null);
 
     return actionResult;
   }
@@ -475,8 +499,7 @@ export class ChessBoardManager {
 
   update(): void {
     this._chessBoard.update();
-    this.piecesManager.updatePieces("b");
-    this.piecesManager.updatePieces("w");
+    this.piecesManager.update();
   }
 
   cleanup(): void {
