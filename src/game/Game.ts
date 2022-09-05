@@ -85,6 +85,10 @@ export class Game {
       return "The game ended with draw by stalemate";
     }
 
+    if (chessInstance.in_threefold_repetition()) {
+      return "The game ended with threefold repetition";
+    }
+
     if (chessInstance.in_draw()) {
       return "The game ended with draw";
     }
