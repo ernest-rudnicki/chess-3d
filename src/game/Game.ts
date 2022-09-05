@@ -5,6 +5,7 @@ import { ChessScene } from "scenes/ChessScene/ChessScene";
 import { ReinhardToneMapping, sRGBEncoding, WebGLRenderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GameOptions } from "./types";
+
 export class Game {
   private width = window.innerWidth;
   private height = window.innerHeight;
