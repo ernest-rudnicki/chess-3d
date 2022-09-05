@@ -11,18 +11,36 @@ export type OnEndGame = (
   playerColor: PieceColor
 ) => void;
 
+export interface PromotionWebWorkerEvent {
+  color: PieceColor;
+  pieceType: PromotablePieces;
+  chessNotationPos: Square;
+  move?: Move;
+  type: "promote";
+}
+
+export interface InitWebWorkerEvent {
+  fen: string;
+  color: PieceColor;
+  type: "init";
+}
+
+export interface AiMoveWebWorkerEvent {
+  playerMove: Move;
+  type: "aiMove";
+}
+
+export interface AiPerformedMoveWebWorkerEvent {
+  aiMove: Move;
+  type: "aiMovePerformed";
+}
+
 export type WebWorkerEvent =
-  | { data: { fen: string; color: PieceColor; type: "init" } }
-  | { data: { playerMove: Move; type: "aiMove" } }
-  | { data: { aiMove: Move; type: "aiMovePerformed" } }
+  | { data: InitWebWorkerEvent }
+  | { data: AiMoveWebWorkerEvent }
+  | { data: AiPerformedMoveWebWorkerEvent }
   | {
-      data: {
-        color: PieceColor;
-        pieceType: PromotablePieces;
-        chessNotationPos: Square;
-        move?: Move;
-        type: "promote";
-      };
+      data: PromotionWebWorkerEvent;
     };
 
 export interface PromotionResult {

@@ -10,7 +10,7 @@ addEventListener("message", (e: WebWorkerEvent) => {
     case "init":
       chessAiManager.init(e.data.color, e.data.fen);
 
-      if (e.data.color !== "w") {
+      if (chessAiManager.isBlack()) {
         return;
       }
 
@@ -28,12 +28,7 @@ addEventListener("message", (e: WebWorkerEvent) => {
       });
       break;
     case "promote":
-      chessAiManager.updateChessEngineWithPromotion(
-        e.data.color,
-        e.data.pieceType,
-        e.data.chessNotationPos,
-        e.data.move
-      );
+      chessAiManager.updateChessEngineWithPromotion(e.data);
       break;
     default:
       return;

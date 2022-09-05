@@ -1,14 +1,16 @@
-import { Chess, ChessInstance, Move, PieceColor, Square } from "chess.js";
+import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PIECE_SQUARE_TABLES, PIECE_WEIGHTS } from "constants/chess-weights";
 import { PieceSquareTables } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
 import { getMatrixPosition } from "utils/chess";
-import { PieceSet, PromotablePieces } from "managers/PiecesManager/types";
+import { PieceSet } from "managers/PiecesManager/types";
+import { PieceChessPosition } from "objects/Pieces/Piece/types";
+import { PromotionWebWorkerEvent } from "managers/ChessBoardManager/types";
 
 // based on https://dev.to/zeyu2001/build-a-simple-chess-ai-in-javascript-18eg
 export class ChessAiManager {
   private color: PieceColor;
-  private pieceSquareTables: PieceSquareTables;
+  private aiSquareTables: PieceSquareTables;
   private opponentSquareTables: PieceSquareTables;
   private chessEngine: ChessInstance;
   private prevSum = 0;
@@ -27,31 +29,30 @@ export class ChessAiManager {
     return cloned;
   }
 
-  init(color: PieceColor, fen: string): void {
-    this.color = color;
-    this.chessEngine.load(fen);
+  private blackStartInit(): void {
+    this.aiSquareTables = this.reverseSquareTablesForBlack();
+    this.opponentSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
+  }
 
-    if (this.color === "b") {
-      this.pieceSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
-      this.opponentSquareTables = this.reverseSquareTablesForBlack();
-      return;
-    }
-
-    this.pieceSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
+  private whiteStartInit(): void {
+    this.aiSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
     this.opponentSquareTables = this.reverseSquareTablesForBlack();
   }
 
-  private getValueFromSquareTable(
+  private getOpponentValueFromSquareTable(
     piece: keyof PieceSet,
-    row: number,
-    column: number,
-    opponentTurn?: boolean
+    chessPosition: PieceChessPosition
   ): number {
-    if (opponentTurn) {
-      return this.opponentSquareTables[piece][row][column];
-    }
+    const { row, column } = chessPosition;
+    return this.opponentSquareTables[piece][row][column];
+  }
 
-    return this.pieceSquareTables[piece][row][column];
+  private getAiValueFromSquareTable(
+    piece: keyof PieceSet,
+    chessPosition: PieceChessPosition
+  ): number {
+    const { row, column } = chessPosition;
+    return this.aiSquareTables[piece][row][column];
   }
 
   private evaluateBoard(move: Move, prevSum: number): number {
@@ -65,13 +66,19 @@ export class ChessAiManager {
       if (moveColor === this.color) {
         newSum +=
           PIECE_WEIGHTS[captured] +
-          this.getValueFromSquareTable(captured, toRow, toColumn);
+          this.getAiValueFromSquareTable(captured, {
+            row: toRow,
+            column: toColumn,
+          });
       }
       // player captured a piece
       else {
         newSum -=
           PIECE_WEIGHTS[captured] +
-          this.getValueFromSquareTable(captured, toRow, toColumn, true);
+          this.getOpponentValueFromSquareTable(captured, {
+            row: toRow,
+            column: toColumn,
+          });
       }
     }
 
@@ -82,34 +89,58 @@ export class ChessAiManager {
       if (moveColor === this.color) {
         newSum -=
           PIECE_WEIGHTS[piece] +
-          this.getValueFromSquareTable(piece, fromRow, fromColumn);
+          this.getAiValueFromSquareTable(piece, {
+            row: fromRow,
+            column: fromColumn,
+          });
 
         newSum +=
           PIECE_WEIGHTS[promoted] +
-          this.getValueFromSquareTable(promoted, toRow, toColumn);
+          this.getAiValueFromSquareTable(promoted, {
+            row: fromRow,
+            column: fromColumn,
+          });
       }
       // player piece was promoted
       else {
         newSum +=
           PIECE_WEIGHTS[piece] +
-          this.getValueFromSquareTable(piece, fromRow, fromColumn, true);
+          this.getOpponentValueFromSquareTable(piece, {
+            row: fromRow,
+            column: fromColumn,
+          });
 
         newSum -=
           PIECE_WEIGHTS[promoted] +
-          this.getValueFromSquareTable(piece, toRow, toColumn, true);
+          this.getOpponentValueFromSquareTable(piece, {
+            row: toRow,
+            column: toColumn,
+          });
       }
     }
     // regular move
     else {
       // if ai moves
       if (moveColor === this.color) {
-        newSum -= this.getValueFromSquareTable(piece, fromRow, fromColumn);
-        newSum += this.getValueFromSquareTable(piece, toRow, toColumn);
+        newSum -= this.getAiValueFromSquareTable(piece, {
+          row: fromRow,
+          column: fromColumn,
+        });
+        newSum += this.getAiValueFromSquareTable(piece, {
+          row: toRow,
+          column: toColumn,
+        });
       }
       // if player moves
       else {
-        newSum += this.getValueFromSquareTable(piece, fromRow, fromColumn);
-        newSum -= this.getValueFromSquareTable(piece, toRow, toColumn);
+        newSum += this.getAiValueFromSquareTable(piece, {
+          row: fromRow,
+          column: fromColumn,
+        });
+        newSum -= this.getAiValueFromSquareTable(piece, {
+          row: toRow,
+          column: toColumn,
+        });
       }
     }
 
@@ -176,17 +207,34 @@ export class ChessAiManager {
     return [bestMove, minVal];
   }
 
+  isWhite(): boolean {
+    return this.color === "w";
+  }
+
+  isBlack(): boolean {
+    return this.color === "b";
+  }
+
+  init(color: PieceColor, fen: string): void {
+    this.color = color;
+    this.chessEngine.load(fen);
+
+    if (this.isBlack()) {
+      this.blackStartInit();
+      return;
+    }
+
+    this.whiteStartInit();
+  }
+
   updateBoardWithPlayerMove(move: Move): void {
     this.chessEngine.move(move);
     this.prevSum = this.evaluateBoard(move, this.prevSum);
   }
 
-  updateChessEngineWithPromotion(
-    color: PieceColor,
-    pieceType: PromotablePieces,
-    chessNotationPos: Square,
-    move?: Move
-  ): void {
+  updateChessEngineWithPromotion(payload: PromotionWebWorkerEvent): void {
+    const { move, chessNotationPos, pieceType, color } = payload;
+
     if (move) {
       this.chessEngine.move(move);
     }
@@ -209,6 +257,7 @@ export class ChessAiManager {
 
     this.prevSum = sum;
     this.chessEngine.move(move);
+
     return move;
   }
 }
