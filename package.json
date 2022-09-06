@@ -12,7 +12,8 @@
     "minify:css": "npx postcss ./dist/styles.css > ./dist/styles.min.css && node ./scripts/post-minify-css.js",
     "start": "npm run build:prod && node server.js",
     "lint": "npm run lint -- --fix",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "heroku-prebuild": "npm install --dev"
   },
   "sideEffects": false,
   "keywords": [],
