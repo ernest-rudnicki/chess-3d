@@ -160,18 +160,22 @@ export class Game {
     document.body.appendChild(div);
   }
 
-  init() {
+  private initGame(): void {
     if (!this.activeScene) {
       throw Error("There is no active scene at the moment");
-    }
-
-    if (!this.activeScene.init) {
-      throw Error("Every scene must be declaring init function");
     }
 
     this.activeScene.init();
 
     this.addStartButton();
+  }
+
+  init(): void {
+    try {
+      this.initGame();
+    } catch (e) {
+      console.error(e.message);
+    }
   }
 
   update(): void {
