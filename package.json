@@ -10,7 +10,7 @@
     "build:dev": "webpack --config webpack.dev.config.js",
     "build:prod": "webpack --config webpack.prod.config.js && npm run minify:css",
     "minify:css": "npx postcss ./dist/styles.css > ./dist/styles.min.css && node ./scripts/post-minify-css.js",
-    "start": "npm run build:prod && node server.js",
+    "start": "node server.js",
     "lint": "npm run lint -- --fix",
     "prepare": "husky install"
   },

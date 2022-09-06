@@ -19,8 +19,8 @@ export class Game {
 
   resizeListener: () => void;
 
-  constructor(options: GameOptions) {
-    this.options = options;
+  constructor(options?: GameOptions) {
+    this.options = options || {};
 
     this.setupLoader();
     this.setupRenderer();
