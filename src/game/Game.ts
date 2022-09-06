@@ -174,7 +174,7 @@ export class Game {
     try {
       this.initGame();
     } catch (e) {
-      console.error(e.message);
+      console.error(e?.message);
     }
   }
 
