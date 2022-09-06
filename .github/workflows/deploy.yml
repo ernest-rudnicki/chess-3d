@@ -16,7 +16,6 @@ jobs:
         with:
           node-version: 16.x
       - run: npm install
-      - run: npm run build:prod
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
