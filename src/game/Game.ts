@@ -178,7 +178,7 @@ export class Game {
     }
   }
 
-  update(): void {
+  private updateGame(): void {
     if (!this.activeScene) {
       throw Error("There is no active scene at the moment");
     }
@@ -186,6 +186,14 @@ export class Game {
     this.activeScene.world.fixedStep();
     this.activeScene.cannonDebugger?.update();
     this.activeScene.update();
+  }
+
+  update(): void {
+    try {
+      this.updateGame();
+    } catch (e) {
+      console.error(e?.message);
+    }
   }
 
   cleanup(): void {
