@@ -15,7 +15,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      - run: npm install
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
