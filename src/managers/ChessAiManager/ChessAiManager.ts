@@ -2,7 +2,7 @@ import { Chess, ChessInstance, Move, PieceColor } from "chess.js";
 import { PIECE_SQUARE_TABLES, PIECE_WEIGHTS } from "constants/chess-weights";
 import { PieceSquareTables } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
-import { getMatrixPosition } from "utils/chess";
+import { getMatrixPosition, isPromotionFlag } from "utils/chess";
 import { PieceSet } from "managers/PiecesManager/types";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { PromotionWebWorkerEvent } from "managers/ChessBoardManager/types";
@@ -55,38 +55,38 @@ export class ChessAiManager {
     return this.aiSquareTables[piece][row][column];
   }
 
+  private isAiColor(color: PieceColor): boolean {
+    return color === this.color;
+  }
+
   private evaluateBoard(move: Move, prevSum: number): number {
     let newSum = prevSum;
     const { row: fromRow, column: fromColumn } = getMatrixPosition(move.from);
     const { row: toRow, column: toColumn } = getMatrixPosition(move.to);
-    const { captured, color: moveColor, piece } = move;
+    const { captured, color: moveColor, piece, flags } = move;
 
     if (captured) {
-      // ai captured a piece
-      if (moveColor === this.color) {
+      if (this.isAiColor(moveColor)) {
         newSum +=
+          PIECE_WEIGHTS[captured] +
+          this.getOpponentValueFromSquareTable(captured, {
+            row: toRow,
+            column: toColumn,
+          });
+      } else {
+        newSum -=
           PIECE_WEIGHTS[captured] +
           this.getAiValueFromSquareTable(captured, {
             row: toRow,
             column: toColumn,
           });
       }
-      // player captured a piece
-      else {
-        newSum -=
-          PIECE_WEIGHTS[captured] +
-          this.getOpponentValueFromSquareTable(captured, {
-            row: toRow,
-            column: toColumn,
-          });
-      }
     }
 
-    if (move.flags === "p") {
-      const promoted = "q";
+    if (isPromotionFlag(flags)) {
+      const promoted = "q"; // for simplicity always promote to queen
 
-      // ai piece was promoted
-      if (moveColor === this.color) {
+      if (this.isAiColor(moveColor)) {
         newSum -=
           PIECE_WEIGHTS[piece] +
           this.getAiValueFromSquareTable(piece, {
@@ -100,28 +100,23 @@ export class ChessAiManager {
             row: fromRow,
             column: fromColumn,
           });
-      }
-      // player piece was promoted
-      else {
+      } else {
         newSum +=
           PIECE_WEIGHTS[piece] +
-          this.getOpponentValueFromSquareTable(piece, {
+          this.getAiValueFromSquareTable(piece, {
             row: fromRow,
             column: fromColumn,
           });
 
         newSum -=
           PIECE_WEIGHTS[promoted] +
-          this.getOpponentValueFromSquareTable(piece, {
+          this.getAiValueFromSquareTable(piece, {
             row: toRow,
             column: toColumn,
           });
       }
-    }
-    // regular move
-    else {
-      // if ai moves
-      if (moveColor === this.color) {
+    } else {
+      if (this.isAiColor(moveColor)) {
         newSum -= this.getAiValueFromSquareTable(piece, {
           row: fromRow,
           column: fromColumn,
@@ -130,9 +125,7 @@ export class ChessAiManager {
           row: toRow,
           column: toColumn,
         });
-      }
-      // if player moves
-      else {
+      } else {
         newSum += this.getAiValueFromSquareTable(piece, {
           row: fromRow,
           column: fromColumn,

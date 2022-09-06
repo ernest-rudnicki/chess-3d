@@ -35,3 +35,7 @@ export function getMatrixPosition(chessNotation: string): PieceChessPosition {
 
   return { row, column };
 }
+
+export function isPromotionFlag(flags: string): boolean {
+  return flags.includes("p");
+}
