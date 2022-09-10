@@ -131,6 +131,5 @@ export abstract class BasicScene extends Scene {
     this.orbitals.update();
     this.camera.updateProjectionMatrix();
     this._renderer.render(this, this.camera);
-    this.world.fixedStep();
   }
 }
