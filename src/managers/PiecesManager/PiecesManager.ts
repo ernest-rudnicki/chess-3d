@@ -1,6 +1,6 @@
 import { World } from "cannon-es";
 import { PieceColor } from "chess.js";
-import { Bishop } from "objects/Bishop/Bishop";
+import { Bishop } from "objects/Pieces/Bishop/Bishop";
 import { ChessBoard } from "objects/ChessBoard/ChessBoard";
 import { King } from "objects/Pieces/King/King";
 import { Knight } from "objects/Pieces/Knight/Knight";

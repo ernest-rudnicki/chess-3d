@@ -34,22 +34,29 @@ export class ChessBoardManager {
   private worker: Worker;
   private uiManager: UserInterfaceManager;
 
+  private loader: GLTFLoader;
+  private world: World;
+
   private selectedInitialPosition: Vec3;
   private selected: Piece | null;
 
   private onEndGameCallback: OnEndGame;
   private onPromotionCallback: OnPromotion;
 
-  constructor(private world: World, private loader: GLTFLoader) {
-    this._chessBoard = new ChessBoard("ChessBoard");
+  constructor(world: World, loader: GLTFLoader) {
+    this.world = world;
+    this.loader = loader;
+
+    this._chessBoard = new ChessBoard("ChessBoard", this.loader);
     this.chessEngine = new Chess();
     this.piecesManager = new PiecesManager(
       this._chessBoard,
       this.loader,
       this.world
     );
-    this.worker = new Worker(new URL("./worker.ts", import.meta.url));
     this.uiManager = new UserInterfaceManager();
+
+    this.worker = new Worker(new URL("./worker.ts", import.meta.url));
   }
 
   private drawSide() {

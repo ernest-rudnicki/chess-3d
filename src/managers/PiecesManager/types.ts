@@ -1,5 +1,5 @@
 import { PieceColor } from "chess.js";
-import { Bishop } from "objects/Bishop/Bishop";
+import { Bishop } from "objects/Pieces/Bishop/Bishop";
 import { King } from "objects/Pieces/King/King";
 import { Knight } from "objects/Pieces/Knight/Knight";
 import { Pawn } from "objects/Pieces/Pawn/Pawn";

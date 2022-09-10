@@ -3,6 +3,7 @@ import { DroppableField } from "./types";
 import { Id } from "global/types";
 import { Body, Box, Vec3 } from "cannon-es";
 import {
+  centerMiddle,
   convertCannonEsQuaternion,
   convertCannonEsVector,
   convertThreeVector,
@@ -19,17 +20,23 @@ import {
   PlaneGeometry,
 } from "three";
 import { BLACK_COLOR_FIELD, WHITE_COLOR_FIELD } from "constants/colors";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { ChessBase } from "objects/ChessBase/ChessBase";
 
 export const FIELD_NAME = "Field";
 
 export class ChessBoard extends BaseGroup {
   private size = 8;
   private currentlyDroppable: DroppableField[] = [];
+  private chessBase: ChessBase;
+  private loader: GLTFLoader;
 
   private boardMatrix: Array<Id[]> = [];
 
-  constructor(name: string) {
+  constructor(name: string, loader: GLTFLoader) {
     super(name);
+    this.loader = loader;
+    this.chessBase = new ChessBase("ChessBase");
   }
 
   private createDropCircle() {
@@ -90,8 +97,13 @@ export class ChessBoard extends BaseGroup {
     });
   }
 
-  private centerMiddle(): void {
-    new Box3().setFromObject(this).getCenter(this.position).multiplyScalar(-1);
+  private initChessBase(): void {
+    this.chessBase.initModel(this.loader).then((model) => {
+      const chessBase = model.scene;
+      chessBase.position.set(3.5, -0.1, 3.5);
+      chessBase.scale.set(16.5, 16, 16.5);
+      this.add(chessBase);
+    });
   }
 
   markPlaneAsDroppable(row: number, column: number): void {
@@ -135,8 +147,9 @@ export class ChessBoard extends BaseGroup {
 
   init(): Body {
     this.createBoardMatrix();
-    this.centerMiddle();
+    centerMiddle(this);
     this.createPsychicsBody();
+    this.initChessBase();
 
     this.body.position.copy(convertThreeVector(this.position));
     this.body.position.y = -this.size;
