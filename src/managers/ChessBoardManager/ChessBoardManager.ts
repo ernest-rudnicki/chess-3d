@@ -378,8 +378,8 @@ export class ChessBoardManager {
         return;
       }
 
-      const isGameOver = this.chessEngine.game_over();
       const actionResult = this.performAiMove(e.data.aiMove);
+      const isGameOver = this.chessEngine.game_over();
 
       cb(actionResult);
 
