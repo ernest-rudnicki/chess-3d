@@ -63,7 +63,7 @@ canvas {
 .score {
  font-size: var(--font-size);
  position: absolute;
- width: 350px;
+ min-width: 350px;
  height: 45px;
  padding: 0 10px;
  background-color: var(--bg-color);
