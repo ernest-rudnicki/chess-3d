@@ -1,5 +1,5 @@
 import { ChessInstance, PieceColor } from "chess.js";
-import { CustomLoadingManager } from "managers/LoadingManager/LoadingManager";
+import { CustomLoadingManager } from "game-logic/LoadingManager/LoadingManager";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { ChessScene } from "scenes/ChessScene/ChessScene";
 import { ReinhardToneMapping, sRGBEncoding, WebGLRenderer } from "three";

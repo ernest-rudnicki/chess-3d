@@ -6,8 +6,8 @@ import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor, Square } from "chess.js";
-import { PieceSet, PromotablePieces } from "managers/PiecesContainer/types";
-import { PiecesContainer } from "managers/PiecesContainer/PiecesContainer";
+import { PieceSet, PromotablePieces } from "game-logic/PiecesContainer/types";
+import { PiecesContainer } from "game-logic/PiecesContainer/PiecesContainer";
 import Worker from "web-worker";
 import {
   ActionResult,
@@ -19,14 +19,14 @@ import {
   PromotionResult,
   WebWorkerEvent,
 } from "./types";
-import { GameInterface } from "managers/GameInterface/GameInterface";
+import { GameInterface } from "game-logic/GameInterface/GameInterface";
 import {
   getChessNotation,
   getMatrixPosition,
   isPromotionResult,
 } from "utils/chess";
 
-export class ChessBoardManager {
+export class ChessGameEngine {
   private _chessBoard: ChessBoard;
   private piecesContainer: PiecesContainer;
   private chessEngine: ChessInstance;

@@ -1,6 +1,6 @@
 import { PieceColor } from "chess.js";
 import { isPiece } from "utils/chess";
-import { ChessBoardManager } from "managers/ChessBoardManager/ChessBoardManager";
+import { ChessGameEngine } from "game-logic/ChessGameEngine/ChessGameEngine";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
@@ -9,16 +9,16 @@ import {
   ActionResult,
   OnEndGame,
   PromotionResult,
-} from "managers/ChessBoardManager/types";
+} from "game-logic/ChessGameEngine/types";
 
 export class ChessScene extends BasicScene {
-  private chessBoardManager: ChessBoardManager;
+  private chessGameEngine: ChessGameEngine;
   private raycaster: Raycaster;
   private clickPointer: Vector2;
 
   constructor(props: BasicSceneProps) {
     super(props);
-    this.chessBoardManager = new ChessBoardManager(this.world, this.loader);
+    this.chessGameEngine = new ChessGameEngine(this.world, this.loader);
   }
 
   private getCoords(event: MouseEvent): { x: number; y: number } {
@@ -41,13 +41,13 @@ export class ChessScene extends BasicScene {
   };
 
   private onMouseUp = (): void => {
-    if (!this.chessBoardManager.isAnySelected()) {
+    if (!this.chessGameEngine.isAnySelected()) {
       return;
     }
     const intersects = this.raycaster.intersectObjects(this.children);
     const item = intersects.find((el) => el.object.userData.ground);
 
-    const actionResult = this.chessBoardManager.deselect(item.object);
+    const actionResult = this.chessGameEngine.deselect(item.object);
 
     if (!actionResult) {
       return;
@@ -74,19 +74,19 @@ export class ChessScene extends BasicScene {
   }
 
   private setupPieces(): void {
-    const pieces = this.chessBoardManager.getAllPieces();
+    const pieces = this.chessGameEngine.getAllPieces();
     pieces.forEach((el: Piece) => {
       this.add(el);
     });
   }
 
   private setupScene(): void {
-    this.add(this.chessBoardManager.chessBoard);
+    this.add(this.chessGameEngine.chessBoard);
     this.setupPieces();
   }
 
   private movePiece(event: MouseEvent): void {
-    if (!this.chessBoardManager.isAnySelected()) {
+    if (!this.chessGameEngine.isAnySelected()) {
       return;
     }
 
@@ -101,13 +101,13 @@ export class ChessScene extends BasicScene {
       return;
     }
 
-    this.chessBoardManager.moveSelectedPiece(item.point.x, item.point.z);
+    this.chessGameEngine.moveSelectedPiece(item.point.x, item.point.z);
   }
 
   private selectPiece(): void {
     this.raycaster.setFromCamera(this.clickPointer, this.camera);
 
-    if (this.chessBoardManager.isAnySelected()) {
+    if (this.chessGameEngine.isAnySelected()) {
       return;
     }
 
@@ -124,7 +124,7 @@ export class ChessScene extends BasicScene {
       return;
     }
 
-    this.chessBoardManager.select(lastParent);
+    this.chessGameEngine.select(lastParent);
   }
 
   private setCameraPosition(playerStartingSide: PieceColor): void {
@@ -159,13 +159,13 @@ export class ChessScene extends BasicScene {
     this.orbitals.autoRotate = true;
     this.setupLights();
     this.setupRaycaster();
-    this.chessBoardManager.init();
+    this.chessGameEngine.init();
     this.setupScene();
   }
 
   start(onEndGame: OnEndGame): void {
     this.orbitals.autoRotate = false;
-    const playerStartingSide = this.chessBoardManager.start(
+    const playerStartingSide = this.chessGameEngine.start(
       (actionResult: ActionResult) => {
         this.onActionPerformed(actionResult);
       },
@@ -182,7 +182,7 @@ export class ChessScene extends BasicScene {
   }
 
   update(): void {
-    this.chessBoardManager.update();
+    this.chessGameEngine.update();
     super.update();
   }
 
@@ -190,6 +190,6 @@ export class ChessScene extends BasicScene {
     window.removeEventListener("mousedown", this.onMouseDown);
     window.removeEventListener("mouseup", this.onMouseUp);
     window.removeEventListener("pointermove", this.onPointerMove);
-    this.chessBoardManager.cleanup();
+    this.chessGameEngine.cleanup();
   }
 }

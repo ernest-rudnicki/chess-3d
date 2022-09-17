@@ -1,6 +1,6 @@
 import { PieceColor } from "chess.js";
 import { BLACK_ICONS, WHITE_ICONS } from "constants/piece-icons";
-import { PieceSet, PromotablePieces } from "managers/PiecesContainer/types";
+import { PieceSet, PromotablePieces } from "game-logic/PiecesContainer/types";
 import { OnPromoteBtnClick } from "./types";
 
 export class GameInterface {

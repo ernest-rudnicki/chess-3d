@@ -16,7 +16,7 @@ import {
   Vector3,
 } from "three";
 import createCannonDebugger from "cannon-es-debugger";
-import { OnEndGame } from "managers/ChessBoardManager/types";
+import { OnEndGame } from "game-logic/ChessGameEngine/types";
 
 export abstract class BasicScene extends Scene {
   private _renderer: Renderer;

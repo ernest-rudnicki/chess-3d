@@ -1,5 +1,5 @@
 import { ChessInstance, Move, PieceColor, Square } from "chess.js";
-import { PromotablePieces } from "managers/PiecesContainer/types";
+import { PromotablePieces } from "game-logic/PiecesContainer/types";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { Object3D } from "three";
 

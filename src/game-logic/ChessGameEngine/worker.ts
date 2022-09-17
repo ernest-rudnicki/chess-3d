@@ -1,4 +1,4 @@
-import { ChessAi } from "managers/ChessAi/ChessAi";
+import { ChessAi } from "game-logic/ChessAi/ChessAi";
 import { WebWorkerEvent } from "./types";
 
 const chessAiManager = new ChessAi();

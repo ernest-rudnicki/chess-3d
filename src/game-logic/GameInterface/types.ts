@@ -1,3 +1,3 @@
-import { PromotablePieces } from "managers/PiecesContainer/types";
+import { PromotablePieces } from "game-logic/PiecesContainer/types";
 
 export type OnPromoteBtnClick = (pieceType: PromotablePieces) => void;
