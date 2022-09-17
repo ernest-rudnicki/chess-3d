@@ -19,7 +19,7 @@ import {
   PromotionResult,
   WebWorkerEvent,
 } from "./types";
-import { UserInterfaceManager } from "managers/UserInterfaceManager/UserInterfaceManager";
+import { GameInterface } from "managers/GameInterface/GameInterface";
 import {
   getChessNotation,
   getMatrixPosition,
@@ -32,7 +32,7 @@ export class ChessBoardManager {
   private chessEngine: ChessInstance;
   private startingPlayerSide: PieceColor;
   private worker: Worker;
-  private uiManager: UserInterfaceManager;
+  private gameInterface: GameInterface;
 
   private loader: GLTFLoader;
   private world: World;
@@ -54,7 +54,7 @@ export class ChessBoardManager {
       this.loader,
       this.world
     );
-    this.uiManager = new UserInterfaceManager();
+    this.gameInterface = new GameInterface();
 
     this.worker = new Worker(new URL("./worker.ts", import.meta.url));
   }
@@ -98,11 +98,11 @@ export class ChessBoardManager {
     captured: keyof PieceSet
   ): void {
     if (colorToUpdate === "w") {
-      this.uiManager.addToWhiteScore(captured);
+      this.gameInterface.addToWhiteScore(captured);
       return;
     }
 
-    this.uiManager.addToBlackScore(captured);
+    this.gameInterface.addToBlackScore(captured);
   }
 
   private capturePiece(move: Move): number | undefined {
@@ -233,7 +233,7 @@ export class ChessBoardManager {
     move: Move
   ): PromotionResult | boolean {
     if (this.startingPlayerSide === color) {
-      this.uiManager.enablePromotionButtons(
+      this.gameInterface.enablePromotionButtons(
         color,
         (promotedTo: PromotablePieces) => {
           const result = this.promotePlayerPiece({
@@ -344,7 +344,7 @@ export class ChessBoardManager {
   }
 
   private notifyAiToMove(playerMove: Move) {
-    this.uiManager.enableOpponentTurnNotification();
+    this.gameInterface.enableOpponentTurnNotification();
     this.worker.postMessage({ type: "aiMove", playerMove });
   }
 
@@ -383,7 +383,7 @@ export class ChessBoardManager {
 
       cb(actionResult);
 
-      this.uiManager.disableOpponentTurnNotification();
+      this.gameInterface.disableOpponentTurnNotification();
 
       if (!isGameOver) {
         return;
@@ -395,7 +395,7 @@ export class ChessBoardManager {
 
   private initChessAi() {
     if (this.startingPlayerSide !== "w") {
-      this.uiManager.enableOpponentTurnNotification();
+      this.gameInterface.enableOpponentTurnNotification();
     }
 
     this.worker.postMessage({
@@ -487,7 +487,7 @@ export class ChessBoardManager {
     onPromotion: OnPromotion
   ): PieceColor {
     this.drawSide();
-    this.uiManager.init(this.startingPlayerSide);
+    this.gameInterface.init(this.startingPlayerSide);
     this.addWebWorkerListener(aiMoveCallback);
     this.initChessAi();
     this.onEndGameCallback = onEndGame;
@@ -510,6 +510,6 @@ export class ChessBoardManager {
   }
 
   cleanup(): void {
-    this.uiManager.cleanup();
+    this.gameInterface.cleanup();
   }
 }

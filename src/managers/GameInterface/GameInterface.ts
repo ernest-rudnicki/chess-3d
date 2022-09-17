@@ -3,7 +3,7 @@ import { BLACK_ICONS, WHITE_ICONS } from "constants/piece-icons";
 import { PieceSet, PromotablePieces } from "managers/PiecesContainer/types";
 import { OnPromoteBtnClick } from "./types";
 
-export class UserInterfaceManager {
+export class GameInterface {
   private whiteScoreElementId = "white-score";
   private blackScoreElementId = "black-score";
   private opponentTurnNotificationElementId = "opponent-turn-notification";
