@@ -8,7 +8,7 @@ import { PromotionWebWorkerEvent } from "managers/ChessBoardManager/types";
 import { PieceSet } from "managers/PiecesContainer/types";
 
 // based on https://dev.to/zeyu2001/build-a-simple-chess-ai-in-javascript-18eg
-export class ChessAiManager {
+export class ChessAi {
   private color: PieceColor;
   private aiSquareTables: PieceSquareTables;
   private opponentSquareTables: PieceSquareTables;

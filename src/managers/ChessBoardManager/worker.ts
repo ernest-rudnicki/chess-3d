@@ -1,7 +1,7 @@
-import { ChessAiManager } from "managers/ChessAiManager/ChessAiManager";
+import { ChessAi } from "managers/ChessAi/ChessAi";
 import { WebWorkerEvent } from "./types";
 
-const chessAiManager = new ChessAiManager();
+const chessAiManager = new ChessAi();
 
 addEventListener("message", (e: WebWorkerEvent) => {
   const type = e.data.type;
