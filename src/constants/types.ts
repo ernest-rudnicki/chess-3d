@@ -1,4 +1,4 @@
-import { PieceSet } from "managers/PiecesManager/types";
+import { PieceSet } from "managers/PiecesContainer/types";
 
 export type SquareTableKeys = keyof PieceSet | "k_endGame";
 

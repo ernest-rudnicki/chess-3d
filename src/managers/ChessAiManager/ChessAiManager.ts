@@ -5,7 +5,7 @@ import cloneDeep from "lodash.clonedeep";
 import { getMatrixPosition, isPromotionFlag } from "utils/chess";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { PromotionWebWorkerEvent } from "managers/ChessBoardManager/types";
-import { PieceSet } from "managers/PiecesManager/types";
+import { PieceSet } from "managers/PiecesContainer/types";
 
 // based on https://dev.to/zeyu2001/build-a-simple-chess-ai-in-javascript-18eg
 export class ChessAiManager {

@@ -11,7 +11,7 @@ import { Queen } from "objects/Pieces/Queen/Queen";
 import { Rook } from "objects/Pieces/Rook/Rook";
 import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { PiecesContainer, PieceSet, PromotablePieces } from "./types";
+import { Pieces, PieceSet, PromotablePieces } from "./types";
 
 export const CHESS_BOARD_NAME = "ChessBoard";
 export const PAWN_NAME = "Pawn";
@@ -21,8 +21,8 @@ export const BISHOP_NAME = "Bishop";
 export const QUEEN_NAME = "Queen";
 export const KING_NAME = "King";
 
-export class PiecesManager {
-  private pieces: PiecesContainer;
+export class PiecesContainer {
+  private pieces: Pieces;
 
   constructor(
     private chessBoard: ChessBoard,

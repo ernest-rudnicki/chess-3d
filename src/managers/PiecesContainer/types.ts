@@ -18,7 +18,7 @@ export interface PieceSet {
   k: King[];
 }
 
-export type PiecesContainer = {
+export type Pieces = {
   [key in PieceColor]: PieceSet;
 } & {
   b: PieceSet;

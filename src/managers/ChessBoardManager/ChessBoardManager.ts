@@ -6,8 +6,8 @@ import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor, Square } from "chess.js";
-import { PieceSet, PromotablePieces } from "managers/PiecesManager/types";
-import { PiecesManager } from "managers/PiecesManager/PiecesManager";
+import { PieceSet, PromotablePieces } from "managers/PiecesContainer/types";
+import { PiecesContainer } from "managers/PiecesContainer/PiecesContainer";
 import Worker from "web-worker";
 import {
   ActionResult,
@@ -28,7 +28,7 @@ import {
 
 export class ChessBoardManager {
   private _chessBoard: ChessBoard;
-  private piecesManager: PiecesManager;
+  private piecesContainer: PiecesContainer;
   private chessEngine: ChessInstance;
   private startingPlayerSide: PieceColor;
   private worker: Worker;
@@ -49,7 +49,7 @@ export class ChessBoardManager {
 
     this._chessBoard = new ChessBoard("ChessBoard", this.loader);
     this.chessEngine = new Chess();
-    this.piecesManager = new PiecesManager(
+    this.piecesContainer = new PiecesContainer(
       this._chessBoard,
       this.loader,
       this.world
@@ -112,7 +112,7 @@ export class ChessBoardManager {
 
     this.updateScoreBoard(color, captured);
 
-    return this.piecesManager.removePiece(
+    return this.piecesContainer.removePiece(
       capturedColor,
       captured,
       capturedChessPosition
@@ -136,7 +136,7 @@ export class ChessBoardManager {
   private handleCastling(color: PieceColor, castlingType: "k" | "q"): void {
     const rookRow = color === "w" ? 0 : 7;
     const rookColumn = castlingType === "q" ? 7 : 0;
-    const castlingRook = this.piecesManager.getPiece(color, "r", {
+    const castlingRook = this.piecesContainer.getPiece(color, "r", {
       row: rookRow,
       column: rookColumn,
     });
@@ -153,7 +153,7 @@ export class ChessBoardManager {
     const opposite = this.getOppositeColor(color);
     const enPassanteRow = color === "w" ? row - 1 : row + 1;
 
-    return this.piecesManager.removePiece(opposite, "p", {
+    return this.piecesContainer.removePiece(opposite, "p", {
       row: enPassanteRow,
       column,
     });
@@ -193,13 +193,13 @@ export class ChessBoardManager {
     const { chessPosition: droppedFieldPosition } = droppedField.userData;
     const chessNotationPos = getChessNotation(droppedFieldPosition);
 
-    const removedPieceId = this.piecesManager.removePiece(
+    const removedPieceId = this.piecesContainer.removePiece(
       color,
       "p",
       piecePosition
     );
 
-    const promotedPiece = this.piecesManager.addPromotedPiece(
+    const promotedPiece = this.piecesContainer.addPromotedPiece(
       color,
       promotedPieceKey,
       droppedFieldPosition
@@ -295,7 +295,7 @@ export class ChessBoardManager {
     const toPos = getMatrixPosition(to);
 
     const toField = this.chessBoard.getField(toPos.row, toPos.column);
-    const movedPiece = this.piecesManager.getPiece(color, piece, fromPos);
+    const movedPiece = this.piecesContainer.getPiece(color, piece, fromPos);
 
     return this.moveAiPiece(toField, movedPiece);
   }
@@ -473,12 +473,12 @@ export class ChessBoardManager {
   }
 
   getAllPieces(): Piece[] {
-    return this.piecesManager.getAllPieces();
+    return this.piecesContainer.getAllPieces();
   }
 
   init(): void {
     this.initChessBoard();
-    this.piecesManager.initPieces();
+    this.piecesContainer.initPieces();
   }
 
   start(
@@ -506,7 +506,7 @@ export class ChessBoardManager {
 
   update(): void {
     this._chessBoard.update();
-    this.piecesManager.update();
+    this.piecesContainer.update();
   }
 
   cleanup(): void {

@@ -1,4 +1,4 @@
-import { PieceSet } from "managers/PiecesManager/types";
+import { PieceSet } from "managers/PiecesContainer/types";
 
 export const WHITE_ICONS: { [key in keyof PieceSet]: string } = {
   k: "&#9812;",
