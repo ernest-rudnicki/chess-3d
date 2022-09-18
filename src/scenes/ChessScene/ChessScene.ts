@@ -28,34 +28,6 @@ export class ChessScene extends BasicScene {
     return { x, y };
   }
 
-  private onPointerMove = (event: MouseEvent) => {
-    this.movePiece(event);
-  };
-
-  private onMouseDown = (event: MouseEvent): void => {
-    const { x, y } = this.getCoords(event);
-    this.clickPointer.x = x;
-    this.clickPointer.y = y;
-
-    this.selectPiece();
-  };
-
-  private onMouseUp = (): void => {
-    if (!this.chessGameEngine.isAnySelected()) {
-      return;
-    }
-    const intersects = this.raycaster.intersectObjects(this.children);
-    const item = intersects.find((el) => el.object.userData.ground);
-
-    const actionResult = this.chessGameEngine.deselect(item.object);
-
-    if (!actionResult) {
-      return;
-    }
-
-    this.onActionPerformed(actionResult);
-  };
-
   private setupRaycaster(): void {
     this.raycaster = new Raycaster();
     this.clickPointer = new Vector2();
@@ -65,44 +37,13 @@ export class ChessScene extends BasicScene {
     window.addEventListener("pointermove", this.onPointerMove);
   }
 
-  private setupLights(): void {
-    this.setupLight("#FFFFFF", new Vector3(0, 8, -8), 3, new Vector3(0, 0, 0));
-
-    this.setupLight("#FFFFFF", new Vector3(0, 13, 0), 8, new Vector3(0, 0, 0));
-
-    this.setupLight("#FFFFFF", new Vector3(0, 8, 8), 3, new Vector3(0, 0, 0));
-  }
-
-  private setupPieces(): void {
-    const pieces = this.chessGameEngine.getAllPieces();
-    pieces.forEach((el: Piece) => {
-      this.add(el);
-    });
-  }
-
-  private setupScene(): void {
-    this.add(this.chessGameEngine.chessBoard);
-    this.setupPieces();
-  }
-
-  private movePiece(event: MouseEvent): void {
-    if (!this.chessGameEngine.isAnySelected()) {
-      return;
-    }
-
+  private onMouseDown = (event: MouseEvent): void => {
     const { x, y } = this.getCoords(event);
+    this.clickPointer.x = x;
+    this.clickPointer.y = y;
 
-    this.raycaster.setFromCamera({ x, y }, this.camera);
-
-    const intersects = this.raycaster.intersectObjects(this.children);
-    const item = intersects.find((el) => el.object.userData.ground);
-
-    if (!item) {
-      return;
-    }
-
-    this.chessGameEngine.moveSelectedPiece(item.point.x, item.point.z);
-  }
+    this.selectPiece();
+  };
 
   private selectPiece(): void {
     this.raycaster.setFromCamera(this.clickPointer, this.camera);
@@ -127,17 +68,69 @@ export class ChessScene extends BasicScene {
     this.chessGameEngine.select(lastParent);
   }
 
+  private onMouseUp = (): void => {
+    if (!this.chessGameEngine.isAnySelected()) {
+      return;
+    }
+    const intersects = this.raycaster.intersectObjects(this.children);
+    const item = intersects.find((el) => el.object.userData.ground);
+
+    const actionResult = this.chessGameEngine.deselect(item.object);
+
+    if (!actionResult) {
+      return;
+    }
+
+    this.onActionPerformed(actionResult);
+  };
+
+  private onPointerMove = (event: MouseEvent) => {
+    this.movePiece(event);
+  };
+
+  private movePiece(event: MouseEvent): void {
+    if (!this.chessGameEngine.isAnySelected()) {
+      return;
+    }
+
+    const { x, y } = this.getCoords(event);
+
+    this.raycaster.setFromCamera({ x, y }, this.camera);
+
+    const intersects = this.raycaster.intersectObjects(this.children);
+    const item = intersects.find((el) => el.object.userData.ground);
+
+    if (!item) {
+      return;
+    }
+
+    this.chessGameEngine.moveSelectedPiece(item.point.x, item.point.z);
+  }
+
+  private setupLights(): void {
+    this.setupLight("#FFFFFF", new Vector3(0, 8, -8), 3, new Vector3(0, 0, 0));
+
+    this.setupLight("#FFFFFF", new Vector3(0, 13, 0), 8, new Vector3(0, 0, 0));
+
+    this.setupLight("#FFFFFF", new Vector3(0, 8, 8), 3, new Vector3(0, 0, 0));
+  }
+
+  private setupScene(): void {
+    this.add(this.chessGameEngine.chessBoard);
+    this.setupPieces();
+  }
+
+  private setupPieces(): void {
+    const pieces = this.chessGameEngine.getAllPieces();
+    pieces.forEach((el: Piece) => {
+      this.add(el);
+    });
+  }
+
   private setCameraPosition(playerStartingSide: PieceColor): void {
     const z = playerStartingSide === "w" ? -8 : 8;
     this.camera.position.set(0, 11, z);
     this.camera.lookAt(0, 0, 0);
-  }
-
-  private removePiecesFromScene(piecesIds: number[]): void {
-    piecesIds.forEach((id) => {
-      const pieceToRemove = this.getObjectById(id);
-      this.remove(pieceToRemove);
-    });
   }
 
   private onActionPerformed(actionResult: ActionResult): void {
@@ -150,6 +143,13 @@ export class ChessScene extends BasicScene {
     }
 
     this.add(promotedPiece);
+  }
+
+  private removePiecesFromScene(piecesIds: number[]): void {
+    piecesIds.forEach((id) => {
+      const pieceToRemove = this.getObjectById(id);
+      this.remove(pieceToRemove);
+    });
   }
 
   init(): void {

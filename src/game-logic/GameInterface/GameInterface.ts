@@ -28,24 +28,6 @@ export class GameInterface {
     document.body.appendChild(div);
   }
 
-  private createPromotionButtons(playerColor: PieceColor): HTMLElement {
-    const btnContainer = document.createElement("DIV");
-
-    this.promotable.forEach((pieceType: PromotablePieces) => {
-      const btn = document.createElement("BUTTON");
-      btn.setAttribute("data-piece-type", pieceType);
-
-      btn.classList.add("btn");
-      btn.classList.add("promotion");
-
-      btn.innerHTML =
-        playerColor === "w" ? WHITE_ICONS[pieceType] : BLACK_ICONS[pieceType];
-      btnContainer.appendChild(btn);
-    });
-
-    return btnContainer;
-  }
-
   private createPromotionElement(
     id: string,
     playerColor: PieceColor,
@@ -70,6 +52,24 @@ export class GameInterface {
         div.remove();
       }
     };
+  }
+
+  private createPromotionButtons(playerColor: PieceColor): HTMLElement {
+    const btnContainer = document.createElement("DIV");
+
+    this.promotable.forEach((pieceType: PromotablePieces) => {
+      const btn = document.createElement("BUTTON");
+      btn.setAttribute("data-piece-type", pieceType);
+
+      btn.classList.add("btn");
+      btn.classList.add("promotion");
+
+      btn.innerHTML =
+        playerColor === "w" ? WHITE_ICONS[pieceType] : BLACK_ICONS[pieceType];
+      btnContainer.appendChild(btn);
+    });
+
+    return btnContainer;
   }
 
   addToWhiteScore(pieceType: keyof PieceSet): void {

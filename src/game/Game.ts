@@ -30,18 +30,6 @@ export class Game {
     this.activeScene = this.createChessScene();
   }
 
-  private createChessScene(): ChessScene {
-    return new ChessScene({
-      renderer: this.renderer,
-      loader: this.loader,
-      options: {
-        addGridHelper: this.options.addGridHelper,
-        lightHelpers: this.options.lightHelpers,
-        cannonDebugger: this.options.cannonDebugger,
-      },
-    });
-  }
-
   private setupLoader(): void {
     this.loadingManager = new CustomLoadingManager();
     this.loader = new GLTFLoader(this.loadingManager);
@@ -70,40 +58,16 @@ export class Game {
     window.addEventListener("resize", this.resizeListener, false);
   }
 
-  private getEndGameMessage(
-    chessInstance: ChessInstance,
-    playerColor: PieceColor
-  ): string {
-    const isPlayerColor = chessInstance.turn() === playerColor;
-
-    if (chessInstance.in_checkmate()) {
-      return isPlayerColor
-        ? "You lost the game by checkmate"
-        : "You won the game by checkmate";
-    }
-
-    if (chessInstance.in_stalemate()) {
-      return "The game ended with draw by stalemate";
-    }
-
-    if (chessInstance.in_threefold_repetition()) {
-      return "The game ended with threefold repetition";
-    }
-
-    if (chessInstance.in_draw()) {
-      return "The game ended with draw";
-    }
-  }
-
-  private restartGame(): void {
-    this.activeScene.cleanup();
-    this.activeScene = this.createChessScene();
-    this.activeScene.init();
-    this.activeScene.start(
-      (chessInstance: ChessInstance, playerColor: PieceColor) => {
-        this.onEndGame(chessInstance, playerColor);
-      }
-    );
+  private createChessScene(): ChessScene {
+    return new ChessScene({
+      renderer: this.renderer,
+      loader: this.loader,
+      options: {
+        addGridHelper: this.options.addGridHelper,
+        lightHelpers: this.options.lightHelpers,
+        cannonDebugger: this.options.cannonDebugger,
+      },
+    });
   }
 
   private createEndPopup(endMsg: string): void {
@@ -133,10 +97,56 @@ export class Game {
     document.body.appendChild(div);
   }
 
+  private restartGame(): void {
+    this.activeScene.cleanup();
+    this.activeScene = this.createChessScene();
+    this.activeScene.init();
+    this.activeScene.start(
+      (chessInstance: ChessInstance, playerColor: PieceColor) => {
+        this.onEndGame(chessInstance, playerColor);
+      }
+    );
+  }
+
   private onEndGame(chessInstance: ChessInstance, playerColor: PieceColor) {
     const endMsg = this.getEndGameMessage(chessInstance, playerColor);
 
     this.createEndPopup(endMsg);
+  }
+
+  private getEndGameMessage(
+    chessInstance: ChessInstance,
+    playerColor: PieceColor
+  ): string {
+    const isPlayerColor = chessInstance.turn() === playerColor;
+
+    if (chessInstance.in_checkmate()) {
+      return isPlayerColor
+        ? "You lost the game by checkmate"
+        : "You won the game by checkmate";
+    }
+
+    if (chessInstance.in_stalemate()) {
+      return "The game ended with draw by stalemate";
+    }
+
+    if (chessInstance.in_threefold_repetition()) {
+      return "The game ended with threefold repetition";
+    }
+
+    if (chessInstance.in_draw()) {
+      return "The game ended with draw";
+    }
+  }
+
+  private initGame(): void {
+    if (!this.activeScene) {
+      throw Error("There is no active scene at the moment");
+    }
+
+    this.activeScene.init();
+
+    this.addStartButton();
   }
 
   private addStartButton(): void {
@@ -160,24 +170,6 @@ export class Game {
     document.body.appendChild(div);
   }
 
-  private initGame(): void {
-    if (!this.activeScene) {
-      throw Error("There is no active scene at the moment");
-    }
-
-    this.activeScene.init();
-
-    this.addStartButton();
-  }
-
-  init(): void {
-    try {
-      this.initGame();
-    } catch (e) {
-      console.error(e?.message);
-    }
-  }
-
   private updateGame(): void {
     if (!this.activeScene) {
       throw Error("There is no active scene at the moment");
@@ -186,6 +178,14 @@ export class Game {
     this.activeScene.world.fixedStep();
     this.activeScene.cannonDebugger?.update();
     this.activeScene.update();
+  }
+
+  init(): void {
+    try {
+      this.initGame();
+    } catch (e) {
+      console.error(e?.message);
+    }
   }
 
   update(): void {

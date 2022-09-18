@@ -19,16 +19,6 @@ export class ChessAi {
     this.chessEngine = new Chess();
   }
 
-  private reverseSquareTablesForBlack(): PieceSquareTables {
-    const cloned = cloneDeep(PIECE_SQUARE_TABLES);
-
-    for (const value of Object.values(cloned)) {
-      value.reverse();
-    }
-
-    return cloned;
-  }
-
   private blackStartInit(): void {
     this.aiSquareTables = this.reverseSquareTablesForBlack();
     this.opponentSquareTables = cloneDeep(PIECE_SQUARE_TABLES);
@@ -39,28 +29,74 @@ export class ChessAi {
     this.opponentSquareTables = this.reverseSquareTablesForBlack();
   }
 
-  private getOpponentValueFromSquareTable(
-    piece: SquareTableKeys,
-    chessPosition: PieceChessPosition
-  ): number {
-    const { row, column } = chessPosition;
-    return this.opponentSquareTables[piece][row][column];
+  private reverseSquareTablesForBlack(): PieceSquareTables {
+    const cloned = cloneDeep(PIECE_SQUARE_TABLES);
+
+    for (const value of Object.values(cloned)) {
+      value.reverse();
+    }
+
+    return cloned;
   }
 
-  private getAiValueFromSquareTable(
-    piece: SquareTableKeys,
-    chessPosition: PieceChessPosition
-  ): number {
-    const { row, column } = chessPosition;
-    return this.aiSquareTables[piece][row][column];
-  }
+  private minimax(
+    depth: number,
+    sum: number,
+    isMaximizingPlayer: boolean,
+    alpha: number,
+    beta: number
+  ): [Move, number] {
+    let maxVal = -Infinity;
+    let bestMove: Move;
+    let minVal = +Infinity;
+    let currentMove: Move;
+    const moves = this.chessEngine.moves();
 
-  private isAiColor(color: PieceColor): boolean {
-    return color === this.color;
-  }
+    if (depth === 0 || moves.length === 0) {
+      return [null, sum];
+    }
 
-  private isEndGameKing(prevSum: number, movedPiece: keyof PieceSet): boolean {
-    return prevSum < -1500 && movedPiece === "k";
+    for (const moveNotation of moves) {
+      currentMove = this.chessEngine.move(moveNotation);
+      const newSum = this.evaluateBoard(currentMove, sum);
+      const [_, childValue] = this.minimax(
+        depth - 1,
+        newSum,
+        !isMaximizingPlayer,
+        alpha,
+        beta
+      );
+
+      this.chessEngine.undo();
+
+      if (isMaximizingPlayer) {
+        if (childValue > maxVal) {
+          maxVal = childValue;
+          bestMove = currentMove;
+        }
+
+        alpha = Math.max(alpha, childValue);
+        if (beta <= alpha) {
+          break;
+        }
+      } else {
+        if (childValue < minVal) {
+          minVal = childValue;
+          bestMove = currentMove;
+        }
+        beta = Math.min(childValue, beta);
+
+        if (beta <= alpha) {
+          break;
+        }
+      }
+    }
+
+    if (isMaximizingPlayer) {
+      return [bestMove, maxVal];
+    }
+
+    return [bestMove, minVal];
   }
 
   private evaluateBoard(move: Move, prevSum: number): number {
@@ -149,64 +185,28 @@ export class ChessAi {
     return newSum;
   }
 
-  private minimax(
-    depth: number,
-    sum: number,
-    isMaximizingPlayer: boolean,
-    alpha: number,
-    beta: number
-  ): [Move, number] {
-    let maxVal = -Infinity;
-    let bestMove: Move;
-    let minVal = +Infinity;
-    let currentMove: Move;
-    const moves = this.chessEngine.moves();
+  private isAiColor(color: PieceColor): boolean {
+    return color === this.color;
+  }
 
-    if (depth === 0 || moves.length === 0) {
-      return [null, sum];
-    }
+  private isEndGameKing(prevSum: number, movedPiece: keyof PieceSet): boolean {
+    return prevSum < -1500 && movedPiece === "k";
+  }
 
-    for (const moveNotation of moves) {
-      currentMove = this.chessEngine.move(moveNotation);
-      const newSum = this.evaluateBoard(currentMove, sum);
-      const [_, childValue] = this.minimax(
-        depth - 1,
-        newSum,
-        !isMaximizingPlayer,
-        alpha,
-        beta
-      );
+  private getOpponentValueFromSquareTable(
+    piece: SquareTableKeys,
+    chessPosition: PieceChessPosition
+  ): number {
+    const { row, column } = chessPosition;
+    return this.opponentSquareTables[piece][row][column];
+  }
 
-      this.chessEngine.undo();
-
-      if (isMaximizingPlayer) {
-        if (childValue > maxVal) {
-          maxVal = childValue;
-          bestMove = currentMove;
-        }
-
-        alpha = Math.max(alpha, childValue);
-        if (beta <= alpha) {
-          break;
-        }
-      } else {
-        if (childValue < minVal) {
-          minVal = childValue;
-          bestMove = currentMove;
-        }
-        beta = Math.min(childValue, beta);
-
-        if (beta <= alpha) {
-          break;
-        }
-      }
-    }
-
-    if (isMaximizingPlayer) {
-      return [bestMove, maxVal];
-    }
-
-    return [bestMove, minVal];
+  private getAiValueFromSquareTable(
+    piece: SquareTableKeys,
+    chessPosition: PieceChessPosition
+  ): number {
+    const { row, column } = chessPosition;
+    return this.aiSquareTables[piece][row][column];
   }
 
   isWhite(): boolean {

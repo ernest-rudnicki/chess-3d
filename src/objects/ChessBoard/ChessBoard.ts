@@ -39,14 +39,6 @@ export class ChessBoard extends BaseGroup {
     this.chessBase = new ChessBase("ChessBase");
   }
 
-  private createDropCircle() {
-    const geometry = new CircleGeometry(0.4, 16);
-    const material = new MeshLambertMaterial({ color: "orange" });
-    const circle = new Mesh(geometry, material);
-
-    return circle;
-  }
-
   private createBoardMatrix(): void {
     this.boardMatrix = [];
     let colorBlack = true;
@@ -104,6 +96,14 @@ export class ChessBoard extends BaseGroup {
       chessBase.scale.set(16.5, 16, 16.5);
       this.add(chessBase);
     });
+  }
+
+  private createDropCircle() {
+    const geometry = new CircleGeometry(0.4, 16);
+    const material = new MeshLambertMaterial({ color: "orange" });
+    const circle = new Mesh(geometry, material);
+
+    return circle;
   }
 
   markPlaneAsDroppable(row: number, column: number): void {

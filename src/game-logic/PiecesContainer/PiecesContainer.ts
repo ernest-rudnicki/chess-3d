@@ -30,40 +30,6 @@ export class PiecesContainer {
     private world: World
   ) {}
 
-  private concatPieceName(
-    name: string,
-    color: PieceColor,
-    column: number,
-    promoted?: boolean
-  ): string {
-    const promotedMsg = promoted ? "Promoted" : "";
-    return `${name}${column}${color === "w" ? "White" : "Black"}` + promotedMsg;
-  }
-
-  private getMajorPieceInitialRow(color: PieceColor): number {
-    return color === "w" ? 0 : 7;
-  }
-
-  private getFieldPosition(chessPosition: PieceChessPosition): Vector3 {
-    const { row, column } = chessPosition;
-    const field = this.chessBoard.getField(row, column);
-    const position = new Vector3();
-
-    field.getWorldPosition(position);
-
-    return position;
-  }
-
-  private setupPiecePosition(
-    piece: Piece,
-    chessPosition: PieceChessPosition
-  ): void {
-    const initialPosition = this.getFieldPosition(chessPosition);
-    const pieceBody = piece.init(initialPosition, this.loader);
-
-    this.world.addBody(pieceBody);
-  }
-
   private initPawns(color: PieceColor): Pawn[] {
     const pawns: Pawn[] = [];
     const row = color === "w" ? 1 : 6;
@@ -79,6 +45,16 @@ export class PiecesContainer {
       pawns.push(pawn);
     }
     return pawns;
+  }
+
+  private initRooks(color: PieceColor): Rook[] {
+    const rooks: Rook[] = [];
+    const row = this.getMajorPieceInitialRow(color);
+
+    rooks.push(this.createRook(color, { row, column: 0 }));
+    rooks.push(this.createRook(color, { row, column: 7 }));
+
+    return rooks;
   }
 
   private createRook(
@@ -102,14 +78,14 @@ export class PiecesContainer {
     return rook;
   }
 
-  private initRooks(color: PieceColor): Rook[] {
-    const rooks: Rook[] = [];
+  private initKnights(color: PieceColor): Knight[] {
     const row = this.getMajorPieceInitialRow(color);
+    const knights = [];
 
-    rooks.push(this.createRook(color, { row, column: 0 }));
-    rooks.push(this.createRook(color, { row, column: 7 }));
+    knights.push(this.createKnight(color, { row, column: 1 }));
+    knights.push(this.createKnight(color, { row, column: 6 }));
 
-    return rooks;
+    return knights;
   }
 
   private createKnight(
@@ -138,14 +114,14 @@ export class PiecesContainer {
     return knight;
   }
 
-  private initKnights(color: PieceColor): Knight[] {
+  private initBishops(color: PieceColor): Bishop[] {
     const row = this.getMajorPieceInitialRow(color);
-    const knights = [];
+    const bishops = [];
 
-    knights.push(this.createKnight(color, { row, column: 1 }));
-    knights.push(this.createKnight(color, { row, column: 6 }));
+    bishops.push(this.createBishop(color, { row, column: 2 }));
+    bishops.push(this.createBishop(color, { row, column: 5 }));
 
-    return knights;
+    return bishops;
   }
 
   private createBishop(
@@ -172,14 +148,12 @@ export class PiecesContainer {
     return bishop;
   }
 
-  private initBishops(color: PieceColor): Bishop[] {
+  private initQueen(color: PieceColor): Queen[] {
+    const column = 4;
     const row = this.getMajorPieceInitialRow(color);
-    const bishops = [];
 
-    bishops.push(this.createBishop(color, { row, column: 2 }));
-    bishops.push(this.createBishop(color, { row, column: 5 }));
-
-    return bishops;
+    const queen = this.createQueen(color, { row, column });
+    return [queen];
   }
 
   private createQueen(
@@ -204,14 +178,6 @@ export class PiecesContainer {
     return queen;
   }
 
-  private initQueen(color: PieceColor): Queen[] {
-    const column = 4;
-    const row = this.getMajorPieceInitialRow(color);
-
-    const queen = this.createQueen(color, { row, column });
-    return [queen];
-  }
-
   private initKing(color: PieceColor): King[] {
     const column = 3;
     const name = this.concatPieceName(KING_NAME, color, column);
@@ -227,6 +193,40 @@ export class PiecesContainer {
     return [king];
   }
 
+  private concatPieceName(
+    name: string,
+    color: PieceColor,
+    column: number,
+    promoted?: boolean
+  ): string {
+    const promotedMsg = promoted ? "Promoted" : "";
+    return `${name}${column}${color === "w" ? "White" : "Black"}` + promotedMsg;
+  }
+
+  private getMajorPieceInitialRow(color: PieceColor): number {
+    return color === "w" ? 0 : 7;
+  }
+
+  private setupPiecePosition(
+    piece: Piece,
+    chessPosition: PieceChessPosition
+  ): void {
+    const initialPosition = this.getFieldPosition(chessPosition);
+    const pieceBody = piece.init(initialPosition, this.loader);
+
+    this.world.addBody(pieceBody);
+  }
+
+  private getFieldPosition(chessPosition: PieceChessPosition): Vector3 {
+    const { row, column } = chessPosition;
+    const field = this.chessBoard.getField(row, column);
+    const position = new Vector3();
+
+    field.getWorldPosition(position);
+
+    return position;
+  }
+
   private reducePieces(color: PieceColor): Piece[] {
     const pieceSet = this.pieces[color];
     let pieces: Piece[] = [];
@@ -238,18 +238,18 @@ export class PiecesContainer {
     return pieces;
   }
 
-  private updatePieces(color: PieceColor): void {
-    for (const pieceSet of Object.values(this.pieces[color])) {
-      pieceSet.forEach((el: Piece) => el.update());
-    }
-  }
-
   private updateWhitePieces(): void {
     this.updatePieces("w");
   }
 
   private updateBlackPieces(): void {
     this.updatePieces("b");
+  }
+
+  private updatePieces(color: PieceColor): void {
+    for (const pieceSet of Object.values(this.pieces[color])) {
+      pieceSet.forEach((el: Piece) => el.update());
+    }
   }
 
   removePiece(
