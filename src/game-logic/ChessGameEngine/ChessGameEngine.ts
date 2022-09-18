@@ -135,8 +135,8 @@ export class ChessGameEngine {
 
       const actionResult = this.performAiMove(e.data.aiMove);
       const isGameOver = this.chessEngine.game_over();
-      cb(actionResult);
 
+      cb(actionResult);
       this.gameInterface.disableOpponentTurnNotification();
 
       if (!isGameOver) {
@@ -262,10 +262,10 @@ export class ChessGameEngine {
   private handleEnPassante(color: PieceColor, droppedField: Object3D): number {
     const { chessPosition } = droppedField.userData;
     const { row, column }: PieceChessPosition = chessPosition;
-    const opposite = getOppositeColor(color);
+    const oppositeColor = getOppositeColor(color);
     const enPassanteRow = color === "w" ? row - 1 : row + 1;
 
-    return this.piecesContainer.removePiece(opposite, "p", {
+    return this.piecesContainer.removePiece(oppositeColor, "p", {
       row: enPassanteRow,
       column,
     });
@@ -491,12 +491,13 @@ export class ChessGameEngine {
     onEndGame: OnEndGame,
     onPromotion: OnPromotion
   ): PieceColor {
+    this.onEndGameCallback = onEndGame;
+    this.onPromotionCallback = onPromotion;
+
     this.drawSide();
     this.gameInterface.init(this.startingPlayerSide);
     this.addWebWorkerListener(aiMoveCallback);
     this.initChessAi();
-    this.onEndGameCallback = onEndGame;
-    this.onPromotionCallback = onPromotion;
 
     return this.startingPlayerSide;
   }
