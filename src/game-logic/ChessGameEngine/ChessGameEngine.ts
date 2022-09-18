@@ -85,10 +85,8 @@ export class ChessGameEngine {
     this.world.addBody(chessBoardBody);
   }
 
-  private updateScoreBoard(
-    colorToUpdate: PieceColor,
-    captured: keyof PieceSet
-  ): void {
+  private updateScoreBoard(move: Move): void {
+    const { color: colorToUpdate, captured } = move;
     if (colorToUpdate === "w") {
       this.gameInterface.addToWhiteScore(captured);
       return;
@@ -183,6 +181,7 @@ export class ChessGameEngine {
 
     if (move.captured) {
       const capturedPieceId = this.capturePiece(move);
+      this.updateScoreBoard(move);
       removedPiecesIds.push(capturedPieceId);
     }
 
@@ -211,8 +210,6 @@ export class ChessGameEngine {
     const { to, color, captured } = move;
     const capturedChessPosition = getMatrixPosition(to);
     const capturedColor = getOppositeColor(color);
-
-    this.updateScoreBoard(color, captured);
 
     return this.piecesContainer.removePiece(
       capturedColor,
