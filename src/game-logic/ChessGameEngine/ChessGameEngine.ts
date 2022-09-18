@@ -30,7 +30,7 @@ import {
 export class ChessGameEngine {
   private _chessBoard: ChessBoard;
   private piecesContainer: PiecesContainer;
-  private chessEngine: ChessInstance;
+  private chessGame: ChessInstance;
   private startingPlayerSide: PieceColor;
   private worker: Worker;
   private gameInterface: GameInterface;
@@ -50,7 +50,7 @@ export class ChessGameEngine {
     this.loader = loader;
 
     this._chessBoard = new ChessBoard("ChessBoard", this.loader);
-    this.chessEngine = new Chess();
+    this.chessGame = new Chess();
     this.piecesContainer = new PiecesContainer(
       this._chessBoard,
       this.loader,
@@ -68,7 +68,7 @@ export class ChessGameEngine {
 
   private markPossibleMoveFields(chessPosition: PieceChessPosition): void {
     const chessNotation = getChessNotation(chessPosition);
-    const possibleMoves = this.chessEngine.moves({
+    const possibleMoves = this.chessGame.moves({
       square: chessNotation,
       verbose: true,
     });
@@ -114,10 +114,10 @@ export class ChessGameEngine {
       stopAi,
     } = this.performPlayerMove(droppedField);
 
-    const isGameOver = this.chessEngine.game_over();
+    const isGameOver = this.chessGame.game_over();
 
     if (isGameOver) {
-      this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
+      this.onEndGameCallback(this.chessGame, this.startingPlayerSide);
     }
 
     if (!stopAi && !isGameOver) {
@@ -134,7 +134,7 @@ export class ChessGameEngine {
       }
 
       const actionResult = this.performAiMove(e.data.aiMove);
-      const isGameOver = this.chessEngine.game_over();
+      const isGameOver = this.chessGame.game_over();
 
       cb(actionResult);
       this.gameInterface.disableOpponentTurnNotification();
@@ -143,7 +143,7 @@ export class ChessGameEngine {
         return;
       }
 
-      this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
+      this.onEndGameCallback(this.chessGame, this.startingPlayerSide);
     };
   }
 
@@ -177,7 +177,7 @@ export class ChessGameEngine {
     const from = getChessNotation(fromPosition);
     const to = getChessNotation(toPosition);
 
-    const move = this.chessEngine.move(`${from}${to}`, {
+    const move = this.chessGame.move(`${from}${to}`, {
       sloppy: true,
     });
 
@@ -324,11 +324,11 @@ export class ChessGameEngine {
     type: PromotablePieces,
     chessNotationPos: Square
   ): void {
-    this.chessEngine.remove(chessNotationPos);
-    this.chessEngine.put({ type, color }, chessNotationPos);
+    this.chessGame.remove(chessNotationPos);
+    this.chessGame.put({ type, color }, chessNotationPos);
 
     // related to bug https://github.com/jhlywa/chess.js/issues/250
-    this.chessEngine.load(this.chessEngine.fen());
+    this.chessGame.load(this.chessGame.fen());
   }
 
   private promotePiece(promotionPayload: PromotionPayload): PromotionResult {
@@ -407,7 +407,7 @@ export class ChessGameEngine {
 
     this.worker.postMessage({
       type: "init",
-      fen: this.chessEngine.fen(),
+      fen: this.chessGame.fen(),
       color: getOppositeColor(this.startingPlayerSide),
     });
   }

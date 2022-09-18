@@ -12,11 +12,11 @@ export class ChessAi {
   private color: PieceColor;
   private aiSquareTables: PieceSquareTables;
   private opponentSquareTables: PieceSquareTables;
-  private chessEngine: ChessInstance;
+  private chessGame: ChessInstance;
   private prevSum = 0;
 
   constructor() {
-    this.chessEngine = new Chess();
+    this.chessGame = new Chess();
   }
 
   private blackStartInit(): void {
@@ -50,14 +50,14 @@ export class ChessAi {
     let bestMove: Move;
     let minVal = +Infinity;
     let currentMove: Move;
-    const moves = this.chessEngine.moves();
+    const moves = this.chessGame.moves();
 
     if (depth === 0 || moves.length === 0) {
       return [null, sum];
     }
 
     for (const moveNotation of moves) {
-      currentMove = this.chessEngine.move(moveNotation);
+      currentMove = this.chessGame.move(moveNotation);
       const newSum = this.evaluateBoard(currentMove, sum);
       const [_, childValue] = this.minimax(
         depth - 1,
@@ -67,7 +67,7 @@ export class ChessAi {
         beta
       );
 
-      this.chessEngine.undo();
+      this.chessGame.undo();
 
       if (isMaximizingPlayer) {
         if (childValue > maxVal) {
@@ -219,7 +219,7 @@ export class ChessAi {
 
   init(color: PieceColor, fen: string): void {
     this.color = color;
-    this.chessEngine.load(fen);
+    this.chessGame.load(fen);
 
     if (this.isBlack()) {
       this.blackStartInit();
@@ -230,7 +230,7 @@ export class ChessAi {
   }
 
   updateBoardWithPlayerMove(move: Move): void {
-    this.chessEngine.move(move);
+    this.chessGame.move(move);
     this.prevSum = this.evaluateBoard(move, this.prevSum);
   }
 
@@ -238,14 +238,14 @@ export class ChessAi {
     const { move, chessNotationPos, pieceType, color } = payload;
 
     if (move) {
-      this.chessEngine.move(move);
+      this.chessGame.move(move);
     }
 
-    this.chessEngine.remove(chessNotationPos);
-    this.chessEngine.put({ type: pieceType, color }, chessNotationPos);
+    this.chessGame.remove(chessNotationPos);
+    this.chessGame.put({ type: pieceType, color }, chessNotationPos);
 
     // related to bug https://github.com/jhlywa/chess.js/issues/250
-    this.chessEngine.load(this.chessEngine.fen());
+    this.chessGame.load(this.chessGame.fen());
   }
 
   calcAiMove(): Move {
@@ -258,7 +258,7 @@ export class ChessAi {
     );
 
     this.prevSum = sum;
-    this.chessEngine.move(move);
+    this.chessGame.move(move);
 
     return move;
   }
