@@ -187,7 +187,7 @@ export class ChessGameEngine {
 
     const result = this.handleFlags(move, field, piece);
 
-    if (this.isObjectId(result)) {
+    if (this.isPieceIdToRemove(result)) {
       removedPiecesIds.push(result);
     } else if (isPromotionResult(result)) {
       const { removedPieceId, promotedPiece } = result;
@@ -218,7 +218,7 @@ export class ChessGameEngine {
     );
   }
 
-  private isObjectId(id?: unknown): id is number {
+  private isPieceIdToRemove(id?: unknown): id is number {
     return id && typeof id === "number";
   }
 
