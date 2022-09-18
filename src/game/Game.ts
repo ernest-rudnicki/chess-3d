@@ -10,14 +10,14 @@ export class Game {
   private width = window.innerWidth;
   private height = window.innerHeight;
 
-  loadingManager: CustomLoadingManager;
-  loader: GLTFLoader;
-  renderer: WebGLRenderer;
-  activeScene: BasicScene | null;
+  private loadingManager: CustomLoadingManager;
+  private loader: GLTFLoader;
+  private renderer: WebGLRenderer;
+  private activeScene: BasicScene | null;
 
-  options: GameOptions;
+  private options: GameOptions;
 
-  resizeListener: () => void;
+  private resizeListener: () => void;
 
   constructor(options?: GameOptions) {
     this.options = options || {};

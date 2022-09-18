@@ -42,6 +42,7 @@ export class ChessGameEngine {
 
   private onEndGameCallback: OnEndGame;
   private onPromotionCallback: OnPromotion;
+  private webWorkerCallback: (e: WebWorkerEvent) => void;
 
   constructor(world: World, loader: GLTFLoader) {
     this.world = world;
@@ -359,6 +360,7 @@ export class ChessGameEngine {
       promotedPiece,
       stopAi,
     } = this.performPlayerMove(droppedField);
+
     const isGameOver = this.chessEngine.game_over();
 
     if (isGameOver) {
@@ -372,15 +374,14 @@ export class ChessGameEngine {
     return { removedPiecesIds, promotedPiece };
   }
 
-  private addWebWorkerListener(cb: AiMoveCallback): void {
-    this.worker.addEventListener("message", (e: WebWorkerEvent) => {
+  private createWebWorkerCallback(cb: AiMoveCallback): void {
+    this.webWorkerCallback = (e: WebWorkerEvent) => {
       if (e.data.type !== "aiMovePerformed") {
         return;
       }
 
       const actionResult = this.performAiMove(e.data.aiMove);
       const isGameOver = this.chessEngine.game_over();
-
       cb(actionResult);
 
       this.gameInterface.disableOpponentTurnNotification();
@@ -390,7 +391,17 @@ export class ChessGameEngine {
       }
 
       this.onEndGameCallback(this.chessEngine, this.startingPlayerSide);
-    });
+    };
+  }
+
+  private cleanupWebWorker(): void {
+    this.worker.removeEventListener("message", this.webWorkerCallback);
+    this.worker.terminate();
+  }
+
+  private addWebWorkerListener(cb: AiMoveCallback): void {
+    this.createWebWorkerCallback(cb);
+    this.worker.addEventListener("message", this.webWorkerCallback);
   }
 
   private initChessAi() {
@@ -511,5 +522,6 @@ export class ChessGameEngine {
 
   cleanup(): void {
     this.gameInterface.cleanup();
+    this.cleanupWebWorker();
   }
 }
