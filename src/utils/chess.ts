@@ -4,7 +4,7 @@ import { ChessFieldLetters } from "maps/ChessFieldLetters";
 import { ChessFieldColumns } from "maps/ChessFieldColumns";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
 import { PromotionResult } from "game-logic/ChessGameEngine/types";
-import { Square } from "chess.js";
+import { PieceColor, Square } from "chess.js";
 
 export function isPiece(object: Object3D): object is Piece {
   return !!(object as Piece).chessPosition;
@@ -38,4 +38,14 @@ export function getMatrixPosition(chessNotation: string): PieceChessPosition {
 
 export function isPromotionFlag(flags: string): boolean {
   return flags.includes("p");
+}
+
+export function getOppositeColor(color: PieceColor): PieceColor {
+  let newColor: PieceColor = "b";
+
+  if (color === "b") {
+    newColor = "w";
+  }
+
+  return newColor;
 }

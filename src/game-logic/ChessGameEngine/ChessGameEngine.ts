@@ -23,6 +23,7 @@ import { GameInterface } from "game-logic/GameInterface/GameInterface";
 import {
   getChessNotation,
   getMatrixPosition,
+  getOppositeColor,
   isPromotionResult,
 } from "utils/chess";
 
@@ -84,16 +85,6 @@ export class ChessGameEngine {
     this.world.addBody(chessBoardBody);
   }
 
-  private getOppositeColor(color: PieceColor): PieceColor {
-    let newColor: PieceColor = "b";
-
-    if (color === "b") {
-      newColor = "w";
-    }
-
-    return newColor;
-  }
-
   private updateScoreBoard(
     colorToUpdate: PieceColor,
     captured: keyof PieceSet
@@ -104,244 +95,6 @@ export class ChessGameEngine {
     }
 
     this.gameInterface.addToBlackScore(captured);
-  }
-
-  private capturePiece(move: Move): number | undefined {
-    const { to, color, captured } = move;
-    const capturedChessPosition = getMatrixPosition(to);
-    const capturedColor = this.getOppositeColor(color);
-
-    this.updateScoreBoard(color, captured);
-
-    return this.piecesContainer.removePiece(
-      capturedColor,
-      captured,
-      capturedChessPosition
-    );
-  }
-
-  private movePieceToField(field: Object3D, piece: Piece): void {
-    const { chessPosition } = field.userData;
-    const worldPosition = new Vector3();
-
-    field.getWorldPosition(worldPosition);
-    worldPosition.y += 0.1;
-
-    piece.changePosition(
-      chessPosition,
-      convertThreeVector(worldPosition),
-      true
-    );
-  }
-
-  private handleCastling(color: PieceColor, castlingType: "k" | "q"): void {
-    const rookRow = color === "w" ? 0 : 7;
-    const rookColumn = castlingType === "q" ? 7 : 0;
-    const castlingRook = this.piecesContainer.getPiece(color, "r", {
-      row: rookRow,
-      column: rookColumn,
-    });
-
-    const rookCastlingColumn = castlingType === "q" ? 4 : 2;
-    const castlingField = this.chessBoard.getField(rookRow, rookCastlingColumn);
-
-    this.movePieceToField(castlingField, castlingRook);
-  }
-
-  private handleEnPassante(color: PieceColor, droppedField: Object3D): number {
-    const { chessPosition } = droppedField.userData;
-    const { row, column }: PieceChessPosition = chessPosition;
-    const opposite = this.getOppositeColor(color);
-    const enPassanteRow = color === "w" ? row - 1 : row + 1;
-
-    return this.piecesContainer.removePiece(opposite, "p", {
-      row: enPassanteRow,
-      column,
-    });
-  }
-
-  private updateAiWithPromotion(
-    color: PieceColor,
-    pieceType: PromotablePieces,
-    chessNotationPos: Square,
-    move: Move
-  ): void {
-    this.worker.postMessage({
-      type: "promote",
-      color,
-      pieceType,
-      chessNotationPos,
-      move,
-    });
-  }
-
-  private updateChessEngineWithPromotion(
-    color: PieceColor,
-    type: PromotablePieces,
-    chessNotationPos: Square
-  ): void {
-    this.chessEngine.remove(chessNotationPos);
-    this.chessEngine.put({ type, color }, chessNotationPos);
-
-    // related to bug https://github.com/jhlywa/chess.js/issues/250
-    this.chessEngine.load(this.chessEngine.fen());
-  }
-
-  private promotePiece(promotionPayload: PromotionPayload): PromotionResult {
-    const { piece, droppedField, color, promotedPieceKey, move } =
-      promotionPayload;
-    const { chessPosition: piecePosition } = piece;
-    const { chessPosition: droppedFieldPosition } = droppedField.userData;
-    const chessNotationPos = getChessNotation(droppedFieldPosition);
-
-    const removedPieceId = this.piecesContainer.removePiece(
-      color,
-      "p",
-      piecePosition
-    );
-
-    const promotedPiece = this.piecesContainer.addPromotedPiece(
-      color,
-      promotedPieceKey,
-      droppedFieldPosition
-    );
-
-    this.updateChessEngineWithPromotion(
-      color,
-      promotedPieceKey,
-      chessNotationPos
-    );
-
-    this.updateAiWithPromotion(color, promotedPieceKey, chessNotationPos, move);
-
-    return { removedPieceId, promotedPiece };
-  }
-
-  private promotePlayerPiece(
-    promotionPayload: PromotionPayload
-  ): PromotionResult {
-    return this.promotePiece(promotionPayload);
-  }
-
-  private promoteAiPiece(promotionPayload: PromotionPayload): PromotionResult {
-    return this.promotePiece(promotionPayload);
-  }
-
-  private handlePromotion(
-    color: PieceColor,
-    droppedField: Object3D,
-    piece: Piece,
-    move: Move
-  ): PromotionResult | boolean {
-    if (this.startingPlayerSide === color) {
-      this.gameInterface.enablePromotionButtons(
-        color,
-        (promotedTo: PromotablePieces) => {
-          const result = this.promotePlayerPiece({
-            color,
-            droppedField,
-            piece,
-            promotedPieceKey: promotedTo,
-            move,
-          });
-
-          this.onPromotionCallback(result);
-          this.notifyAiToMove(move);
-        }
-      );
-      return true;
-    }
-    // for simplicity ai will always promote to queen
-    return this.promoteAiPiece({
-      color,
-      droppedField,
-      piece,
-      promotedPieceKey: "q",
-    });
-  }
-
-  private handleFlags(
-    move: Move,
-    droppedField: Object3D,
-    piece: Piece
-  ): number | boolean | PromotionResult {
-    const { flags, color } = move;
-    switch (flags) {
-      case "q":
-      case "k":
-        this.handleCastling(color, flags);
-        break;
-      case "e":
-        return this.handleEnPassante(color, droppedField);
-      case "np":
-      case "cp":
-      case "p":
-        return this.handlePromotion(color, droppedField, piece, move);
-    }
-  }
-
-  private moveAiPiece(toField: Object3D, movedPiece: Piece): ActionResult {
-    movedPiece.removeMass();
-
-    const actionResult = this.handlePieceMove(toField, movedPiece);
-
-    movedPiece.resetMass();
-
-    return actionResult;
-  }
-
-  private performAiMove(move: Move): ActionResult {
-    const { from, to, color, piece } = move;
-    const fromPos = getMatrixPosition(from);
-    const toPos = getMatrixPosition(to);
-
-    const toField = this.chessBoard.getField(toPos.row, toPos.column);
-    const movedPiece = this.piecesContainer.getPiece(color, piece, fromPos);
-
-    return this.moveAiPiece(toField, movedPiece);
-  }
-
-  private isObjectId(id?: unknown): id is number {
-    return id && typeof id === "number";
-  }
-
-  private handlePieceMove(field: Object3D, piece: Piece): MoveResult {
-    const { chessPosition: toPosition } = field.userData;
-    const { chessPosition: fromPosition } = piece;
-    const removedPiecesIds: number[] = [];
-    let promoted: Piece;
-
-    const from = getChessNotation(fromPosition);
-    const to = getChessNotation(toPosition);
-
-    const move = this.chessEngine.move(`${from}${to}`, {
-      sloppy: true,
-    });
-
-    if (move.captured) {
-      const capturedPieceId = this.capturePiece(move);
-      removedPiecesIds.push(capturedPieceId);
-    }
-
-    const result = this.handleFlags(move, field, piece);
-
-    if (this.isObjectId(result)) {
-      removedPiecesIds.push(result);
-    } else if (isPromotionResult(result)) {
-      const { removedPieceId, promotedPiece } = result;
-      promoted = promotedPiece;
-
-      removedPiecesIds.push(removedPieceId);
-    }
-
-    this.movePieceToField(field, piece);
-
-    return {
-      removedPiecesIds,
-      move,
-      promotedPiece: promoted,
-      stopAi: typeof result === "boolean" && result,
-    };
   }
 
   private notifyAiToMove(playerMove: Move) {
@@ -394,6 +147,249 @@ export class ChessGameEngine {
     };
   }
 
+  private performAiMove(move: Move): ActionResult {
+    const { from, to, color, piece } = move;
+    const fromPos = getMatrixPosition(from);
+    const toPos = getMatrixPosition(to);
+
+    const toField = this.chessBoard.getField(toPos.row, toPos.column);
+    const movedPiece = this.piecesContainer.getPiece(color, piece, fromPos);
+
+    return this.moveAiPiece(toField, movedPiece);
+  }
+
+  private moveAiPiece(toField: Object3D, movedPiece: Piece): ActionResult {
+    movedPiece.removeMass();
+
+    const actionResult = this.handlePieceMove(toField, movedPiece);
+
+    movedPiece.resetMass();
+
+    return actionResult;
+  }
+
+  private handlePieceMove(field: Object3D, piece: Piece): MoveResult {
+    const { chessPosition: toPosition } = field.userData;
+    const { chessPosition: fromPosition } = piece;
+    const removedPiecesIds: number[] = [];
+    let promoted: Piece;
+
+    const from = getChessNotation(fromPosition);
+    const to = getChessNotation(toPosition);
+
+    const move = this.chessEngine.move(`${from}${to}`, {
+      sloppy: true,
+    });
+
+    if (move.captured) {
+      const capturedPieceId = this.capturePiece(move);
+      removedPiecesIds.push(capturedPieceId);
+    }
+
+    const result = this.handleFlags(move, field, piece);
+
+    if (this.isObjectId(result)) {
+      removedPiecesIds.push(result);
+    } else if (isPromotionResult(result)) {
+      const { removedPieceId, promotedPiece } = result;
+      promoted = promotedPiece;
+
+      removedPiecesIds.push(removedPieceId);
+    }
+
+    this.movePieceToField(field, piece);
+
+    return {
+      removedPiecesIds,
+      move,
+      promotedPiece: promoted,
+      stopAi: typeof result === "boolean" && result,
+    };
+  }
+
+  private capturePiece(move: Move): number | undefined {
+    const { to, color, captured } = move;
+    const capturedChessPosition = getMatrixPosition(to);
+    const capturedColor = getOppositeColor(color);
+
+    this.updateScoreBoard(color, captured);
+
+    return this.piecesContainer.removePiece(
+      capturedColor,
+      captured,
+      capturedChessPosition
+    );
+  }
+
+  private isObjectId(id?: unknown): id is number {
+    return id && typeof id === "number";
+  }
+
+  private handleFlags(
+    move: Move,
+    droppedField: Object3D,
+    piece: Piece
+  ): number | boolean | PromotionResult {
+    const { flags, color } = move;
+    switch (flags) {
+      case "q":
+      case "k":
+        this.handleCastling(color, flags);
+        break;
+      case "e":
+        return this.handleEnPassante(color, droppedField);
+      case "np":
+      case "cp":
+      case "p":
+        return this.handlePromotion(color, droppedField, piece, move);
+    }
+  }
+
+  private handleCastling(color: PieceColor, castlingType: "k" | "q"): void {
+    const rookRow = color === "w" ? 0 : 7;
+    const rookColumn = castlingType === "q" ? 7 : 0;
+    const castlingRook = this.piecesContainer.getPiece(color, "r", {
+      row: rookRow,
+      column: rookColumn,
+    });
+
+    const rookCastlingColumn = castlingType === "q" ? 4 : 2;
+    const castlingField = this.chessBoard.getField(rookRow, rookCastlingColumn);
+
+    this.movePieceToField(castlingField, castlingRook);
+  }
+
+  private handleEnPassante(color: PieceColor, droppedField: Object3D): number {
+    const { chessPosition } = droppedField.userData;
+    const { row, column }: PieceChessPosition = chessPosition;
+    const opposite = getOppositeColor(color);
+    const enPassanteRow = color === "w" ? row - 1 : row + 1;
+
+    return this.piecesContainer.removePiece(opposite, "p", {
+      row: enPassanteRow,
+      column,
+    });
+  }
+
+  private handlePromotion(
+    color: PieceColor,
+    droppedField: Object3D,
+    piece: Piece,
+    move: Move
+  ): PromotionResult | boolean {
+    if (this.isPlayerColor(color)) {
+      this.gameInterface.enablePromotionButtons(
+        color,
+        (promotedTo: PromotablePieces) => {
+          const result = this.promotePlayerPiece({
+            color,
+            droppedField,
+            piece,
+            promotedPieceKey: promotedTo,
+            move,
+          });
+
+          this.onPromotionCallback(result);
+          this.notifyAiToMove(move);
+        }
+      );
+      return true;
+    }
+
+    // for simplicity ai will always promote to queen
+    return this.promoteAiPiece({
+      color,
+      droppedField,
+      piece,
+      promotedPieceKey: "q",
+    });
+  }
+
+  private isPlayerColor(color: PieceColor): boolean {
+    return color === this.startingPlayerSide;
+  }
+
+  private promotePlayerPiece(
+    promotionPayload: PromotionPayload
+  ): PromotionResult {
+    return this.promotePiece(promotionPayload);
+  }
+
+  private promoteAiPiece(promotionPayload: PromotionPayload): PromotionResult {
+    return this.promotePiece(promotionPayload);
+  }
+
+  private updateChessEngineWithPromotion(
+    color: PieceColor,
+    type: PromotablePieces,
+    chessNotationPos: Square
+  ): void {
+    this.chessEngine.remove(chessNotationPos);
+    this.chessEngine.put({ type, color }, chessNotationPos);
+
+    // related to bug https://github.com/jhlywa/chess.js/issues/250
+    this.chessEngine.load(this.chessEngine.fen());
+  }
+
+  private promotePiece(promotionPayload: PromotionPayload): PromotionResult {
+    const { piece, droppedField, color, promotedPieceKey, move } =
+      promotionPayload;
+    const { chessPosition: piecePosition } = piece;
+    const { chessPosition: droppedFieldPosition } = droppedField.userData;
+    const chessNotationPos = getChessNotation(droppedFieldPosition);
+
+    const removedPieceId = this.piecesContainer.removePiece(
+      color,
+      "p",
+      piecePosition
+    );
+
+    const promotedPiece = this.piecesContainer.addPromotedPiece(
+      color,
+      promotedPieceKey,
+      droppedFieldPosition
+    );
+
+    this.updateChessEngineWithPromotion(
+      color,
+      promotedPieceKey,
+      chessNotationPos
+    );
+
+    this.updateAiWithPromotion(color, promotedPieceKey, chessNotationPos, move);
+
+    return { removedPieceId, promotedPiece };
+  }
+
+  private updateAiWithPromotion(
+    color: PieceColor,
+    pieceType: PromotablePieces,
+    chessNotationPos: Square,
+    move: Move
+  ): void {
+    this.worker.postMessage({
+      type: "promote",
+      color,
+      pieceType,
+      chessNotationPos,
+      move,
+    });
+  }
+
+  private movePieceToField(field: Object3D, piece: Piece): void {
+    const { chessPosition } = field.userData;
+    const worldPosition = new Vector3();
+
+    field.getWorldPosition(worldPosition);
+    worldPosition.y += 0.1;
+
+    piece.changePosition(
+      chessPosition,
+      convertThreeVector(worldPosition),
+      true
+    );
+  }
+
   private cleanupWebWorker(): void {
     this.worker.removeEventListener("message", this.webWorkerCallback);
     this.worker.terminate();
@@ -412,19 +408,8 @@ export class ChessGameEngine {
     this.worker.postMessage({
       type: "init",
       fen: this.chessEngine.fen(),
-      color: this.getOppositeColor(this.startingPlayerSide),
+      color: getOppositeColor(this.startingPlayerSide),
     });
-  }
-
-  private resetSelectedPiecePosition(): void {
-    const { x, y, z } = this.selectedInitialPosition;
-
-    this.selected.changeWorldPosition(x, y, z);
-    this.setPieceInitialPosition(null);
-  }
-
-  private isPlayerPiece(piece: Piece): boolean {
-    return piece.color === this.startingPlayerSide;
   }
 
   private removePieceFromWorld(piece: Piece): void {
@@ -445,6 +430,13 @@ export class ChessGameEngine {
     this.selected = piece;
   }
 
+  private resetSelectedPiecePosition(): void {
+    const { x, y, z } = this.selectedInitialPosition;
+
+    this.selected.changeWorldPosition(x, y, z);
+    this.setPieceInitialPosition(null);
+  }
+
   get chessBoard(): ChessBoard {
     return this._chessBoard;
   }
@@ -454,7 +446,9 @@ export class ChessGameEngine {
   }
 
   select(piece: Piece): void {
-    if (!this.isPlayerPiece(piece)) {
+    const { color } = piece;
+
+    if (!this.isPlayerColor(color)) {
       return;
     }
 
