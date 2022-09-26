@@ -141,7 +141,7 @@ export class Game {
 
   private initGame(): void {
     if (!this.activeScene) {
-      throw Error("There is no active scene at the moment");
+      throw new Error("There is no active scene at the moment");
     }
 
     this.activeScene.init();
@@ -172,7 +172,7 @@ export class Game {
 
   private updateGame(): void {
     if (!this.activeScene) {
-      throw Error("There is no active scene at the moment");
+      throw new Error("There is no active scene at the moment");
     }
 
     this.activeScene.world.fixedStep();
