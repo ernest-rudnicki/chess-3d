@@ -1,5 +1,5 @@
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { BasicSceneProps } from "./types";
+import { BasicSceneProps, LightOptions } from "./types";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { World, Vec3 } from "cannon-es";
 import {
@@ -99,19 +99,18 @@ export abstract class BasicScene extends Scene {
     this.cannonDebugger = createCannonDebugger(this, this.world);
   }
 
-  setupLight(
-    color: ColorRepresentation,
-    position: Vector3,
-    intensity: number,
-    lookAt?: Vector3
-  ): void {
+  setupLight(options: LightOptions): void {
+    const { color, intensity, lookAt, position, castShadow } = options;
     const light = new PointLight(color, intensity);
     light.position.copy(position);
 
-    light.castShadow = true;
     light.shadow.bias = 0.0001;
     light.shadow.mapSize.width = 1024 * 2;
     light.shadow.mapSize.height = 1024 * 2;
+
+    if (castShadow) {
+      light.castShadow = castShadow;
+    }
 
     if (lookAt) {
       light.lookAt(lookAt);
