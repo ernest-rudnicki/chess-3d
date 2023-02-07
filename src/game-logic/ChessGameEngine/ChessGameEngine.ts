@@ -515,5 +515,7 @@ export class ChessGameEngine {
   cleanup(): void {
     this.gameInterface.cleanup();
     this.cleanupWebWorker();
+    this.chessBoard.dispose();
+    this.piecesContainer.cleanup();
   }
 }

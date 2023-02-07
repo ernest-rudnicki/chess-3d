@@ -5,7 +5,6 @@ import { World, Vec3 } from "cannon-es";
 import {
   AxesHelper,
   Color,
-  ColorRepresentation,
   GridHelper,
   Light,
   PerspectiveCamera,
@@ -13,7 +12,6 @@ import {
   PointLightHelper,
   Renderer,
   Scene,
-  Vector3,
 } from "three";
 import createCannonDebugger from "cannon-es-debugger";
 import { OnEndGame } from "game-logic/ChessGameEngine/types";

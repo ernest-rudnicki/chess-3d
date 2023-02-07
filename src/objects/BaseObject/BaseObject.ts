@@ -1,5 +1,5 @@
 import { Body } from "cannon-es";
-import { Object3D } from "three";
+import { Mesh, Object3D } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 export abstract class BaseObject extends Object3D {
@@ -28,6 +28,26 @@ export abstract class BaseObject extends Object3D {
           reject(event);
         }
       );
+    });
+  }
+
+  dispose(): void {
+    this.model.scene.traverse((object: Mesh) => {
+      if (!object) {
+        return;
+      }
+
+      if (object.geometry) {
+        object.geometry.dispose();
+      }
+
+      if (object.material) {
+        if ((<any>object.material).map) {
+          (<any>object.material).map.dispose();
+        }
+
+        (<any>object.material).dispose();
+      }
     });
   }
 }

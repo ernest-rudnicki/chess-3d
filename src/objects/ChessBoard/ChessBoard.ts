@@ -9,7 +9,6 @@ import {
   convertThreeVector,
 } from "utils/general";
 import {
-  Box3,
   CircleGeometry,
   Color,
   FrontSide,

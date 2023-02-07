@@ -273,6 +273,7 @@ export class PiecesContainer {
     this.world.removeBody(removedPiece.body);
     pieceSet.splice(removedPieceIndex, 1);
 
+    removedPiece.dispose();
     return removedPiece.id;
   }
 
@@ -345,5 +346,13 @@ export class PiecesContainer {
   update(): void {
     this.updateBlackPieces();
     this.updateWhitePieces();
+  }
+
+  cleanup(): void {
+    const pieces = this.getAllPieces();
+
+    pieces.forEach((piece) => {
+      piece.dispose();
+    });
   }
 }
