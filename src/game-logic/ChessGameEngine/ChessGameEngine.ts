@@ -6,7 +6,7 @@ import { Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { convertThreeVector } from "utils/general";
 import { Chess, ChessInstance, Move, PieceColor, Square } from "chess.js";
-import { PieceSet, PromotablePieces } from "game-logic/PiecesContainer/types";
+import { PromotablePieces } from "game-logic/PiecesContainer/types";
 import { PiecesContainer } from "game-logic/PiecesContainer/PiecesContainer";
 import Worker from "web-worker";
 import {
