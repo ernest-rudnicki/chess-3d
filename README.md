@@ -11,9 +11,7 @@ If you are encountering performance issues make sure you have **hardware acceler
 The guides for different browsers are available here:
 [Chrome](https://help.clickup.com/hc/en-us/articles/6327835447191-Enable-hardware-acceleration-in-Google-Chrome) | [Firefox](https://support.mozilla.org/en-US/kb/performance-settings) | [Opera](https://windowsreport.com/opera-browser-hardware-acceleration/)
 
-Free heroku apps are taken asleep after a while, therefore you would have wait a bit for heroku server to load it.
-
-Game available on: https://chess-game-3d.herokuapp.com/
+Game available on: https://chess-3d-mja9.vercel.app/
 
 ## Useful commands
 
