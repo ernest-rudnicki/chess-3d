@@ -65,7 +65,7 @@ canvas {
  position: absolute;
  min-width: 350px;
  height: 45px;
- padding: 0 10px;
+ padding: 2px 10px;
  background-color: var(--bg-color);
  border-radius: 3px;
  border: 1px solid var(--border-color);
