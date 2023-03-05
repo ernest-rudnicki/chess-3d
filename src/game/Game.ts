@@ -39,6 +39,7 @@ export class Game {
     this.renderer = new WebGLRenderer({
       canvas: document.getElementById("app") as HTMLCanvasElement,
       alpha: false,
+      antialias: true,
       powerPreference: "high-performance",
     });
 
