@@ -1,4 +1,4 @@
-import { PieceSet } from "game-logic/PiecesContainer/types";
+import { PieceSet } from "logic/PiecesContainer/types";
 
 export type SquareTableKeys = keyof PieceSet | "k_endGame";
 

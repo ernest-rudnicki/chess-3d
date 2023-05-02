@@ -4,8 +4,8 @@ import { PieceSquareTables, SquareTableKeys } from "constants/types";
 import cloneDeep from "lodash.clonedeep";
 import { getMatrixPosition, isPromotionFlag } from "utils/chess";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
-import { PromotionWebWorkerEvent } from "game-logic/ChessGameEngine/types";
-import { PieceSet } from "game-logic/PiecesContainer/types";
+import { PromotionWebWorkerEvent } from "logic/ChessGameEngine/types";
+import { PieceSet } from "logic/PiecesContainer/types";
 
 // based on https://dev.to/zeyu2001/build-a-simple-chess-ai-in-javascript-18eg
 export class ChessAi {

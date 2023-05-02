@@ -1,6 +1,6 @@
 import { PieceColor } from "chess.js";
 import { isPiece } from "utils/chess";
-import { ChessGameEngine } from "game-logic/ChessGameEngine/ChessGameEngine";
+import { ChessGameEngine } from "logic/ChessGameEngine/ChessGameEngine";
 import { Piece } from "objects/Pieces/Piece/Piece";
 import { BasicScene } from "scenes/BasicScene/BasicScene";
 import { BasicSceneProps } from "scenes/BasicScene/types";
@@ -9,7 +9,7 @@ import {
   ActionResult,
   OnEndGame,
   PromotionResult,
-} from "game-logic/ChessGameEngine/types";
+} from "logic/ChessGameEngine/types";
 
 export class ChessScene extends BasicScene {
   private chessGameEngine: ChessGameEngine;

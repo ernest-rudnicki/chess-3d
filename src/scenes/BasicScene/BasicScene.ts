@@ -14,7 +14,7 @@ import {
   Scene,
 } from "three";
 import createCannonDebugger from "cannon-es-debugger";
-import { OnEndGame } from "game-logic/ChessGameEngine/types";
+import { OnEndGame } from "logic/ChessGameEngine/types";
 
 export abstract class BasicScene extends Scene {
   private _renderer: Renderer;

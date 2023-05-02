@@ -1,4 +1,4 @@
-import { PieceSet } from "game-logic/PiecesContainer/types";
+import { PieceSet } from "logic/PiecesContainer/types";
 
 export const WHITE_ICONS: { [key in keyof PieceSet]: string } = {
   k: "&#9812;",

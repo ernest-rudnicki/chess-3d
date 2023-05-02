@@ -3,7 +3,7 @@ import { Object3D } from "three";
 import { ChessFieldLetters } from "maps/ChessFieldLetters";
 import { ChessFieldColumns } from "maps/ChessFieldColumns";
 import { PieceChessPosition } from "objects/Pieces/Piece/types";
-import { PromotionResult } from "game-logic/ChessGameEngine/types";
+import { PromotionResult } from "logic/ChessGameEngine/types";
 import { PieceColor, Square } from "chess.js";
 
 export function isPiece(object: Object3D): object is Piece {
